@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/Data">
+        <file>Data/JoSIM_n.exe</file>
+        <file>Data/jsim_n.exe</file>
+        <file>Data/si.inp</file>
+    </qresource>
+    <qresource prefix="/WSIM">
+        <file>WSIM/Wsim.exe</file>
+        <file>WSIM/SMP.exe</file>
+        <file>WSIM/Idc.dat</file>
+        <file>WSIM/parameters.dat</file>
+    </qresource>
+    <qresource prefix="/Help">
+        <file>Help/Manual.pdf</file>
+        <file>Help/Manual2.pdf</file>
+    </qresource>
+    <qresource prefix="/WSIM/Help">
+        <file>WSIM/Help/about_Idc.html</file>
+        <file>WSIM/Help/about_parameters_file.html</file>
+        <file>WSIM/Help/about_program.html</file>
+        <file>WSIM/Help/index.html</file>
+    </qresource>
+</RCC>

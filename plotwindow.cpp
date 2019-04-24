@@ -22,7 +22,22 @@ PlotWindow::PlotWindow(QWidget *parent) :
 
     ui->customPlot->plotLayout()->insertRow(0);
 
-    title = new QCPTextElement(ui->customPlot, "JOINUS Plotter", QFont("sans", 14, QFont::Bold));
+    switch (Simindex)
+    {case 0:
+        title = new QCPTextElement(ui->customPlot, "Time domain simulation", QFont("sans", 14, QFont::Bold));
+        break;
+    case 1:
+        title = new QCPTextElement(ui->customPlot, "I-V characteristics", QFont("sans", 14, QFont::Bold));
+        break;
+    case 2:
+        title = new QCPTextElement(ui->customPlot, "Parametric analysis", QFont("sans", 14, QFont::Bold));
+        break;
+    case 3:
+        title = new QCPTextElement(ui->customPlot, "Temperature analysis", QFont("sans", 14, QFont::Bold));
+        break;
+    default:
+        title = new QCPTextElement(ui->customPlot, "Plotter", QFont("sans", 14, QFont::Bold));
+    }
     ui->customPlot->plotLayout()->addElement(0, 0, title);
 
     ui->labelColorShow->setAutoFillBackground(true);
@@ -213,8 +228,8 @@ void PlotWindow::addPlots(int simstep)
     QVector<double> x(n), y(n);
 
     //Plotting the first two column of the data in a single plot
-
-    if (ui->comboBox->currentText()=="Single Plot ( X , Y )")
+    if (ui->comboBox->currentIndex()==0)
+    //if (ui->comboBox->currentText()=="Single Plot ( X , Y )")
     {
         int j=0;
         if (Simindex==1){
@@ -248,7 +263,8 @@ void PlotWindow::addPlots(int simstep)
 
     //Plotting the first two column of the data in a single plot and inverting X and Y
 
-    else if (ui->comboBox->currentText()=="Single Plot ( Y , X )")
+    //else if (ui->comboBox->currentText()=="Single Plot ( Y , X )")
+     else if (ui->comboBox->currentIndex()==1)
     {
         int j=0;
         if (Simindex==1){
@@ -280,7 +296,8 @@ void PlotWindow::addPlots(int simstep)
 
     //Plotting the all the columns, first column is X and the rest are Y
 
-    else if (ui->comboBox->currentText()=="Multiple Plot ( X , Y1 , Y2 , ...)")
+    //else if (ui->comboBox->currentText()=="Multiple Plot ( X , Y1 , Y2 , ...)")
+        else if (ui->comboBox->currentIndex()==2)
     {
          if (Simindex==1){
             for (int k=1; k<columnSize; k++)
@@ -319,7 +336,8 @@ void PlotWindow::addPlots(int simstep)
     }
 
 
-    else if (ui->comboBox->currentText()=="Multiple Plot ( X1 , Y1 , X2 , Y2 , ...)")
+    //else if (ui->comboBox->currentText()=="Multiple Plot ( X1 , Y1 , X2 , Y2 , ...)")
+        else if (ui->comboBox->currentIndex()==3)
     {
         if (Simindex==1){
         for (int k=0; k<columnSize-1; k+=2)
@@ -1024,6 +1042,7 @@ void PlotWindow::on_paramSlide_valueChanged(int value)
         if (value==titleVals.length()/2)
             title->setText("All Graphs");
         else
+            // Change it for temperature sweep!
             title->setText(titleVals.at(value*2+1)+titleVals.at(value*2));
         ui->customPlot->replot();
 

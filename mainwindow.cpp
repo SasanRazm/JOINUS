@@ -10,32 +10,56 @@
 #include "calcvals.h"
 #include "simulateall.h"
 
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {  
     ui->setupUi(this);
+
+    // Initialize the values for the input and output files
     ui->SaveLineEdit->setText(DataPath+"/Out.dat");
     ui->NetlistLineEdit->setText(DataPath+"/si.inp");
     ui->frame->close();
     QString NetlistFile = ui->NetlistLineEdit->text();
+
+    // Set text editor font
+    QFont font;
+    font.setFamily("Courier");
+    font.setFixedPitch(true);
+    font.setPointSize(12);
+    ui->NetlistPlainTextEdit->setFont(font);
+    font.setFamily("Arial");
+    font.setPointSize(8);
+    ui->TerminalPlainTextEdit->setFont(font);
+
+    // Initialize the highlighter for the netlist editor
+
+    m_jsimsyntax = new Jsimsyntax(ui->NetlistPlainTextEdit->document());
     LoadNetlist(NetlistFile);
 
 }
 
 
-//*** Main Simulation Function***
-//By pushing this button, the netlist would be compiled and based on the user selections,
+// *** Main Simulation Function***
+// By pushing this button, the netlist would be compiled and based on the user selections,
 // the simulation would start.
-//You can add new simulation types here!
+// You can add new simulation types here!
+// Be careful of the global parameters!
+
 void MainWindow::on_StartPushButton_clicked()
 {
     simulateall *simclass=new simulateall;
+
+    // ConsoleOutputs gives the outputs and errors of the terminal. In windows it is Command Prompt.
     struct ConsoleOutputs simout={"",""};
+
+    // SimParams are parameters that are set for the simulation. Full defenition in the header file.
     struct SimParams simParams=readSimParams();
     CalcVals *calcVal=new CalcVals;
 
-    //testing to see if the entered parameters are legit
+    // Testing to see if the entered parameters are legit
 
     bool validData1=true;
     bool validData2=true;
@@ -64,7 +88,7 @@ void MainWindow::on_StartPushButton_clicked()
     ui->ProgressBar->setValue(0);
 
 
-    //*** new netlist ***
+    // *** new netlist ***
     // Make a netlist without comments with changes for temperature and noise made to it
     QString mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex);
     if (mnnerr!="Success"){
@@ -92,7 +116,7 @@ void MainWindow::on_StartPushButton_clicked()
 
         switch (Simindex)
         {
-            //Normal time domain simulation
+            // Normal time domain simulation
         case 0:
 
             ui->ProgressBar->setValue(50);
@@ -103,7 +127,7 @@ void MainWindow::on_StartPushButton_clicked()
             break;
 
 
-            //I-V simulation results
+            // I-V simulation results
         case 1:
 
             ui->ProgressBar->setValue(50);
@@ -116,7 +140,7 @@ void MainWindow::on_StartPushButton_clicked()
 
             break;
 
-            //Parametric shift
+            // Parametric shift
         case 2:
 
             if (simParams.pointNum.toInt()>1)
@@ -128,7 +152,7 @@ void MainWindow::on_StartPushButton_clicked()
             {
                 simParams.subParam=initSubParam+"<*>"+calcVal->convertToUnits(calcVal->convertToValues(simParams.minVal)+simstep*stepSize);
 
-                //Change the netlist with the new parameter
+                // Change the netlist with the new parameter
                 QString mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex);
                 if (mnnerr!="Success")
                     QMessageBox::warning(this,"Error!",mnnerr);
@@ -204,13 +228,14 @@ void MainWindow::on_StartPushButton_clicked()
         if (ui->SaveCheckBox->isChecked()==true)
             Copy_File(ui->SaveLineEdit->text(),QDir::currentPath()+OutputFileName);
 
-        //testing the temperatrue:
-        //***Delete afterward***
+        // Testing the temperatrue:
+        // ***Delete afterward***
 //       ui->TerminalPlainTextEdit->appendPlainText(QString::number(titleVals.length())+"    "+simParams.pointNum);
 //        for (int simstep=0;simstep<titleVals.length()/2;simstep++){
 //             QString DataFileTest = QDir::currentPath()+"/Data/Tmp"+QString::number(simstep)+"K.dat"+"      "+titleVals.at(simstep*2+1)+" "+titleVals.at(simstep*2);
 //              ui->TerminalPlainTextEdit->appendPlainText(DataFileTest);
 //       }
+        // ***Delete afterward***
 
 
         if (ui->PlotCheckBox->isChecked()==true)
@@ -807,4 +832,16 @@ void MainWindow::on_actionManuals_triggered()
 
 //}
 
+void MainWindow::on_actionFont_Properties_triggered()
+{
+    bool ok;
+    QFont font = QFontDialog::getFont(&ok);
+    ui->NetlistPlainTextEdit->setFont(font);
+    ui->TerminalPlainTextEdit->setFont(font);
+}
 
+void MainWindow::on_actionRun_Custom_Plotter_triggered()
+{
+    dialogPlot = new DialogPlot(this);
+    dialogPlot->show();
+}

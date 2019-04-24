@@ -61,10 +61,10 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="tickPosition">
-      <enum>QSlider::TicksBothSides</enum>
+      <enum>QSlider::TicksAbove</enum>
      </property>
      <property name="tickInterval">
-      <number>0</number>
+      <number>1</number>
      </property>
     </widget>
    </item>
@@ -193,7 +193,7 @@
      <item>
       <widget class="QRadioButton" name="radioButton">
        <property name="text">
-        <string>Show</string>
+        <string>More options...</string>
        </property>
       </widget>
      </item>
@@ -208,22 +208,22 @@
       <widget class="QComboBox" name="comboBox">
        <item>
         <property name="text">
-         <string>Single Plot ( X , Y )</string>
+         <string>Single curve ( X , Y )</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Single Plot ( Y , X )</string>
+         <string>Single curve ( Y , X )</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Multiple Plot ( X , Y1 , Y2 , ...)</string>
+         <string>Multiple curves ( X , Y1 , Y2 , ...)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Multiple Plot ( X1 , Y1 , X2 , Y2 , ...)</string>
+         <string>Multiple curves ( X1 , Y1 , X2 , Y2 , ...)</string>
         </property>
        </item>
       </widget>
@@ -244,7 +244,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Data Points</string>
+          <string>Show markers</string>
          </property>
         </widget>
        </item>
@@ -280,7 +280,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Log Scale</string>
+          <string>Y-Axis log-scale</string>
          </property>
         </widget>
        </item>
@@ -332,7 +332,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&amp;Plot</string>
+        <string>&amp;Redraw</string>
        </property>
        <property name="autoDefault">
         <bool>false</bool>

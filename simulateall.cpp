@@ -13,6 +13,7 @@
 
 simulateall::simulateall()
 {
+    //Define variable WaitTime
     WaitTime=200;
     Tstep=10;
 }
@@ -564,7 +565,7 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
 
                     case 3:
                         if (tempIndicator){
-                            titleVals.append(QString::number(temperature));
+                            titleVals.append(QString::number(temperature)+" K");
                             titleVals.append("Temperature = ");
                             tempIndicator=false;
                         }

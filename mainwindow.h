@@ -5,6 +5,11 @@
 #include <QSysInfo>
 #include <ActiveQt>
 #include "dialogplot.h"
+#include "jsimsyntax.h"
+
+//QT_BEGIN_NAMESPACE
+//class QTextEdit;
+//QT_END_NAMESPACE
 
 const QString PlotPath = QDir::currentPath()+"/Graphs";
 const QString DataPath = QDir::currentPath()+"/Data";
@@ -84,9 +89,14 @@ private slots:
 
 
 
+    void on_actionFont_Properties_triggered();
+
+    void on_actionRun_Custom_Plotter_triggered();
+
 private:
     Ui::MainWindow *ui;
     DialogPlot *dialogPlot;
+    Jsimsyntax *m_jsimsyntax;
 };
 
 #endif // MAINWINDOW_H

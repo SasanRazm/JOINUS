@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->SaveLineEdit->setText(DataPath+"/Out.dat");
     ui->NetlistLineEdit->setText(DataPath+"/si.inp");
     ui->frame->close();
+    ui->TempLineEdit->setEnabled(false);
     QString NetlistFile = ui->NetlistLineEdit->text();
 
     // Set text editor font
@@ -51,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::on_StartPushButton_clicked()
 {
     simulateall *simclass=new simulateall;
+    TempFileName=QDir::currentPath()+"/Data/TempOut.tmp";
 
     // ConsoleOutputs gives the outputs and errors of the terminal. In windows it is Command Prompt.
     struct ConsoleOutputs simout={"",""};
@@ -58,6 +60,9 @@ void MainWindow::on_StartPushButton_clicked()
     // SimParams are parameters that are set for the simulation. Full defenition in the header file.
     struct SimParams simParams=readSimParams();
     CalcVals *calcVal=new CalcVals;
+
+    //Statistical analyze of the I-V curve activation
+    bool IVstatistical = ui->actionIV_Curve_Statistical_Noise->isChecked();
 
     // Testing to see if the entered parameters are legit
 
@@ -90,7 +95,7 @@ void MainWindow::on_StartPushButton_clicked()
 
     // *** new netlist ***
     // Make a netlist without comments with changes for temperature and noise made to it
-    QString mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex);
+    QString mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex,IVstatistical);
     if (mnnerr!="Success"){
         QMessageBox::warning(this,"Error!",mnnerr);
         return;
@@ -108,7 +113,6 @@ void MainWindow::on_StartPushButton_clicked()
         ui->TerminalPlainTextEdit->appendPlainText("Noise Simulation: "+noisecond);
         ui->TerminalPlainTextEdit->appendPlainText("Temperature value:"+  QString::number(temperature));
         ui->TerminalPlainTextEdit->appendPlainText("Delimator: '"+  delimator+"'");
-
 
         QString initSubParam=simParams.subParam;
         double stepSize=0;
@@ -130,10 +134,40 @@ void MainWindow::on_StartPushButton_clicked()
             // I-V simulation results
         case 1:
 
-            ui->ProgressBar->setValue(50);
-            simout = simclass->simulateivcurve(TempFileName,SimulatorIndex,simParams.pointNum.toInt(),simParams.subParam.toInt());
-            ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
-            ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+
+            if (IVstatistical)
+            {
+                ui->ProgressBar->setValue(20);
+
+                //testing the netlist
+
+                simout = simclass->simulateivtest(TempFileName,SimulatorIndex,simParams.pointNum.toInt(),simParams.subParam.toInt());
+                ui->ProgressBar->setValue(40);
+                ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
+                ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+                TempFileName=QDir::currentPath()+"/Data/TempOut1.tmp";
+
+                //make new netlist after statistical analysis        
+                mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex,2);
+                if (mnnerr!="Success"){
+                    QMessageBox::warning(this,"My Error!",mnnerr);
+                    ui->StartPushButton->setEnabled(true);
+                    return;
+                }
+                ui->ProgressBar->setValue(50);
+
+                //simulate the newly generated netlist from statistical data
+                simout = simclass->simulateivcurve(TempFileName,SimulatorIndex,simParams.pointNum.toInt(),simParams.subParam.toInt(),IVstatistical);
+                ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
+                ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+
+
+            }else{
+                ui->ProgressBar->setValue(50);
+                simout = simclass->simulateivcurve(TempFileName,SimulatorIndex,simParams.pointNum.toInt(),simParams.subParam.toInt(),IVstatistical);
+                ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
+                ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+            }
 
             ui->ProgressBar->setValue(100);
             columNum=2;
@@ -153,7 +187,8 @@ void MainWindow::on_StartPushButton_clicked()
                 simParams.subParam=initSubParam+"<*>"+calcVal->convertToUnits(calcVal->convertToValues(simParams.minVal)+simstep*stepSize);
 
                 // Change the netlist with the new parameter
-                QString mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex);
+                TempFileName=QDir::currentPath()+"/Data/TempOut"+QString::number(simstep)+".tmp";
+                QString mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex,IVstatistical);
                 if (mnnerr!="Success")
                     QMessageBox::warning(this,"Error!",mnnerr);
                 else{
@@ -169,7 +204,7 @@ void MainWindow::on_StartPushButton_clicked()
 
                     bool whileLoopLogic=QFile::copy(QDir::currentPath()+OutputFileName, Outtemp);
 
-                    while (!whileLoopLogic){}
+                    while (!whileLoopLogic){}                  
 
                 }
 
@@ -188,10 +223,12 @@ void MainWindow::on_StartPushButton_clicked()
             for (int simstep=0 ; simstep<simParams.pointNum.toInt() ; simstep++)
             {
                 temperature=calcVal->convertToValues(simParams.minVal)+simstep*stepSize;
+                ui->TempLineEdit->setText(QString::number(temperature));
                 simParams.tempVal=QString::number(temperature);
 
                 //Change the netlist with the new parameter
-                QString mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex);
+                TempFileName=QDir::currentPath()+"/Data/TempOut"+QString::number(simstep)+".tmp";
+                QString mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex,IVstatistical);
                 if (mnnerr!="Success")
                     QMessageBox::warning(this,"Error!",mnnerr);
 
@@ -215,7 +252,12 @@ void MainWindow::on_StartPushButton_clicked()
 
         case 4:
 
-            QMessageBox::warning(this,"Sorry!","For BER calculation, use the MC Optimizer program!");
+
+            break;
+
+        case 5:
+
+
             break;
 
         default:
@@ -494,18 +536,18 @@ void MainWindow::on_TypeComboBox_currentIndexChanged(int index)
         ui->frame->show();
         ui->label_7->setText("Number of Steps");
         ui->label_8->setText("Temperature");
-        ui->TempLineEdit->setEnabled(true);
         ui->label_9->setText("Minimum");
         ui->label_10->setText("Maximum");
         ui->label_11->setText("Current Source");
         ui->ParamLineEdit->setEnabled(true);
+        ui->TempLineEdit->setEnabled(false);
         ui->label_12->setText("Loop Count");
         ui->ParamLineEdit->setText("I0");
         ui->SubParamLineEdit->setText("1");
         ui->MinValLineEdit->setText("-2m");
         ui->MaxValLineEdit->setText("2m");
         ui->StepLineEdit->setText("40");
-        ui->TempLineEdit->setText("4.2");
+        ui->TempLineEdit->setText(QString::number(temperature));
         ui->SubParamLineEdit->setEnabled(true);
         ui->label_12->show();
         QMessageBox::information(this,"I-V characteristic","For I-V measurement, the program takes first output as Current and Second "
@@ -517,18 +559,18 @@ void MainWindow::on_TypeComboBox_currentIndexChanged(int index)
         ui->ParamLineEdit->setEnabled(true);
         ui->label_7->setText("Number of Steps");
         ui->label_8->setText("Temperature");
-        ui->TempLineEdit->setEnabled(true);
         ui->label_9->setText("Minimum");
         ui->label_10->setText("Maximum");
         ui->label_11->setText("Parameter");
         ui->label_12->setText("Sub-Parameter");
         ui->SubParamLineEdit->setEnabled(true);
+        ui->TempLineEdit->setEnabled(false);
         ui->ParamLineEdit->setText("I1");
         ui->SubParamLineEdit->setText("200GHz");
         ui->MinValLineEdit->setText("100G");
         ui->MaxValLineEdit->setText("500G");
         ui->StepLineEdit->setText("5");
-        ui->TempLineEdit->setText("4.2");
+        ui->TempLineEdit->setText(QString::number(temperature));
         QMessageBox::information(this,"Parameter Shift","For parametric shift, in the main parameter part, enter the name of your object (Ex.I1)."
                                                        "In sub-parameter window enter the object part that you want to change (Ex.200GHz)."
                                                        " See examples for more information.");
@@ -537,11 +579,11 @@ void MainWindow::on_TypeComboBox_currentIndexChanged(int index)
         ui->frame->show();
         ui->label_7->setText("Number of Steps");
         ui->label_8->setText("Temperature");
-        ui->TempLineEdit->setEnabled(false);
         ui->label_9->setText("Minimum");
         ui->label_10->setText("Maximum");
         ui->label_11->setText("Temperature");
         ui->ParamLineEdit->setEnabled(false);
+        ui->TempLineEdit->setEnabled(false);
         ui->label_12->setText("Sub-Parameter");
         ui->ParamLineEdit->setText("Temperature");
         ui->SubParamLineEdit->setText(" ");
@@ -551,12 +593,49 @@ void MainWindow::on_TypeComboBox_currentIndexChanged(int index)
         ui->TempLineEdit->setText(" ");
         ui->SubParamLineEdit->setEnabled(false);
         break;
+        //Continue from here
     case 4:
-        QMessageBox::information(this,"Parameter Shift","This part would be functional in next version!");
-        ui->frame->hide();
+        ui->frame->show();
+        ui->ParamLineEdit->setEnabled(true);
+        ui->label_7->setText("Number of Steps");
+        ui->label_8->setText("Temperature");
+        ui->label_9->setText("Minimum Value");
+        ui->label_10->setText("Maximum Value");
+        ui->label_11->setText("Source Name");
+        ui->label_12->setText("Source Current Value");
+        ui->SubParamLineEdit->setEnabled(true);
+        ui->TempLineEdit->setEnabled(false);
+        ui->ParamLineEdit->setText("I1");
+        ui->SubParamLineEdit->setText("200GHz");
+        ui->MinValLineEdit->setText("100G");
+        ui->MaxValLineEdit->setText("500G");
+        ui->StepLineEdit->setText("5");
+        ui->TempLineEdit->setText(QString::number(temperature));
+        QMessageBox::information(this,"Notice","Bit error rate calculation is for circuits with periodic input and output. "
+                                         "For more complex circuits please use Monte Carlo Optimizer software!");
+        break;
+    case 5:
+        ui->frame->show();
+        ui->ParamLineEdit->setEnabled(true);
+        ui->label_7->setText("Number of Steps");
+        ui->label_8->setText("Input Node");
+        ui->label_9->setText("Minimum Value");
+        ui->label_10->setText("Maximum Value");
+        ui->label_11->setText("Input Element");
+        ui->label_12->setText("Output Element");
+        ui->SubParamLineEdit->setEnabled(true);
+        ui->TempLineEdit->setEnabled(true);
+        ui->ParamLineEdit->setText("I1");
+        ui->SubParamLineEdit->setText("200GHz");
+        ui->MinValLineEdit->setText("100G");
+        ui->MaxValLineEdit->setText("500G");
+        ui->StepLineEdit->setText("5");
+        ui->TempLineEdit->setText("10");
+        QMessageBox::information(this,"Frequency Response","The function applys certain number of pulses at the input and measures the number of output pulses."
+                                                       "Enter the Input node, Input and output junctions and frequency range here.");
         break;
     default:
-        QMessageBox::warning(this,"Error","How?!");
+        QMessageBox::warning(this,"Error","After this point it is only void...");
         Simindex=0;
         break;
     }
@@ -844,4 +923,33 @@ void MainWindow::on_actionRun_Custom_Plotter_triggered()
 {
     dialogPlot = new DialogPlot(this);
     dialogPlot->show();
+}
+
+// This function would get the value of the temperature from user
+void MainWindow::on_actionSet_Temperature_triggered()
+{
+    bool ok;
+    bool validData1=true;
+    bool validData2=true;
+    QString tempValString = QInputDialog::getText(  this,  tr("Temperature Value"),
+               tr("Enter the value of the temperature for simulation."),
+               QLineEdit::Normal, "", &ok );
+    if( ok && !tempValString.isEmpty() )
+    {
+        validData2=tempValString.toDouble(&validData1)>=0;
+        if (!validData1 || !validData2)
+        {
+            QMessageBox::warning(this,"Error!","Temperature should be real number bigger or equal to zero!");
+            return;
+        }
+            temperature = tempValString.toDouble();
+            if (Simindex!=5)
+                ui->TempLineEdit->setText(QString::number(temperature));
+    }
+    else
+    {
+        temperature = 4.2;
+        if (Simindex!=5)
+            ui->TempLineEdit->setText("4.2");
+    }
 }

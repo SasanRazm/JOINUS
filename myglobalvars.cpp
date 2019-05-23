@@ -10,7 +10,7 @@ QString delimator = " ";
 QStringList RawData = {"1","2"};
 QStringList titleVals={};
 QString TempFileName = QDir::currentPath()+"/Data/ModiNL.cir";
-QString TempOutFile = QDir::currentPath()+"/Data/TempOut.dat";
+QString TempOutFile = QDir::currentPath()+"/Data/TempOut.tmp";
 int columNum = 2;
 double temperature = 4.2;
 double hbar=1.05457e-34;
@@ -21,4 +21,9 @@ double Pi=3.14159265358979;
 double Phi0=hbar*Pi/ecnst;
 double timestep=1;
 int Simindex=0;
+
+myglobalvars::myglobalvars()
+{
+
+}
 

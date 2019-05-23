@@ -14,8 +14,9 @@
 simulateall::simulateall()
 {
     //Define variable WaitTime
-    WaitTime=200;
-    Tstep=10;
+    //This is the base value.
+    WaitTime=100;
+    Tstep=5;
 }
 
 
@@ -126,10 +127,13 @@ struct processedNL simulateall::processNetlist(QString FileName)
 
 // Simulation of the methods that are characterized by the Curve method.
 // I-V curve and BER are part of this one
-struct ConsoleOutputs simulateall::simulateivcurve(QString FileName, int SimulatorIndex, int points, int loopCnt)
+struct ConsoleOutputs simulateall::simulateivcurve(QString FileName, int SimulatorIndex, int points, int loopCnt,bool IVstatistical)
 {
     QVector<double> I(points*loopCnt);
     QVector<double> V(points*loopCnt);
+
+    //The vector for different waittimes
+    QVector<double> waittimevals(points);
 
     if (points%2==1)
         points--;
@@ -183,83 +187,81 @@ struct ConsoleOutputs simulateall::simulateivcurve(QString FileName, int Simulat
     QVector <double> DataI(RawData.length()/columNum);
     QVector <double> DataV(RawData.length()/columNum);
 
-
-
-    int j=0;
-    for(int i=0 ; i < RawData.length() ; i++)
-    {
-        if (i%columNum==1) DataI[j]=RawData.at(i).toDouble(&validDatax);
-        else if (i%columNum==2)
+        int j=0;
+        for(int i=0 ; i < RawData.length() ; i++)
         {
-            DataV[j]=RawData.at(i).toDouble(&validDatay);
-            if (validDatax && validDatay)
+            if (i%columNum==1) DataI[j]=RawData.at(i).toDouble(&validDatax);
+            else if (i%columNum==2)
             {
-                j++;
-                //stream << QString::number(j)+" : "+QString::number(DataI[j])+" , "+QString::number(DataV[j])<<'\n';
+                DataV[j]=RawData.at(i).toDouble(&validDatay);
+                if (validDatax && validDatay)
+                {
+                    j++;
+                    //stream << QString::number(j)+" : "+QString::number(DataI[j])+" , "+QString::number(DataV[j])<<'\n';
+                }
+
+            }
+        }
+
+        //    Calculate the I and V of the curve as the I became stable. Tstep is the
+        //    rise time of the current and WaitTime is the settling time of the
+        //    voltage. The voltage is averaged over the WaitTime. If graph is too noisy
+        //    or unstable, increase TimeStep and WaitTime. The function would be
+        //    slower, but the result would be more accurate.
+
+        if (IVstatistical)
+        {
+            int sumWaitTime=0;
+            QFile waitfile(QDir::currentPath()+"/testOutPut.DAT");
+            if (!waitfile.open(QFile::ReadOnly | QFile::Text))
+            {
+                return {"Problem with permissions!","There is a problem in file creation. Check the permissions!"};
             }
 
+            QTextStream waitstream(&waitfile);
+            QVector<int> waittimevals(points*loopCnt);
+
+            for (int testcntr=0;testcntr<points*loopCnt;testcntr++)
+                    waittimevals[testcntr]=waitstream.readLine().toInt();
+
+                waitfile.close();
+                waitstream.flush();
+
+            for (int IVcntr=0;IVcntr<points*loopCnt;IVcntr++)
+            {
+                sumWaitTime=sumWaitTime+waittimevals[IVcntr];
+                int firstindex=static_cast<int>(round((Tstep*(IVcntr+1)+sumWaitTime-waittimevals[IVcntr])/timestep));
+                int secondindex=static_cast<int>(round((Tstep*(IVcntr+1)+sumWaitTime)/timestep));
+                I[IVcntr]=DataI[firstindex];
+
+
+                //Average the voltage over the WaitTime
+
+                double Vtemp=0;
+                for (int Vsum=firstindex;Vsum<secondindex;Vsum++)
+                    Vtemp = Vtemp+DataV[Vsum]/(secondindex-firstindex);
+                V[IVcntr]=Vtemp;
+            }
         }
+
+        else{
+
+            for (int IVcntr=0;IVcntr<points*loopCnt;IVcntr++)
+            {
+
+                int firstindex=static_cast<int>(round(((Tstep+WaitTime)*(IVcntr+1)-WaitTime)/timestep));
+                int secondindex=static_cast<int>(round(((Tstep+WaitTime)*(IVcntr+1))/timestep));
+                I[IVcntr]=DataI[firstindex];
+
+
+                //Average the voltage over the WaitTime
+
+                double Vtemp=0;
+                for (int Vsum=firstindex;Vsum<secondindex;Vsum++)
+                    Vtemp = Vtemp+DataV[Vsum]/(secondindex-firstindex);
+                V[IVcntr]=Vtemp;
+            }
     }
-
-
-
-
-
-    //*** Delete this!***
-    //For test to see if we reach here
-
-    QFile filet(QDir::currentPath()+"/Data/test.dat");
-    if (!filet.open(QFile::WriteOnly | QFile::Text)){
-        return {filet.errorString()," There is a problem in file creation. Check the permissions! "};
-    }else
-    {
-        QTextStream stream(&filet);
-
-//        for (int IVcntr=0;IVcntr<RawData.length();IVcntr++)
-//            stream << RawData.at(IVcntr) << '\n';
-
-        for (int IVcntr=0;IVcntr<points*loopCnt;IVcntr++)
-        {
-
-            int firstindex=static_cast<int>(round(((Tstep+WaitTime)*(IVcntr+1)-WaitTime)/timestep));
-            int secondindex=static_cast<int>(round(((Tstep+WaitTime)*(IVcntr+1))/timestep));
-            I[IVcntr]=DataI[firstindex];
-            double Vtemp=0;
-            for (int Vsum=firstindex;Vsum<secondindex;Vsum++)
-                Vtemp = Vtemp+DataV[Vsum]/(secondindex-firstindex);
-            V[IVcntr]=Vtemp;
-            stream << QString::number(firstindex)+" : "+QString::number(secondindex)+" -> "+QString::number(V[IVcntr])+"   "+QString::number(I[IVcntr])<<'\n';
-        }
-   }
-
-   //End of the test sequence
-    //*** Delete this!***
-
-
-    //    Calculate the I and V of the curve as the I became stable. Tstep is the
-    //    rise time of the current and WaitTime is the settling time of the
-    //    voltage. The voltage is averaged over the WaitTime. If graph is too noisy
-    //    or unstable, increase TimeStep and WaitTime. The function would be
-    //    slower, but the result would be more accurate.
-
-    for (int IVcntr=0;IVcntr<points*loopCnt;IVcntr++)
-    {
-
-        int firstindex=static_cast<int>(round(((Tstep+WaitTime)*(IVcntr+1)-WaitTime)/timestep));
-        int secondindex=static_cast<int>(round(((Tstep+WaitTime)*(IVcntr+1))/timestep));
-        I[IVcntr]=DataI[firstindex];
-
-
-        //Average the voltage over the WaitTime
-
-        double Vtemp=0;
-        for (int Vsum=firstindex;Vsum<secondindex;Vsum++)
-            Vtemp = Vtemp+DataV[Vsum]/(secondindex-firstindex);
-        V[IVcntr]=Vtemp;
-
-
-    }
-
     DataI.clear();
     DataV.clear();
     //Open the outputfile to put the I-V values into it
@@ -283,6 +285,157 @@ struct ConsoleOutputs simulateall::simulateivcurve(QString FileName, int Simulat
 }
 
 
+// This functions first run a simple I-V and process the data to make a better I-V curve
+
+struct ConsoleOutputs simulateall::simulateivtest(QString FileName, int SimulatorIndex,int points, int loopCnt)
+{
+    QVector<double> I(points*loopCnt);
+    QVector<double> V(points*loopCnt);
+    QString testingIV= QDir::currentPath()+"/Data/testingIV.tmp";
+
+    //The vector for different waittimes
+    QVector<int> waittimevals(points*loopCnt);
+//   QVector<double> CurrentSteps(points*loopCnt);
+    QVector<double> diff2Volt(points*loopCnt);
+    double diff2VoltMax;
+
+    if (points%2==1)
+        points--;
+
+    bool validDatax=true;
+    bool validDatay=true;
+    QString OutFile= QDir::currentPath()+OutputFileName;
+    QString testOutFile= QDir::currentPath()+"/testOutPut.DAT";
+
+    struct ConsoleOutputs out = simulatenetlist(FileName,SimulatorIndex);
+
+    // copy the output to tempfile and delete the outputfile
+    if (QFile::exists(testingIV))
+        QFile::remove(testingIV);
+    if(QFile::copy(OutFile, testingIV))
+        QFile::remove(OutFile);
+    else
+      return {"Problem with permissions!","There is a problem in file creation. Check the permissions!"};
+
+    //read the data from output that is TempOutFile now
+    QFile file(testingIV);
+    QStringList fields;
+
+    if (!file.open(QFile::ReadOnly | QFile::Text))
+    {
+        return {"Problem with permissions!","There is a problem in file creation. Check the permissions!"};
+    }
+
+    QTextStream in(&file);
+
+    //Put the data into the RawData global variable
+    bool firstline=true;
+    while(!in.atEnd()) {
+        QString line = in.readLine();
+        if (delimator=="," && firstline)
+        firstline=false;
+        else
+        fields.append(line.split(delimator));
+    }
+    file.close();
+    in.flush();
+
+    RawData.clear();
+    for(int i=0 ; i < fields.length() ; i++){
+        if (!fields.at(i).isEmpty())
+        {
+            RawData.append(fields.at(i));
+        }
+    }
+    fields.clear();
+
+    //Take the second colomn as I and third as V
+    QVector <double> DataI(RawData.length()/columNum);
+    QVector <double> DataV(RawData.length()/columNum);
+
+    int j=0;
+    for(int i=0 ; i < RawData.length() ; i++)
+    {
+        if (i%columNum==1) DataI[j]=RawData.at(i).toDouble(&validDatax);
+        else if (i%columNum==2)
+        {
+            DataV[j]=RawData.at(i).toDouble(&validDatay);
+            if (validDatax && validDatay)
+            {
+                j++;
+                //stream << QString::number(j)+" : "+QString::number(DataI[j])+" , "+QString::number(DataV[j])<<'\n';
+            }
+
+        }
+    }
+
+    //    Calculate the I and V of the curve as the I became stable. Tstep is the
+    //    rise time of the current and WaitTime is the settling time of the
+    //    voltage. The voltage is averaged over the WaitTime. If graph is too noisy
+    //    or unstable, increase TimeStep and WaitTime. The function would be
+    //    slower, but the result would be more accurate.
+
+    for (int IVcntr=0;IVcntr<points*loopCnt;IVcntr++)
+    {
+
+        int firstindex=static_cast<int>(round(((Tstep+WaitTime)*(IVcntr+1)-WaitTime)/timestep));
+        int secondindex=static_cast<int>(round(((Tstep+WaitTime)*(IVcntr+1))/timestep));
+        I[IVcntr]=DataI[firstindex];
+
+
+        //Average the voltage over the WaitTime
+
+        double Vtemp=0;
+        for (int Vsum=firstindex;Vsum<secondindex;Vsum++)
+            Vtemp = Vtemp+DataV[Vsum]/(secondindex-firstindex);
+        V[IVcntr]=Vtemp;
+
+    }
+
+    DataI.clear();
+    DataV.clear();
+
+
+    //double Vthreshold=V[V.length()/2]-V[0];
+    //Process the data for finding the points for higher wait time
+    diff2Volt[0]=std::abs(V[2]-2*V[1]+V[0]);
+    diff2VoltMax=diff2Volt[0];
+    diff2Volt[V.length()]=std::abs(V[V.length()]-2*V[V.length()-1]+V[V.length()-2]);
+    for (int fcntr=1; fcntr<V.length()-1;fcntr++)
+    {
+        diff2Volt[fcntr]=std::abs(V[fcntr+1]-2*V[fcntr]+V[fcntr-1]);
+        if (diff2Volt[fcntr]>diff2VoltMax)
+            diff2VoltMax=diff2Volt[fcntr];
+    }
+
+    for (int fcntr=0; fcntr<V.length();fcntr++)
+    {
+        waittimevals[fcntr]=static_cast<int>(1+20*diff2Volt[fcntr]/diff2VoltMax)*WaitTime;
+    }
+
+
+    //Open the outputfile to put the I-V values into it
+    QFile file2(testOutFile);
+    if (!file2.open(QFile::WriteOnly | QFile::Text)){
+        return {file2.errorString()," There is a problem in file creation. Check the permissions! "};
+    }else
+    {
+        QTextStream stream(&file2);
+        for (int fcntr=0; fcntr<V.length();fcntr++)
+            stream << QString::number(waittimevals[fcntr])+'\n';
+        file2.close();
+        stream.flush();
+
+    }
+
+    I.clear();
+    V.clear();
+    waittimevals.clear();
+    QFile::remove(testingIV);
+    return out;
+}
+
+
 //Run the simulator for the input netlist and generate the output
 struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int SimulatorIndex)
 {
@@ -291,6 +444,7 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
 
     QString simstderr="";
     QString simstdout="";
+//    QString commandline=DataPath+"/jsim_n.exe "+FileName;
 
     QProcess process;
     //QString OSname=QSysInfo::productType();
@@ -301,13 +455,19 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
                     process.start("./jsim_n "+FileName);
                     process.waitForFinished(-1); // will wait forever until finished
         #elif _WIN32
+
+//        QProcess::execute(commandline);
+
                     process.setProgram("cmd.exe");
                     process.setArguments({"/c",DataPath+"/jsim_n.exe", FileName});
                     process.setCreateProcessArgumentsModifier([] (
                         QProcess::CreateProcessArguments *args) {
                                     args->flags &= CREATE_NO_WINDOW;});
+                    //qint64 pid;
+                    //process.startDetached(&pid);
                     process.start();
                     process.waitForFinished(-1);
+
         #else
                     process.start("./jsim_n "+FileName);
                     process.waitForFinished(-1); // will wait forever until finished
@@ -341,6 +501,7 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
                                     args->flags &= CREATE_NO_WINDOW;});
                     process.start();
                     process.waitForFinished(-1);
+
         #else
                     process.start("./JoSIM -o "+OutFile+" "+FileName);
                     process.waitForFinished(-1); // will wait forever until finished
@@ -374,10 +535,15 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
 //It will create a series of PWL currents to step the I, for I-V simulation mode
 //Must get the parameter and the value for shifting.
 
-QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct SimParams simParams,int SimulatorIndex)
+QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct SimParams simParams,int SimulatorIndex,int IVstatistical)
 {
     CalcVals *values= new CalcVals;
     double stepVal=0;
+    if (IVstatistical==1)
+        WaitTime=50;
+    else if (IVstatistical==2)
+        WaitTime=250;
+    int waitTimeSum=0;
 
     struct processedNL netlist = processNetlist(NetlistFile);
     if (netlist.OutFileName=="NoFileExist"){
@@ -464,47 +630,163 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
                             //When the number of points is bigger than one, the loop starts and depending on the nuber of periods,
                             //  the loop would generate PWL signals.
 
-                            else
-                            for (int loopcntr=0;loopcntr<simParams.subParam.toInt();loopcntr++)
-                            {
+                            else{
 
-                                //First half of the loop
-                                for (int pointCntr=0;pointCntr<halfloopVal;pointCntr++)
+                                //If the I-V curve in testing stage is measured
+                                if (IVstatistical==1)
+                                    for (int loopcntr=0;loopcntr<simParams.subParam.toInt();loopcntr++)
+                                    {
+
+                                        //First half of the loop
+                                        for (int pointCntr=0;pointCntr<halfloopVal;pointCntr++)
+                                        {
+                                            // Make the index for the PWL current name
+                                            int PWLindex = loopcntr*simParams.pointNum.toInt()+pointCntr;
+
+
+                                            // The first part is applying the Imin to the loop
+                                            if (PWLindex == 0)
+                                                newLine="IPWL0   "+rcommand.at(1)+
+                                                        "   "+rcommand.at(2)+"   "+"PWL(0ps 0mA "+ QString::number(Tstep)+
+                                                        "ps "+ simParams.minVal+"A)";
+
+                                            //Next we increase the I value by steps
+                                            else
+                                                newLine="IPWL"+QString::number(PWLindex)+"   "+rcommand.at(1)+"   "+rcommand.at(2)+"   "
+                                                    + "PWL(0ps 0mA "+ QString::number((Tstep+WaitTime)*PWLindex)+"ps "
+                                                    +"0mA " + QString::number((Tstep+WaitTime)*PWLindex+Tstep)+"ps "+values->convertToUnits(stepVal)+"A)";
+
+                                            //Write the value to the temporary netlist file
+                                            stream << newLine <<'\n';
+                                        }
+
+                                        for (int pointCntr=halfloopVal;pointCntr<2*halfloopVal;pointCntr++)
+                                        {
+
+                                            int PWLindex = 2*loopcntr*halfloopVal+pointCntr;
+
+                                            newLine="IPWL"+QString::number(PWLindex)+"   "+rcommand.at(1)+"   "+rcommand.at(2)+"   "
+                                                    +"PWL(0ps 0mA "+ QString::number((Tstep+WaitTime)*PWLindex)+"ps 0mA "
+                                                    + QString::number((Tstep+WaitTime)*PWLindex+Tstep)+"ps "+values->convertToUnits(-1*stepVal)+"A)";
+
+                                            //Write the value to the temporary netlist file
+                                            stream << newLine <<'\n';
+
+                                        }
+                                    }
+
+                                //If the I-V curve in statistical stage is measured
+                                else if (IVstatistical==2)
                                 {
-                                    // Make the index for the PWL current name
-                                    int PWLindex = loopcntr*simParams.pointNum.toInt()+pointCntr;
+                                    //Load the datafile containing the infornmation for Waittimes
+                                    QString testOutFile= QDir::currentPath()+"/testOutPut.DAT";
+                                    QFile newfile(testOutFile);
+                                    if (!newfile.open(QFile::ReadOnly | QFile::Text)){
+                                        return newfile.errorString();
+                                    }
+                                    else{
+                                            QTextStream waitstream(&newfile);
+                                            QVector<int> waittimevals(simParams.subParam.toInt()*simParams.pointNum.toInt());
+                                            for (int testcntr=0;testcntr<simParams.subParam.toInt()*simParams.pointNum.toInt();testcntr++)
+                                                    waittimevals[testcntr]=waitstream.readLine().toInt();
+
+                                            //testing to see if we read correctly
 
 
-                                    // The first part is applying the Imin to the loop
-                                    if (PWLindex == 0)
-                                        newLine="IPWL0   "+rcommand.at(1)+
-                                                "   "+rcommand.at(2)+"   "+"PWL(0ps 0mA "+ QString::number(Tstep)+
-                                                "ps "+ simParams.minVal+"A)";
+                                                newfile.close();
+                                                waitstream.flush();
 
-                                    //Next we increase the I value by steps
-                                    else
-                                        newLine="IPWL"+QString::number(PWLindex)+"   "+rcommand.at(1)+"   "+rcommand.at(2)+"   "
-                                            + "PWL(0ps 0mA "+ QString::number((Tstep+WaitTime)*PWLindex)+"ps "
-                                            +"0mA " + QString::number((Tstep+WaitTime)*PWLindex+Tstep)+"ps "+values->convertToUnits(stepVal)+"A)";
 
-                                    //Write the value to the temporary netlist file
-                                    stream << newLine <<'\n';
+                                    //Generating the netlist                           
+
+                                    for (int loopcntr=0;loopcntr<simParams.subParam.toInt();loopcntr++)
+                                    {
+
+                                        //First half of the loop
+                                        for (int pointCntr=0;pointCntr<halfloopVal;pointCntr++)
+                                        {
+                                            // Make the index for the PWL current name
+                                            int PWLindex = loopcntr*simParams.pointNum.toInt()+pointCntr;
+                                            waitTimeSum=waitTimeSum+waittimevals[PWLindex];
+
+
+                                            // The first part is applying the Imin to the loop
+                                            if (PWLindex == 0)
+                                                newLine="IPWL0   "+rcommand.at(1)+
+                                                        "   "+rcommand.at(2)+"   "+"PWL(0ps 0mA "+ QString::number(Tstep)+
+                                                        "ps "+ simParams.minVal+"A)";
+
+                                            //Next we increase the I value by steps
+                                            else
+                                                newLine="IPWL"+QString::number(PWLindex)+"   "+rcommand.at(1)+"   "+rcommand.at(2)+"   "
+                                                    + "PWL(0ps 0mA "+ QString::number(Tstep*PWLindex+waitTimeSum)+"ps "
+                                                    +"0mA " + QString::number(Tstep*(PWLindex+1)+waitTimeSum)+"ps "+values->convertToUnits(stepVal)+"A)";
+
+                                            //Write the value to the temporary netlist file
+                                            stream << newLine <<'\n';
+                                        }
+
+                                        for (int pointCntr=halfloopVal;pointCntr<2*halfloopVal;pointCntr++)
+                                        {
+
+                                            int PWLindex = 2*loopcntr*halfloopVal+pointCntr;
+                                            waitTimeSum=waitTimeSum+waittimevals[PWLindex];
+
+                                            newLine="IPWL"+QString::number(PWLindex)+"   "+rcommand.at(1)+"   "+rcommand.at(2)+"   "
+                                                    +"PWL(0ps 0mA "+ QString::number(Tstep*PWLindex+waitTimeSum)+"ps 0mA "
+                                                    + QString::number((Tstep+1)*PWLindex+waitTimeSum)+"ps "+values->convertToUnits(-1*stepVal)+"A)";
+
+                                            //Write the value to the temporary netlist file
+                                            stream << newLine <<'\n';
+
+                                        }
+                                    }
+                                }
                                 }
 
-                                for (int pointCntr=halfloopVal;pointCntr<2*halfloopVal;pointCntr++)
+                                //If the I-V curve is normally measured
+                                else
+                                    for (int loopcntr=0;loopcntr<simParams.subParam.toInt();loopcntr++)
                                 {
+                                    //First half of the loop
+                                    for (int pointCntr=0;pointCntr<halfloopVal;pointCntr++)
+                                    {
+                                        // Make the index for the PWL current name
+                                        int PWLindex = loopcntr*simParams.pointNum.toInt()+pointCntr;
 
-                                    int PWLindex = 2*loopcntr*halfloopVal+pointCntr;
 
-                                    newLine="IPWL"+QString::number(PWLindex)+"   "+rcommand.at(1)+"   "+rcommand.at(2)+"   "
-                                            +"PWL(0ps 0mA "+ QString::number((Tstep+WaitTime)*PWLindex)+"ps 0mA "
-                                            + QString::number((Tstep+WaitTime)*PWLindex+Tstep)+"ps "+values->convertToUnits(-1*stepVal)+"A)";
+                                        // The first part is applying the Imin to the loop
+                                        if (PWLindex == 0)
+                                            newLine="IPWL0   "+rcommand.at(1)+
+                                                    "   "+rcommand.at(2)+"   "+"PWL(0ps 0mA "+ QString::number(Tstep)+
+                                                    "ps "+ simParams.minVal+"A)";
 
-                                    //Write the value to the temporary netlist file
-                                    stream << newLine <<'\n';
+                                        //Next we increase the I value by steps
+                                        else
+                                            newLine="IPWL"+QString::number(PWLindex)+"   "+rcommand.at(1)+"   "+rcommand.at(2)+"   "
+                                                + "PWL(0ps 0mA "+ QString::number((Tstep+WaitTime)*PWLindex)+"ps "
+                                                +"0mA " + QString::number((Tstep+WaitTime)*PWLindex+Tstep)+"ps "+values->convertToUnits(stepVal)+"A)";
 
+                                        //Write the value to the temporary netlist file
+                                        stream << newLine <<'\n';
+                                    }
+
+                                    for (int pointCntr=halfloopVal;pointCntr<2*halfloopVal;pointCntr++)
+                                    {
+
+                                        int PWLindex = 2*loopcntr*halfloopVal+pointCntr;
+
+                                        newLine="IPWL"+QString::number(PWLindex)+"   "+rcommand.at(1)+"   "+rcommand.at(2)+"   "
+                                                +"PWL(0ps 0mA "+ QString::number((Tstep+WaitTime)*PWLindex)+"ps 0mA "
+                                                + QString::number((Tstep+WaitTime)*PWLindex+Tstep)+"ps "+values->convertToUnits(-1*stepVal)+"A)";
+
+                                        //Write the value to the temporary netlist file
+                                        stream << newLine <<'\n';
+
+                                    }
                                 }
                             }
+
 
                             // One increament to counter to skip the Main Parameters orginal value.
                             fcntr++;
@@ -522,6 +804,10 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
                             }
                             //sample line: ".TRAN 0.5PS 500PS 0.1PS 0.1PS"
                             int endtime = (2*simParams.subParam.toInt()*(simParams.pointNum.toInt()/2))*(Tstep+WaitTime)+WaitTime;
+
+                            if (IVstatistical==2)
+                                endtime = (2*simParams.subParam.toInt()*(simParams.pointNum.toInt()/2))*Tstep+waitTimeSum+WaitTime;
+
                             QString newline = rcommand.at(0)+" "+rcommand.at(1)+" "+QString::number(endtime)
                                     +"PS "+rcommand.at(3)+" "+rcommand.at(4);
                             netlist.Commands.replace(fcntr,newline);

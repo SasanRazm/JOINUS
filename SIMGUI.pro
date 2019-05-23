@@ -4,11 +4,17 @@
 #
 #-------------------------------------------------
 
-QT       += core gui axcontainer
+QT       += core gui
+
+win32 {
+    QT       +=axcontainer
+}
+
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
-TARGET = SIMGUI
+QMAKE_TARGET = JOINUS
+TARGET = JOINUS
 TEMPLATE = app
 RC_ICONS = icon.ico
 
@@ -49,7 +55,8 @@ HEADERS += \
 FORMS += \
         mainwindow.ui \
     plotwindow.ui \
-    dialogplot.ui
+    dialogplot.ui \
+    dialogsetparam.ui
 
 RESOURCES += \
     simguiresources.qrc

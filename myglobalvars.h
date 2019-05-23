@@ -26,5 +26,12 @@ extern double Kbolt;
 extern double Pi;
 extern double Phi0;
 
+class myglobalvars
+{
+public:
+
+    myglobalvars();
+
+};
 
 #endif // MYGLOBALVARS_H

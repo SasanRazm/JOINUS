@@ -645,6 +645,11 @@
                 <string>Bit Error Rate</string>
                </property>
               </item>
+              <item>
+               <property name="text">
+                <string>Frequency Response</string>
+               </property>
+              </item>
              </widget>
             </item>
             <item>
@@ -1468,8 +1473,10 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
      <string>&amp;Tools</string>
     </property>
     <addaction name="action_Open_Console"/>
+    <addaction name="actionSet_Temperature"/>
     <addaction name="actionRun_Custom_Plotter"/>
     <addaction name="actionIV_Curve_Statistical_Noise"/>
+    <addaction name="actionSet_Advanced_values"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -1622,14 +1629,27 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
    </property>
   </action>
   <action name="actionIV_Curve_Statistical_Noise">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>IV-Curve Statistical &amp;Noise</string>
    </property>
    <property name="statusTip">
     <string>Modify the IV Curve Noise model from normal JSIM noise model to Brownian noise model.</string>
+   </property>
+  </action>
+  <action name="actionSet_Advanced_values">
+   <property name="text">
+    <string>Set &amp;Advanced values</string>
+   </property>
+  </action>
+  <action name="actionSet_Temperature">
+   <property name="text">
+    <string>Set &amp;Temperature</string>
    </property>
   </action>
  </widget>

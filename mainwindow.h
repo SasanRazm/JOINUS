@@ -93,6 +93,8 @@ private slots:
 
     void on_actionRun_Custom_Plotter_triggered();
 
+    void on_actionSet_Temperature_triggered();
+
 private:
     Ui::MainWindow *ui;
     DialogPlot *dialogPlot;

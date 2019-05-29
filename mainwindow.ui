@@ -622,22 +622,22 @@
               </property>
               <item>
                <property name="text">
-                <string>Time domain</string>
+                <string>Time Domain</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>I-V characteristics</string>
+                <string>I-V Characteristics</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>Parametric analysis</string>
+                <string>Parametric Analysis</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>Temperature analysis</string>
+                <string>Temperature Analysis</string>
                </property>
               </item>
               <item>
@@ -648,6 +648,11 @@
               <item>
                <property name="text">
                 <string>Frequency Response</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>I-V Characteristics new</string>
                </property>
               </item>
              </widget>

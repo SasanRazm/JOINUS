@@ -272,7 +272,7 @@ struct ConsoleOutputs simulateall::simulateivcurve(QString FileName, int Simulat
     {
         QTextStream stream(&file2);
         for (int fcntr=0; fcntr<V.length();fcntr++)
-            stream << QString::number(V[fcntr])+"   "+QString::number(I[fcntr])<<'\n';
+            stream << QString::number(V[fcntr])+delimator+QString::number(I[fcntr])<<'\n';
         file2.close();
         stream.flush();
 
@@ -436,6 +436,129 @@ struct ConsoleOutputs simulateall::simulateivtest(QString FileName, int Simulato
 }
 
 
+// Moving average I-V calculation
+struct ConsoleOutputs simulateall::simulateivnew(QString FileName, int SimulatorIndex,int points)
+{
+
+    //The vector for different waittimes
+    QVector<double> waittimevals(points);
+
+    if (points%2==1)
+        points--;
+
+    bool validDatax=true;
+    bool validDatay=true;
+    QString OutFile= QDir::currentPath()+OutputFileName;
+    struct ConsoleOutputs out = simulatenetlist(FileName,SimulatorIndex);
+
+    // copy the output to tempfile and delete the outputfile
+    if (QFile::exists(TempOutFile))
+        QFile::remove(TempOutFile);
+    if(QFile::copy(OutFile, TempOutFile))
+        QFile::remove(OutFile);
+    else
+      return {"Problem with permissions!","There is a problem in file creation. Check the permissions!"};
+
+    //read the data from output that is TempOutFile now
+    QFile file(TempOutFile);
+    QStringList fields;
+
+    if (!file.open(QFile::ReadOnly | QFile::Text))
+    {
+        return {"Problem with permissions!","There is a problem in file creation. Check the permissions!"};
+    }
+
+    QTextStream in(&file);
+
+    //Put the data into the RawData global variable
+    bool firstline=true;
+    while(!in.atEnd()) {
+        QString line = in.readLine();
+        if (delimator=="," && firstline)
+        firstline=false;
+        else
+        fields.append(line.split(delimator));
+    }
+    file.close();
+    in.flush();
+
+    RawData.clear();
+    for(int i=0 ; i < fields.length() ; i++){
+        if (!fields.at(i).isEmpty())
+        {
+            RawData.append(fields.at(i));
+        }
+    }
+    fields.clear();
+
+    //Take the second colomn as I and third as V
+    QVector <double> DataI(RawData.length()/columNum);
+    QVector <double> DataV(RawData.length()/columNum);
+
+        int j=0;
+        for(int i=0 ; i < RawData.length() ; i++)
+        {
+            if (i%columNum==1) DataI[j]=RawData.at(i).toDouble(&validDatax);
+            else if (i%columNum==2)
+            {
+                DataV[j]=RawData.at(i).toDouble(&validDatay);
+                if (validDatax && validDatay)
+                {
+                    j++;
+                }
+            }
+        }
+
+        //Moving average
+        QVector<double> I= movingAverage(DataI,points);
+        QVector<double> V= movingAverage(DataV,points);
+
+        DataI.clear();
+        DataV.clear();
+
+        //Open the outputfile to put the I-V values into it
+        QFile file2(OutFile);
+        if (!file2.open(QFile::WriteOnly | QFile::Text)){
+            return {file2.errorString()," There is a problem in file creation. Check the permissions! "};
+        }else
+        {
+            QTextStream stream(&file2);
+            for (int fcntr=0; fcntr<V.length();fcntr++)
+                stream << QString::number(V[fcntr])+delimator+QString::number(I[fcntr])<<'\n';
+            file2.close();
+            stream.flush();
+        }
+
+        I.clear();
+        V.clear();
+
+        return out;
+}
+
+
+// Moving average function
+QVector<double> simulateall::movingAverage(QVector<double> datain,int windowSize)
+{
+
+    QVector<double> dataOut(datain.length());
+
+    if (datain.length()>windowSize){
+        dataOut[0]=datain[0]/windowSize;
+
+        for (int avecntr=1 ; avecntr<windowSize ; avecntr++)
+          dataOut[avecntr]=dataOut[avecntr-1]+datain[avecntr]/windowSize;
+
+        for (int avecntr=windowSize ; avecntr<datain.length() ; avecntr++)
+          dataOut[avecntr]=dataOut[avecntr-1]+(datain[avecntr]-datain[avecntr-windowSize])/windowSize;
+    } else{
+        for (int avecntr=1 ; avecntr<datain.length() ; avecntr++)
+          dataOut[avecntr]=dataOut[avecntr-1]+datain[avecntr]/windowSize;
+    }
+
+    return dataOut;
+
+}
+
 //Run the simulator for the input netlist and generate the output
 struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int SimulatorIndex)
 {
@@ -530,6 +653,151 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
     return {simstdout,simstderr};
 }
 
+// BER calculations are done here
+struct ConsoleOutputs simulateall::simulateBER(int SimulatorIndex,float Multiplyer,double SubParamVal)
+{
+    QString OutFile= QDir::currentPath()+OutputFileName;
+    TempFileName=QDir::currentPath()+"/Data/TempNetlistBER.tmp";
+    ConsoleOutputs simstd={"",""};
+    float BER=100;
+    long DataIn=1;
+    long DataOut=0;
+
+    simstd=simulatenetlist(TempFileName,SimulatorIndex);
+
+    QFile file(QDir::currentPath()+OutputFileName);
+    QStringList lastline;
+    QStringList PhaseData;
+
+    if (!file.open(QFile::ReadOnly | QFile::Text))
+    {
+        return {"Problem with permissions!","There is a problem in file creation. Check the permissions!"};
+    }
+
+    QTextStream in(&file);
+    QString line;
+    // Get the last line of the output
+
+    while(!in.atEnd()) line = in.readLine();
+    lastline.append(line.split(delimator));
+    file.close();
+    in.flush();
+
+    for(int i=0 ; i < lastline.length() ; i++)
+        if (!lastline.at(i).isEmpty())
+        {
+            PhaseData.append(lastline.at(i));
+        }
+    for(int i=0 ; i < PhaseData.length() ; i++)
+        {
+            if (i%columNum==1) DataIn=static_cast<int>(PhaseData.at(i).toDouble()/(2*Pi));
+            if (i%columNum==2) DataOut=static_cast<int>(PhaseData.at(i).toDouble()/(2*Pi));
+        }
+
+    lastline.clear();
+    PhaseData.clear();
+
+    if (DataIn==0)
+        BER=100;
+    else
+    {
+        BER=std::abs(100*(1-DataOut*Multiplyer/DataIn));
+        if (BER>100)
+            BER=100;
+    }
+
+
+    QString BERtempfile=QDir::currentPath()+"/Data/TempOutputBER.DAT";
+    QFile file2(BERtempfile);
+
+    if (!file2.open(QFile::WriteOnly | QFile::Text | QFile::Append)){
+        return {file2.errorString()," There is a problem in file creation. Check the permissions! "};
+    }else
+    {
+        QTextStream BERstream(&file2);
+        BERstream << QString::number(SubParamVal)+delimator+QString::number(static_cast<double>(BER))<<'\n';
+        //<<delimator<<delimator<<QString::number(DataIn)<<delimator<<delimator<<QString::number(DataOut)
+        file2.close();
+        BERstream.flush();
+    }
+
+    return simstd;
+
+}
+
+
+//Frequency response calculations are done here
+struct ConsoleOutputs simulateall::simulateFreq(int SimulatorIndex,float Multiplyer,double SubParamVal)
+{
+    QString OutFile= QDir::currentPath()+OutputFileName;
+    TempFileName=QDir::currentPath()+"/Data/TempNetlistFreq.tmp";
+    ConsoleOutputs simstd={"",""};
+    float BER=100;
+    long DataIn=1;
+    long DataOut=0;
+
+    simstd=simulatenetlist(TempFileName,SimulatorIndex);
+
+    QFile file(QDir::currentPath()+OutputFileName);
+    QStringList lastline;
+    QStringList PhaseData;
+
+    if (!file.open(QFile::ReadOnly | QFile::Text))
+    {
+        return {"Problem with permissions!","There is a problem in file creation. Check the permissions!"};
+    }
+
+    QTextStream in(&file);
+    QString line;
+    // Get the last line of the output
+
+    while(!in.atEnd()) line = in.readLine();
+    lastline.append(line.split(delimator));
+    file.close();
+    in.flush();
+
+    for(int i=0 ; i < lastline.length() ; i++)
+        if (!lastline.at(i).isEmpty())
+        {
+            PhaseData.append(lastline.at(i));
+        }
+    for(int i=0 ; i < PhaseData.length() ; i++)
+        {
+            if (i%columNum==1) DataIn=static_cast<int>(PhaseData.at(i).toDouble()/(2*Pi));
+            if (i%columNum==2) DataOut=static_cast<int>(PhaseData.at(i).toDouble()/(2*Pi));
+        }
+
+    lastline.clear();
+    PhaseData.clear();
+
+    if (DataIn==0)
+        BER=100;
+    else
+    {
+        BER=std::abs(100*(1-DataOut*Multiplyer/DataIn));
+        if (BER>100)
+            BER=100;
+    }
+
+
+    QString BERtempfile=QDir::currentPath()+"/Data/TempOutputBER.DAT";
+    QFile file2(BERtempfile);
+
+    if (!file2.open(QFile::WriteOnly | QFile::Text | QFile::Append)){
+        return {file2.errorString()," There is a problem in file creation. Check the permissions! "};
+    }else
+    {
+        QTextStream BERstream(&file2);
+        BERstream << QString::number(SubParamVal)+delimator+QString::number(static_cast<double>(BER))<<'\n';
+        //<<delimator<<delimator<<QString::number(DataIn)<<delimator<<delimator<<QString::number(DataOut)
+        file2.close();
+        BERstream.flush();
+    }
+
+    return simstd;
+
+}
+
 
 //Create new netlist based on the selections of the user. Considering the Temerature and Noise
 //It will create a series of PWL currents to step the I, for I-V simulation mode
@@ -539,11 +807,16 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
 {
     CalcVals *values= new CalcVals;
     double stepVal=0;
+    bool firstencounter=true;
+    // For case6 new I-V
+    int timeInterval=20;
+
     if (IVstatistical==1)
         WaitTime=50;
     else if (IVstatistical==2)
         WaitTime=250;
     int waitTimeSum=0;
+
 
     struct processedNL netlist = processNetlist(NetlistFile);
     if (netlist.OutFileName=="NoFileExist"){
@@ -598,13 +871,15 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
                     switch (Simindex)
                     {
 
+                    // Normal time transient simulation
                     case 0:
                         stream << netlist.Commands.at(fcntr)<<'\n';
                         break;
 
+                    // I-V characteristic simulation
                     case 1:
                         // Find the line with parameter and make the changes
-                        if (netlist.Commands.at(fcntr).contains(simParams.mainParam,Qt::CaseInsensitive))
+                        if (firstencounter && netlist.Commands.at(fcntr).contains(simParams.mainParam,Qt::CaseInsensitive))
                         {
                             QStringList rcommand={};
                             QStringList tempe=netlist.Commands.at(fcntr).split(" ");
@@ -790,6 +1065,7 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
 
                             // One increament to counter to skip the Main Parameters orginal value.
                             fcntr++;
+                            firstencounter=false;
                         }
 
 
@@ -818,6 +1094,7 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
                         stream << netlist.Commands.at(fcntr)<<'\n';
                         break;
 
+                    // Parametric sweep characteristic
                     case 2:
 
                         if (simParams.subParam.contains("<*>") && netlist.Commands.at(fcntr).contains(simParams.mainParam,Qt::CaseInsensitive))
@@ -849,6 +1126,7 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
                         stream << netlist.Commands.at(fcntr)<<'\n';
                         break;
 
+                    // Temperature sweep characteristic
                     case 3:
                         if (tempIndicator){
                             titleVals.append(QString::number(temperature)+" K");
@@ -859,9 +1137,115 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
                         stream << netlist.Commands.at(fcntr)<<'\n';
                         break;
 
+                    // Bit Error rate calculation
                     case 4:
+
+                        if (simParams.subParam.contains("<*>") && netlist.Commands.at(fcntr).contains(simParams.mainParam,Qt::CaseInsensitive))
+                        {
+
+                            //Replacing the new parameter applied from Main window to the simulation line
+                            QRegExp r = QRegExp("^(-?\\d+\\.*\\d*[nµumKG]?)(.*)(<\\*>)(-?\\d+\\.*\\d*[nµumKG]?)(.*)$", Qt::CaseInsensitive);
+                            r.indexIn(simParams.subParam);
+                            QString newline=netlist.Commands.at(fcntr);
+                            newline.replace(r.cap(1)+r.cap(2),r.cap(4)+r.cap(2),Qt::CaseInsensitive);
+                            netlist.Commands.replace(fcntr,newline);
+                        }
+
+                        //Changing the outputs to phase output
+                        if (netlist.Commands.at(fcntr).contains("print",Qt::CaseInsensitive))
+                        {
+                            QString newline=netlist.Commands.at(fcntr);
+                            if (netlist.Commands.at(fcntr).contains("devv",Qt::CaseInsensitive))
+                                newline.replace("devv","PHASE",Qt::CaseInsensitive);
+                            else if (netlist.Commands.at(fcntr).contains("devi",Qt::CaseInsensitive))
+                                newline.replace("devi","PHASE",Qt::CaseInsensitive);
+                            else if (netlist.Commands.at(fcntr).contains("phase",Qt::CaseInsensitive))
+                                newline.replace("phase","PHASE",Qt::CaseInsensitive);
+                            else newline="";
+
+
+                            netlist.Commands.replace(fcntr,newline);
+
+                        }
+
                         stream << netlist.Commands.at(fcntr)<<'\n';
                         break;
+
+                    // Frequency sweep calculation
+                    case 5:
+
+                        stream << netlist.Commands.at(fcntr)<<'\n';
+                        break;
+
+                    case 6:
+
+                        if (firstencounter && netlist.Commands.at(fcntr).contains(simParams.mainParam,Qt::CaseInsensitive))
+                        {
+
+                            int loopcnt=simParams.subParam.toInt();
+                            QStringList rcommand={};
+                            QStringList tempe=netlist.Commands.at(fcntr).split(" ");
+                            for (int tempcntr=0;tempcntr<tempe.length();tempcntr++){
+                                if (!tempe.at(tempcntr).isEmpty())
+                                    rcommand.append(tempe.at(tempcntr));
+                            }
+
+                            QString newLine="*** Problem occured in loop! ***";
+
+                            //When the number of loops is bigger than one, the loop starts and depending on the number of periods,
+                            //  the loop would generate PWL signals.
+
+                                    for (int loopcntr=0;loopcntr<loopcnt;loopcntr++)
+                                    {
+
+                                            int PWLindex = loopcntr*timeInterval*4;
+
+
+                                            // The first part is applying the Imin to the loop
+                                            if (PWLindex == 0)
+                                                newLine="IPWL0   "+rcommand.at(1)+
+                                                        "   "+rcommand.at(2)+"   " + "PWL(0ps 0mA "+QString::number(timeInterval)+"ns "
+                                                        +simParams.maxVal + "A  "+QString::number(timeInterval*3)+"ns  " + simParams.minVal + "A   "
+                                                        +QString::number(timeInterval*4)+"ns  0mA)";
+
+                                            //Next we increase the I value by steps
+                                            else
+                                                newLine="IPWL"+QString::number(loopcntr)+"   "+rcommand.at(1)+"   "+rcommand.at(2)+"   "
+                                                        + "PWL(0ps 0mA "+QString::number(PWLindex)+"ns 0mA"+QString::number(PWLindex+timeInterval)+"ns "
+                                                        + simParams.maxVal + "A  "+QString::number(PWLindex+timeInterval*3)+"ns  " + simParams.minVal + "A   "
+                                                        + QString::number(PWLindex+timeInterval*4)+"ns  0mA)";
+
+                                            //Write the value to the temporary netlist file
+                                            stream << newLine <<'\n';
+                                        }
+
+                                    fcntr++;
+                                    firstencounter=false;
+
+                        }
+
+                        if (netlist.Commands.at(fcntr).contains("tran",Qt::CaseInsensitive)){
+                            QStringList rcommand={};
+                            QStringList tempe=netlist.Commands.at(fcntr).split(" ");
+                            for (int tempcntr=0;tempcntr<tempe.length();tempcntr++){
+                                if (!tempe.at(tempcntr).isEmpty())
+                                    rcommand.append(tempe.at(tempcntr));
+                            }
+                            //sample line: ".TRAN 0.5PS 500PS 0.1PS 0.1PS"
+                            int endtime = simParams.subParam.toInt()*timeInterval*4+timeInterval;
+
+                            QString newline = rcommand.at(0)+" "+rcommand.at(1)+" "+QString::number(endtime)
+                                    +"NS "+rcommand.at(3)+" "+rcommand.at(4);
+                            netlist.Commands.replace(fcntr,newline);
+                        }
+
+                        stream << netlist.Commands.at(fcntr)<<'\n';
+                        break;
+
+                    default:
+                        stream << netlist.Commands.at(fcntr)<<'\n';
+                        break;
+
 
                     }
 

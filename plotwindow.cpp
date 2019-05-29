@@ -35,6 +35,15 @@ PlotWindow::PlotWindow(QWidget *parent) :
     case 3:
         title = new QCPTextElement(ui->customPlot, "Temperature analysis", QFont("sans", 14, QFont::Bold));
         break;
+    case 4:
+        title = new QCPTextElement(ui->customPlot, "BER Calculation", QFont("sans", 14, QFont::Bold));
+        break;
+    case 5:
+        title = new QCPTextElement(ui->customPlot, "Frequency Response", QFont("sans", 14, QFont::Bold));
+        break;
+    case 6:
+        title = new QCPTextElement(ui->customPlot, "I-V characteristics", QFont("sans", 14, QFont::Bold));
+        break;
     default:
         title = new QCPTextElement(ui->customPlot, "Plotter", QFont("sans", 14, QFont::Bold));
     }
@@ -48,10 +57,20 @@ PlotWindow::PlotWindow(QWidget *parent) :
     ui->customPlot->yAxis->setTickLabelFont(QFont("times", 10));
 
 
-    if (Simindex==1){
+    if (Simindex==1 || Simindex==6){
 
         ui->customPlot->xAxis->setLabel("Voltage (mV)");
         ui->customPlot->yAxis->setLabel("Current (µA)");
+
+    } else if (Simindex==4){
+
+        ui->customPlot->xAxis->setLabel("Parameter Value");
+        ui->customPlot->yAxis->setLabel("BER (%)");
+
+    } else if (Simindex==5){
+
+        ui->customPlot->xAxis->setLabel("Frequency (GHz)");
+        ui->customPlot->yAxis->setLabel("Pulse Number (#)");
 
     } else{
 
@@ -98,12 +117,12 @@ PlotWindow::PlotWindow(QWidget *parent) :
     ui->checkBox_2->setChecked(true);
 
     //Set the plotter mode.
-    if ((columNum>2) && (Simindex!=1))
+    if (columNum>2 && (Simindex==2 || Simindex==3))
         ui->comboBox->setCurrentIndex(2);
     else
         ui->comboBox->setCurrentIndex(0);
 
-    if (Simindex==1)
+    if (Simindex==1 || Simindex==4 || Simindex==5)
         ui->checkBox->setChecked(true);
 
     //show the slider bar for sliding between parameters
@@ -112,7 +131,7 @@ PlotWindow::PlotWindow(QWidget *parent) :
     else ui->paramSlide->hide();
 
     //Clear the data and start reading the out file
-    if (Simindex<2)
+    if (Simindex!=2 && Simindex!=3)
     {
         RawData.clear();
         struct FileDataString readData={"Read function is not working correctly!",{}};
@@ -229,10 +248,11 @@ void PlotWindow::addPlots(int simstep)
 
     //Plotting the first two column of the data in a single plot
     if (ui->comboBox->currentIndex()==0)
+
     //if (ui->comboBox->currentText()=="Single Plot ( X , Y )")
     {
         int j=0;
-        if (Simindex==1){
+        if (Simindex!=2 && Simindex!=3){
             for(int i=0 ; i < RawData.length() ; i++)
             {
                 if (i%columnSize==0) x[j]=RawData.at(i).toDouble(&validDatax);
@@ -267,7 +287,7 @@ void PlotWindow::addPlots(int simstep)
      else if (ui->comboBox->currentIndex()==1)
     {
         int j=0;
-        if (Simindex==1){
+        if (Simindex!=2 && Simindex!=3){
         for(int i=0 ; i < RawData.length() ; i++)
         {
             if (i%columnSize==0) x[j]=RawData.at(i).QString::toDouble(&validDatax);
@@ -299,7 +319,7 @@ void PlotWindow::addPlots(int simstep)
     //else if (ui->comboBox->currentText()=="Multiple Plot ( X , Y1 , Y2 , ...)")
         else if (ui->comboBox->currentIndex()==2)
     {
-         if (Simindex==1){
+         if (Simindex!=2 && Simindex!=3){
             for (int k=1; k<columnSize; k++)
             {
                 int j=0;
@@ -339,7 +359,7 @@ void PlotWindow::addPlots(int simstep)
     //else if (ui->comboBox->currentText()=="Multiple Plot ( X1 , Y1 , X2 , Y2 , ...)")
         else if (ui->comboBox->currentIndex()==3)
     {
-        if (Simindex==1){
+        if (Simindex!=2 && Simindex!=3){
         for (int k=0; k<columnSize-1; k+=2)
         {
             int j=0;
@@ -383,12 +403,17 @@ void PlotWindow::addPlots(int simstep)
 
 void PlotWindow::addPlotSingleXY(QVector<double> x,QVector<double> y,int simstep)
 {
-    if (Simindex==1){
+    if (Simindex!=2 && Simindex!=3){
     QCPCurve *newCurve = new QCPCurve(ui->customPlot->xAxis, ui->customPlot->yAxis);
     QVector<QCPCurveData> dataCurve(x.length());
 
-    for (int i=0; i<x.length(); ++i)
-        dataCurve[i] = QCPCurveData(i, x[i]*1000, y[i]*1000000);
+    if (Simindex==1 || Simindex==6)
+        for (int i=0; i<x.length(); i++)
+            dataCurve[i] = QCPCurveData(i, x[i]*1000, y[i]*1000000);
+    else
+        for (int i=0; i<x.length(); i++)
+            dataCurve[i] = QCPCurveData(i, x[i], y[i]);
+
 
     newCurve->data()->set(dataCurve,false);
 
@@ -449,12 +474,17 @@ void PlotWindow::addPlotSingleYX(QVector<double> x,QVector<double> y,int simstep
     ui->customPlot->xAxis->setLabel(ui->customPlot->yAxis->label());
     ui->customPlot->yAxis->setLabel(ui->customPlot->xAxis->label());
 
-    if (Simindex==1){
+    if (Simindex!=2 && Simindex!=3){
     QCPCurve *newCurve = new QCPCurve(ui->customPlot->xAxis, ui->customPlot->yAxis);
     QVector<QCPCurveData> dataCurve(x.length());
 
-    for (int i=0; i<x.length(); ++i)
-        dataCurve[i] = QCPCurveData(i, y[i]*1000, x[i]*1000000);
+    if (Simindex==1 || Simindex==6)
+        for (int i=0; i<x.length(); ++i)
+            dataCurve[i] = QCPCurveData(i, y[i]*1000000, x[i]*1000);
+    else
+        for (int i=0; i<x.length(); ++i)
+            dataCurve[i] = QCPCurveData(i, y[i], x[i]);
+
 
     newCurve->data()->set(dataCurve,false);
 
@@ -514,13 +544,17 @@ void PlotWindow::addPlotSingleYX(QVector<double> x,QVector<double> y,int simstep
 
 void PlotWindow::addPlotMultiXYY(QVector<double> x,QVector<double> y,int graphcolor,int simstep)
 {
-    if (Simindex==1){
+    if (Simindex!=2 && Simindex!=3){
     QCPCurve *newCurve = new QCPCurve(ui->customPlot->xAxis, ui->customPlot->yAxis);
     QVector<QCPCurveData> dataCurve(x.length());
 
 
-    for (int i=0; i<x.length(); ++i)
-        dataCurve[i] = QCPCurveData(i, x[i]*1000, y[i]*1000000);
+    if (Simindex==1 || Simindex==6)
+        for (int i=0; i<x.length(); ++i)
+            dataCurve[i] = QCPCurveData(i, x[i]*1000, y[i]*1000000);
+    else
+        for (int i=0; i<x.length(); ++i)
+            dataCurve[i] = QCPCurveData(i, x[i], y[i]);
 
     newCurve->data()->set(dataCurve,false);
 
@@ -620,13 +654,24 @@ void PlotWindow::addPlotMultiXYY(QVector<double> x,QVector<double> y,int graphco
 
 void PlotWindow::addPlotMultiXYXY(QVector<double> x,QVector<double> y,int graphcolor,int simstep)
 {
-    if (Simindex==1){
+//    if (Simindex==1){
+//    QCPCurve *newCurve = new QCPCurve(ui->customPlot->xAxis, ui->customPlot->yAxis);
+//    QVector<QCPCurveData> dataCurve(x.length());
+
+
+//    for (int i=0; i<x.length(); ++i)
+//        dataCurve[i] = QCPCurveData(i, x[i]*1000, y[i]*1000000);
+    if (Simindex!=2 && Simindex!=3){
     QCPCurve *newCurve = new QCPCurve(ui->customPlot->xAxis, ui->customPlot->yAxis);
     QVector<QCPCurveData> dataCurve(x.length());
 
 
-    for (int i=0; i<x.length(); ++i)
-        dataCurve[i] = QCPCurveData(i, x[i]*1000, y[i]*1000000);
+    if (Simindex==1 && Simindex==6)
+        for (int i=0; i<x.length(); ++i)
+            dataCurve[i] = QCPCurveData(i, x[i]*1000, y[i]*1000000);
+    else
+        for (int i=0; i<x.length(); ++i)
+            dataCurve[i] = QCPCurveData(i, x[i], y[i]);
 
     newCurve->data()->set(dataCurve,false);
 

@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::on_StartPushButton_clicked()
 {
     simulateall *simclass=new simulateall;
-    TempFileName=QDir::currentPath()+"/Data/TempOut.tmp";
+    //TempFileName=QDir::currentPath()+"/Data/TempOut.tmp";
 
     // ConsoleOutputs gives the outputs and errors of the terminal. In windows it is Command Prompt.
     struct ConsoleOutputs simout={"",""};
@@ -90,6 +90,8 @@ void MainWindow::on_StartPushButton_clicked()
     int SimulatorIndex=ui->SimComboBox->currentIndex();
     bool noise= ui->NoiseCheckBox->isChecked();
     QString NetlistFile=ui->NetlistLineEdit->text();
+    QString BERtempfile=QDir::currentPath()+"/Data/TempOutputBER.DAT";
+    QString Freqtempfile=QDir::currentPath()+"/Data/TempOutputFreq.DAT";
     ui->ProgressBar->setValue(0);
 
 
@@ -114,9 +116,14 @@ void MainWindow::on_StartPushButton_clicked()
         ui->TerminalPlainTextEdit->appendPlainText("Temperature value:"+  QString::number(temperature));
         ui->TerminalPlainTextEdit->appendPlainText("Delimator: '"+  delimator+"'");
 
+
+
         QString initSubParam=simParams.subParam;
         double stepSize=0;
         titleVals.clear();
+
+        QVector <long> DataIn(simParams.pointNum.toInt());
+        QVector <long> DataOut(simParams.pointNum.toInt());
 
         switch (Simindex)
         {
@@ -212,6 +219,7 @@ void MainWindow::on_StartPushButton_clicked()
 
             break;
 
+            //Temperature sweep simulation
         case 3:
             simParams.subParam="4.2";
 
@@ -250,15 +258,97 @@ void MainWindow::on_StartPushButton_clicked()
 
             break;
 
+        //Bit error rate calculations
         case 4:
 
+            if (simParams.pointNum.toInt()>1)
+                stepSize=(calcVal->convertToValues(simParams.maxVal)-
+                          calcVal->convertToValues(simParams.minVal))/(simParams.pointNum.toInt()-1);
+
+            if (QFile::exists(BERtempfile))
+                QFile::remove(BERtempfile);
+
+            for (int simstep=0 ; simstep<simParams.pointNum.toInt() ; simstep++)
+            {
+                simParams.subParam=initSubParam+"<*>"+calcVal->convertToUnits(calcVal->convertToValues(simParams.minVal)+simstep*stepSize);
+
+                // Change the netlist with the new parameter
+
+                QString mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex,IVstatistical);
+                if (mnnerr!="Success")
+                    QMessageBox::warning(this,"Error!",mnnerr);
+                else{
+
+                    ui->ProgressBar->setValue(100*(simstep+1)/simParams.pointNum.toInt());
+                    simout=simclass->simulateBER(SimulatorIndex,simParams.tempVal.toFloat(),calcVal->convertToValues(simParams.minVal)+simstep*stepSize);
+                    ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
+                    ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+                }
+              }
+
+            if (QFile::exists(QDir::currentPath()+OutputFileName))
+                QFile::remove(QDir::currentPath()+OutputFileName);
+            if(QFile::copy(BERtempfile, QDir::currentPath()+OutputFileName))
+                QFile::remove(BERtempfile);
+            else
+                break;
+
+            columNum=2;
 
             break;
 
+        //Shift and find maximum frequency
         case 5:
+            if (Simindex==5){
+                double minV=Phi0*calcVal->convertToValues(simParams.minVal)*1e6;
+                double maxV=Phi0*calcVal->convertToValues(simParams.maxVal)*1e6;
+                if (simParams.pointNum.toInt()>1)
+                    stepSize=(maxV-minV)/(simParams.pointNum.toInt()-1);
+                if (QFile::exists(Freqtempfile))
+                    QFile::remove(Freqtempfile);
+
+                for (int simstep=0 ; simstep<simParams.pointNum.toInt() ; simstep++)
+                {
 
 
+                    simParams.subParam=initSubParam+"<*>"+calcVal->convertToUnits(calcVal->convertToValues(simParams.minVal)+simstep*stepSize);
+
+                    // Change the netlist with the new parameter
+
+                    QString mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex,IVstatistical);
+                    if (mnnerr!="Success")
+                        QMessageBox::warning(this,"Error!",mnnerr);
+                    else{
+
+                        ui->ProgressBar->setValue(100*(simstep+1)/simParams.pointNum.toInt());
+                        simout=simclass->simulateBER(SimulatorIndex,simParams.tempVal.toFloat(),calcVal->convertToValues(simParams.minVal)+simstep*stepSize);
+                        ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
+                        ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+                    }
+                  }
+
+                if (QFile::exists(QDir::currentPath()+OutputFileName))
+                    QFile::remove(QDir::currentPath()+OutputFileName);
+                if(QFile::copy(Freqtempfile, QDir::currentPath()+OutputFileName))
+                    QFile::remove(Freqtempfile);
+                else
+                    break;
+            }
+
+            columNum=2;
             break;
+
+        //New I-V calculation method
+        case 6:
+
+            ui->ProgressBar->setValue(50);
+            simout = simclass->simulateivnew(TempFileName,SimulatorIndex,simParams.pointNum.toInt());
+            ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
+            ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+            ui->ProgressBar->setValue(100);
+            columNum=2;
+            break;
+
 
         default:
             ui->statusBar->showMessage("The simulation type is not valid!");
@@ -371,7 +461,6 @@ void MainWindow::on_SQUIDPushBottun_clicked()
 }
 
 // Load the netlist file and copies it to the Plain text editor
-// ***Does not compile netlist for now***
 void MainWindow::on_NetlistToolButton_clicked()
 {
     QString NetlistFile = QFileDialog::getOpenFileName(this, tr("Open Netlist File..."),QString(), tr("Netlist Files (*.js *.inp);;All Files (*)"));
@@ -593,24 +682,25 @@ void MainWindow::on_TypeComboBox_currentIndexChanged(int index)
         ui->TempLineEdit->setText(" ");
         ui->SubParamLineEdit->setEnabled(false);
         break;
+
         //Continue from here
     case 4:
         ui->frame->show();
         ui->ParamLineEdit->setEnabled(true);
         ui->label_7->setText("Number of Steps");
-        ui->label_8->setText("Temperature");
+        ui->label_8->setText("Multiplier");
         ui->label_9->setText("Minimum Value");
         ui->label_10->setText("Maximum Value");
         ui->label_11->setText("Source Name");
         ui->label_12->setText("Source Current Value");
         ui->SubParamLineEdit->setEnabled(true);
-        ui->TempLineEdit->setEnabled(false);
-        ui->ParamLineEdit->setText("I1");
-        ui->SubParamLineEdit->setText("200GHz");
-        ui->MinValLineEdit->setText("100G");
-        ui->MaxValLineEdit->setText("500G");
-        ui->StepLineEdit->setText("5");
-        ui->TempLineEdit->setText(QString::number(temperature));
+        ui->TempLineEdit->setEnabled(true);
+        ui->ParamLineEdit->setText("VBias");
+        ui->SubParamLineEdit->setText("2.5mV");
+        ui->MinValLineEdit->setText("1m");
+        ui->MaxValLineEdit->setText("5m");
+        ui->StepLineEdit->setText("40");
+        ui->TempLineEdit->setText("2");
         QMessageBox::information(this,"Notice","Bit error rate calculation is for circuits with periodic input and output. "
                                          "For more complex circuits please use Monte Carlo Optimizer software!");
         break;
@@ -619,21 +709,44 @@ void MainWindow::on_TypeComboBox_currentIndexChanged(int index)
         ui->ParamLineEdit->setEnabled(true);
         ui->label_7->setText("Number of Steps");
         ui->label_8->setText("Input Node");
-        ui->label_9->setText("Minimum Value");
-        ui->label_10->setText("Maximum Value");
+        ui->label_9->setText("Minimum Frequency");
+        ui->label_10->setText("Maximum Frequency");
         ui->label_11->setText("Input Element");
         ui->label_12->setText("Output Element");
         ui->SubParamLineEdit->setEnabled(true);
         ui->TempLineEdit->setEnabled(true);
-        ui->ParamLineEdit->setText("I1");
-        ui->SubParamLineEdit->setText("200GHz");
-        ui->MinValLineEdit->setText("100G");
-        ui->MaxValLineEdit->setText("500G");
-        ui->StepLineEdit->setText("5");
-        ui->TempLineEdit->setText("10");
+        ui->ParamLineEdit->setText("XI1_B1");
+        ui->SubParamLineEdit->setText("XI5_B2");
+        ui->MinValLineEdit->setText("10G");
+        ui->MaxValLineEdit->setText("200G");
+        ui->StepLineEdit->setText("20");
+        ui->TempLineEdit->setText("XI1-10");
         QMessageBox::information(this,"Frequency Response","The function applys certain number of pulses at the input and measures the number of output pulses."
                                                        "Enter the Input node, Input and output junctions and frequency range here.");
         break;
+    case 6:
+        ui->frame->show();
+        ui->label_7->setText("Averaging Constant");
+        ui->label_8->setText("Temperature");
+        ui->label_9->setText("Minimum");
+        ui->label_10->setText("Maximum");
+        ui->label_11->setText("Current Source");
+        ui->ParamLineEdit->setEnabled(true);
+        ui->TempLineEdit->setEnabled(false);
+        ui->label_12->setText("Loop Count");
+        ui->ParamLineEdit->setText("I0");
+        ui->SubParamLineEdit->setText("1");
+        ui->MinValLineEdit->setText("-2m");
+        ui->MaxValLineEdit->setText("2m");
+        ui->StepLineEdit->setText("1500");
+        ui->TempLineEdit->setText(QString::number(temperature));
+        ui->SubParamLineEdit->setEnabled(true);
+        ui->label_12->show();
+        QMessageBox::information(this,"I-V characteristic","For I-V measurement, the program takes first output as Current and Second "
+                                                       "as Voltage. The other outputs would be ignored!"
+                                                       " See examples for more information.");
+        break;
+
     default:
         QMessageBox::warning(this,"Error","After this point it is only void...");
         Simindex=0;
@@ -823,17 +936,6 @@ void MainWindow::on_MenuOpen_triggered()
 
 }
 
-//On exiting program, destroys all the objects and files created by the code.
-MainWindow::~MainWindow()
-{
-    QFile file(TempFileName);
-    file.remove();
-    file.close();
-    QFile file1(TempOutFile);
-    file1.remove();
-    file1.close();
-    delete ui;
-}
 
 void MainWindow::on_SimComboBox_currentIndexChanged(int index)
 {
@@ -943,7 +1045,7 @@ void MainWindow::on_actionSet_Temperature_triggered()
             return;
         }
             temperature = tempValString.toDouble();
-            if (Simindex!=5)
+            if ((Simindex!=5) && (Simindex!=4))
                 ui->TempLineEdit->setText(QString::number(temperature));
     }
     else
@@ -952,4 +1054,35 @@ void MainWindow::on_actionSet_Temperature_triggered()
         if (Simindex!=5)
             ui->TempLineEdit->setText("4.2");
     }
+}
+
+//On exiting program, destroys all the objects and files created by the code.
+MainWindow::~MainWindow()
+{
+    //Find the temporary file list and delete them all
+
+    //QFile file(TemporaryFiles.tmp);
+    //QStringList fields;
+
+    //if (!file.open(QFile::ReadOnly | QFile::Text))
+    //{
+    //    return {"Problem with permissions!","There is a problem in file creation. Check the permissions!"};
+    //}
+
+    //    while(!in.atEnd()) {
+    //        QString line = in.readLine();
+    //    if (QFile::exists(line))
+    //       QFile::remove(line);
+    //    }
+    //    file.close();
+    //    in.flush();
+
+
+    QFile file(TempFileName);
+    file.remove();
+    file.close();
+    QFile file1(TempOutFile);
+    file1.remove();
+    file1.close();
+    delete ui;
 }

@@ -117,7 +117,7 @@ PlotWindow::PlotWindow(QWidget *parent) :
     ui->checkBox_2->setChecked(true);
 
     //Set the plotter mode.
-    if (columNum>2 && (Simindex==2 || Simindex==3))
+    if (columNum>2 && Simindex!=1 && Simindex!=4 && Simindex!=6)
         ui->comboBox->setCurrentIndex(2);
     else
         ui->comboBox->setCurrentIndex(0);
@@ -134,7 +134,7 @@ PlotWindow::PlotWindow(QWidget *parent) :
     if (Simindex!=2 && Simindex!=3)
     {
         RawData.clear();
-        struct FileDataString readData={"Read function is not working correctly!",{}};
+        struct FileDataString readData={"Read function is not working correctly!",{"Plotter error"}};
         QString DataFile = QDir::currentPath()+OutputFileName;
         if (!DataFile.isEmpty())
         {
@@ -156,40 +156,6 @@ PlotWindow::PlotWindow(QWidget *parent) :
     } else {
 
         ui->paramSlide->setValue(0);
-//        for (int simstep=0;simstep<titleVals.length()/2;simstep++)
-//        {
-//            RawData.clear();
-//            struct FileDataString readData={"Read function is not working correctly!",{"Plotter error"}};
-
-//            QString DataFile=QDir::currentPath()+OutputFileName;
-
-//            if (Simindex==2)
-//                DataFile = QDir::currentPath()+"/Data/Tmp"+titleVals.at(simstep*2)+".dat";
-//            else if (Simindex==3)
-//                DataFile = QDir::currentPath()+"/Data/Tmp"+QString::number(simstep)+"K.dat";
-
-//            if (!DataFile.isEmpty())
-//            {
-//                ui->lineEdit_2->setText(DataFile);
-//                readData = readoutdata(DataFile,delimator);
-
-//            if (readData.ErrMessage!="Perfect")
-//                QMessageBox::warning(this,"Error!",readData.ErrMessage);
-
-//            for(int i=0 ; i < readData.DataVals.length() ; i++){
-//                if (!readData.DataVals.at(i).isEmpty())
-//                {
-//                    RawData.append(readData.DataVals.at(i));
-//                }
-
-//            }
-//            //Plotting the data
-//            addPlots(simstep);
-//            title->setText("All Graphs");
-//            ui->customPlot->replot();
-//            }
-//        }
-
         RawData.clear();
         QString DataFile=QDir::currentPath()+OutputFileName;
         if (Simindex==2)
@@ -216,7 +182,7 @@ PlotWindow::PlotWindow(QWidget *parent) :
         }
 
         addPlots(0);
-        title->setText("All Graphs");
+        //title->setText("All Graphs");
         title->setText(titleVals.at(1)+titleVals.at(0));
         ui->customPlot->replot();
 
@@ -252,7 +218,7 @@ void PlotWindow::addPlots(int simstep)
     //if (ui->comboBox->currentText()=="Single Plot ( X , Y )")
     {
         int j=0;
-        if (Simindex!=2 && Simindex!=3){
+        if (Simindex!=0 && Simindex!=2 && Simindex!=3){
             for(int i=0 ; i < RawData.length() ; i++)
             {
                 if (i%columnSize==0) x[j]=RawData.at(i).toDouble(&validDatax);
@@ -287,7 +253,7 @@ void PlotWindow::addPlots(int simstep)
      else if (ui->comboBox->currentIndex()==1)
     {
         int j=0;
-        if (Simindex!=2 && Simindex!=3){
+        if (Simindex!=0 && Simindex!=2 && Simindex!=3){
         for(int i=0 ; i < RawData.length() ; i++)
         {
             if (i%columnSize==0) x[j]=RawData.at(i).QString::toDouble(&validDatax);
@@ -319,7 +285,7 @@ void PlotWindow::addPlots(int simstep)
     //else if (ui->comboBox->currentText()=="Multiple Plot ( X , Y1 , Y2 , ...)")
         else if (ui->comboBox->currentIndex()==2)
     {
-         if (Simindex!=2 && Simindex!=3){
+         if (Simindex!=0 && Simindex!=2 && Simindex!=3){
             for (int k=1; k<columnSize; k++)
             {
                 int j=0;
@@ -359,7 +325,7 @@ void PlotWindow::addPlots(int simstep)
     //else if (ui->comboBox->currentText()=="Multiple Plot ( X1 , Y1 , X2 , Y2 , ...)")
         else if (ui->comboBox->currentIndex()==3)
     {
-        if (Simindex!=2 && Simindex!=3){
+        if (Simindex!=0 && Simindex!=2 && Simindex!=3){
         for (int k=0; k<columnSize-1; k+=2)
         {
             int j=0;
@@ -403,7 +369,7 @@ void PlotWindow::addPlots(int simstep)
 
 void PlotWindow::addPlotSingleXY(QVector<double> x,QVector<double> y,int simstep)
 {
-    if (Simindex!=2 && Simindex!=3){
+    if (Simindex!=0 && Simindex!=2 &&Simindex!=3 && Simindex!=5){
     QCPCurve *newCurve = new QCPCurve(ui->customPlot->xAxis, ui->customPlot->yAxis);
     QVector<QCPCurveData> dataCurve(x.length());
 
@@ -474,7 +440,7 @@ void PlotWindow::addPlotSingleYX(QVector<double> x,QVector<double> y,int simstep
     ui->customPlot->xAxis->setLabel(ui->customPlot->yAxis->label());
     ui->customPlot->yAxis->setLabel(ui->customPlot->xAxis->label());
 
-    if (Simindex!=2 && Simindex!=3){
+    if (Simindex!=0 && Simindex!=2 &&Simindex!=3 && Simindex!=5){
     QCPCurve *newCurve = new QCPCurve(ui->customPlot->xAxis, ui->customPlot->yAxis);
     QVector<QCPCurveData> dataCurve(x.length());
 
@@ -544,7 +510,7 @@ void PlotWindow::addPlotSingleYX(QVector<double> x,QVector<double> y,int simstep
 
 void PlotWindow::addPlotMultiXYY(QVector<double> x,QVector<double> y,int graphcolor,int simstep)
 {
-    if (Simindex!=2 && Simindex!=3){
+    if (Simindex!=0 && Simindex!=2 &&Simindex!=3 && Simindex!=5){
     QCPCurve *newCurve = new QCPCurve(ui->customPlot->xAxis, ui->customPlot->yAxis);
     QVector<QCPCurveData> dataCurve(x.length());
 
@@ -661,12 +627,12 @@ void PlotWindow::addPlotMultiXYXY(QVector<double> x,QVector<double> y,int graphc
 
 //    for (int i=0; i<x.length(); ++i)
 //        dataCurve[i] = QCPCurveData(i, x[i]*1000, y[i]*1000000);
-    if (Simindex!=2 && Simindex!=3){
+    if (Simindex!=0 && Simindex!=2 &&Simindex!=3 && Simindex!=5){
     QCPCurve *newCurve = new QCPCurve(ui->customPlot->xAxis, ui->customPlot->yAxis);
     QVector<QCPCurveData> dataCurve(x.length());
 
 
-    if (Simindex==1 && Simindex==6)
+    if (Simindex==1 || Simindex==6)
         for (int i=0; i<x.length(); ++i)
             dataCurve[i] = QCPCurveData(i, x[i]*1000, y[i]*1000000);
     else

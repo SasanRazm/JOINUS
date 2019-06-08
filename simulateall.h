@@ -17,7 +17,7 @@ public:
     struct ConsoleOutputs simulateivtest(QString FileName, int SimulatorIndex,int points, int loopCnt);
     struct ConsoleOutputs simulateivnew(QString FileName, int SimulatorIndex,int points);
     struct ConsoleOutputs simulateBER(int SimulatorIndex,float Multiplyer, double SubParamVal);
-    struct ConsoleOutputs simulateFreq(int SimulatorIndex,float Multiplyer, double SubParamVal);
+    struct ConsoleOutputs simulateFreq(int SimulatorIndex,QVector<double> Multiplyers, double SubParamVal);
     QVector<double> movingAverage(QVector<double> datain,int windowSize);
     struct processedNL processNetlist(QString FileName);
 };

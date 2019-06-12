@@ -133,10 +133,10 @@ R3               226       220  33.52ohm
 ***RTEST 1 1 15ohm
 ***Main cell
 
-Va                3          0  PULSE(0.0mV  1.034mV   70ps   1.0ps   1.0ps   1.0ps   50.0ps)
-Vb                2          0  PULSE(0.0mV  1.034mV   20ps   1.0ps   1.0ps   1.0ps   100.0ps)
-Vclk              1          0  PULSE(0.0mV  1.034mV   0ps   1.0ps   1.0ps   1.0ps   50.0ps)
-Vbias             43         0  PWL(0ps 0mv 10ps 2.5mv)
+Va                3          0  PULSE(0.0mV  1.034mV   30ps   1.0ps   1.0ps   1.0ps   40.0ps)
+Vb                2          0  PULSE(0.0mV  1.034mV   10ps   1.0ps   1.0ps   1.0ps   40.0ps)
+Vclk              1          0  PULSE(0.0mV  1.034mV   0ps   1.0ps   1.0ps   1.0ps   20.0ps)
+Vbias             43         0  PWL(0ps 0mv 5ps 2.5mv)
 XI1               jtl         3          4         43
 XI2               jtl         4          5         43
 
@@ -153,9 +153,9 @@ XI9               jtl         12         14         43
 
 XI10               SINK        14         43
 *** jsim input file ***
-.tran 0.1PS 250pS 0PS 0.1PS
+.tran 0.1PS 3nS 0PS 0.1PS
 .file ANDOUT.DAT
 .print devv XI2_B2
-.print devv XI4_B2
-.print devv XI6_B2
+**.print devv XI4_B2
+**.print devv XI6_B2
 .print devv XI10_B1

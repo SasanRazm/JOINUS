@@ -339,11 +339,12 @@ void MainWindow::on_StartPushButton_clicked()
                         QMessageBox::warning(this,"Error!",mnnerr);
                     else{
 
-                        simout=simclass->simulateFreq(SimulatorIndex,Multiplyers,calcVal->convertToValues(simParams.minVal)+simstep*stepSize/Phi0);
+                        double freqvalforfunc=calcVal->convertToValues(simParams.minVal)+simstep*stepSize/Phi0;
+                        simout=simclass->simulateFreq(SimulatorIndex,Multiplyers,freqvalforfunc);
                         ui->ProgressBar->setValue(100*(simstep+1)/simParams.pointNum.toInt());
                         ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
                         ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
-                        QMessageBox::warning(this,"Error!","Reach here");
+
                     }
                   }
             }else{

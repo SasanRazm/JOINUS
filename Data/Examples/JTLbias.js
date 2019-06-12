@@ -45,21 +45,22 @@ RS1                6         9   1.73ohm *SHUNT=3.73
 .ends
 
 *** ("45") mapped to 0
-V7                50         0  PULSE(0.0mV  1.034mV   0ps   1.0ps   1.0ps   1.0ps   50.0ps)
-V1                47         0  PWL(0ps 0mv 5ps 2.5mv)
-V2                43         0  PWL(0ps 0mv 10ps 2.5mv)
-XI7               jtl         46         48         47
-XI6               jtl         48         44         43
-XI5               SINK        44         47
-Rgnd               50         46   0.05ohm *SHUNT=3.73   
+V7                50         0  PULSE(0.0mV  1.034mV   0ps   1.0ps   1.0ps   1.0ps   20.0ps)
+V1                47         0  PWL(0ps 0mv 10ps 2.5mv)
+Vbias             43         0  PWL(0ps 0mv 10ps 2.5mv)
+XI1               jtl         50         49         47
+XI2               jtl         49         48         47
+XI3               jtl         48         46         43
+XItest            jtl         46         45         43
+XI4               SINK        45         47
+**Rgnd               50         46   0.05ohm *SHUNT=3.73   
 *** netlist file ***
 
 *** jsim input file ***
 
 *** jsim input file ***
-.tran 0.2PS 200pS 0PS 0.1PS
+.tran 0.5PS 3nS 0PS 0.1PS
 .file JTLOUT.DAT
-.print nodev 50 0
-***.print devv XI7_B1
-.print devv XI6_B2
-***.print devv XI6_B2
+**.print nodev 50 0
+.print phase XI2_B1
+.print phase XI4_B1

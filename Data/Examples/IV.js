@@ -14,10 +14,12 @@
 
 *** top cell: JJ210
 B8                1        2   jjmod area=1.50
-RS8               1        2   4ohm *SHUNT=3.73
+RS8               1        2   6.2ohm *SHUNT=3.73
+LS8               1        3   29.28nH
+CS8               3        2   0.09pF
 Rsource           2        0   1ohm
 I0                0        1   PWL(0ps 0mV 50ps 1mA)
-I1               1         0   SIN(0ps 0.2mA 200GHZ 0us 0)
+*I1               1         0   SIN(0ps 0.2mA 50GHZ 0us 0)
 
 
 *** jsim input file ***

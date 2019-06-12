@@ -70,7 +70,7 @@ PlotWindow::PlotWindow(QWidget *parent) :
     } else if (Simindex==5){
 
         ui->customPlot->xAxis->setLabel("Frequency (GHz)");
-        ui->customPlot->yAxis->setLabel("Pulse Number (#)");
+        ui->customPlot->yAxis->setLabel("Number of Pulses (#)");
 
     } else{
 

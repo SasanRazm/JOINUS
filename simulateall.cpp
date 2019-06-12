@@ -738,7 +738,6 @@ struct ConsoleOutputs simulateall::simulateFreq(int SimulatorIndex,QVector<doubl
     //TempFileName=QDir::currentPath()+"/Data/TempNetlistFreq.tmp";
     ConsoleOutputs simstd={"",""};
     QVector<long> DataVals;
-    DataVals[0]=1;
 
     simstd=simulatenetlist(TempFileName,SimulatorIndex);
 
@@ -764,11 +763,9 @@ struct ConsoleOutputs simulateall::simulateFreq(int SimulatorIndex,QVector<doubl
         if (!lastline.at(i).isEmpty())
             PhaseData.append(lastline.at(i));
 
-    for(int i=0 ; i < PhaseData.length() ; i++)
-        {
-        for(int j=0 ; j < columNum ; j++)
-         if (i%columNum==j+1) DataVals[j]=static_cast<int>(PhaseData.at(i).toDouble()/(2*Pi));
-        }
+    for(int i=0 ; i < PhaseData.length()-1 ; i++)
+         DataVals.append(static_cast<int>(PhaseData.at(i+1).toDouble()/(2*Pi)));
+
 
     lastline.clear();
     PhaseData.clear();
@@ -782,15 +779,14 @@ struct ConsoleOutputs simulateall::simulateFreq(int SimulatorIndex,QVector<doubl
     {
         QTextStream Freqstream(&file2);
         Freqstream << QString::number(SubParamVal/1e9)+delimator;
-        for(int j=1 ; j < columNum ; j++)
-        Freqstream << QString::number(Multiplyers[j-1]*DataVals[j])+delimator;
+        for(int j=0 ; j < columNum-1 ; j++)
+        Freqstream << QString::number(Multiplyers[j]*DataVals[j])+delimator;
         Freqstream<<'\n';
         file2.close();
         Freqstream.flush();
     }
 
     return simstd;
-
 }
 
 

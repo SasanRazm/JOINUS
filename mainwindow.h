@@ -95,6 +95,7 @@ private slots:
 
     void on_actionSet_Temperature_triggered();
 
+
 private:
     Ui::MainWindow *ui;
     DialogPlot *dialogPlot;

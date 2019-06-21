@@ -412,7 +412,7 @@ void MainWindow::on_StartPushButton_clicked()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this,"About SimGUI","This program is generated in Savoie Mont Blanc University as part of the ColdFlux Project.");
+    QMessageBox::about(this,"About JOINUS","This program is generated in Savoie Mont Blanc University as part of the ColdFlux Project.");
 }
 
 // Load the Werthamer Model program

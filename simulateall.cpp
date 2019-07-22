@@ -15,8 +15,8 @@ simulateall::simulateall()
 {
     //Define variable WaitTime
     //This is the base value.
-    WaitTime=100;
-    Tstep=5;
+    WaitTime=200;
+    Tstep=10;
 }
 
 
@@ -822,7 +822,8 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
         //Set the parameters for making the new netlist
 
         if (SimulatorIndex==0)
-        OutputFileName = netlist.OutFileName;
+            OutputFileName = netlist.OutFileName;
+
         columNum = netlist.columNumb;
         timestep = netlist.tstep;
 
@@ -867,7 +868,7 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
 
                     // Normal time transient simulation
                     case 0:
-                        stream << netlist.Commands.at(fcntr)<<'\n';
+                            stream << netlist.Commands.at(fcntr)<<'\n';
                         break;
 
                     // I-V characteristic simulation

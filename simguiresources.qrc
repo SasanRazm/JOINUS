@@ -13,6 +13,9 @@
     <qresource prefix="/Help">
         <file>Help/Manual.pdf</file>
         <file>Help/Manual2.pdf</file>
+        <file>Help/Margin.png</file>
+        <file>Help/Optimizer.PNG</file>
+        <file>Help/Yield.png</file>
     </qresource>
     <qresource prefix="/WSIM/Help">
         <file>WSIM/Help/about_Idc.html</file>

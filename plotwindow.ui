@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1510</width>
-    <height>776</height>
+    <width>1583</width>
+    <height>788</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -226,6 +226,11 @@
          <string>Multiple curves ( X1 , Y1 , X2 , Y2 , ...)</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Bar plot</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
@@ -312,7 +317,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Auto&amp;Scale</string>
+        <string>Auto&amp;scale</string>
        </property>
       </widget>
      </item>

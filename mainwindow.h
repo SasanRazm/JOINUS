@@ -5,6 +5,7 @@
 #include <QSysInfo>
 #include <ActiveQt>
 #include "dialogplot.h"
+#include "autooptim.h"
 #include "jsimsyntax.h"
 
 //QT_BEGIN_NAMESPACE
@@ -25,6 +26,7 @@ struct ConsoleOutputs {
     QString ConsolErr;
     QString ConsolOut;
 };
+
 struct processedNL{
     QString Vg;
     QString Icrit,Rnorm,Cap;
@@ -64,8 +66,6 @@ public:
 private slots:
     void on_StartPushButton_clicked();
     void on_actionAbout_triggered();
-    void on_WSIMPushBottun_clicked();
-    void on_SQUIDPushBottun_clicked();
     void on_NetlistToolButton_clicked();
     void plotNetlist();
     void GNUplot();
@@ -90,15 +90,18 @@ private slots:
 
 
     void on_actionFont_Properties_triggered();
-
     void on_actionRun_Custom_Plotter_triggered();
-
     void on_actionSet_Temperature_triggered();
-
+    void on_actionAUTO5_triggered();
+    void on_actionChange_background_color_triggered();
+    void on_action_WSIM_triggered();
+    void on_actionSQUID_MAP_triggered();
+    void on_actionMAR_GINOPT_triggered();
 
 private:
     Ui::MainWindow *ui;
     DialogPlot *dialogPlot;
+    AutoOptim *autooptim;
     Jsimsyntax *m_jsimsyntax;
 };
 

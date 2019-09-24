@@ -22,6 +22,8 @@ PlotWindow::PlotWindow(QWidget *parent) :
 
     ui->customPlot->plotLayout()->insertRow(0);
 
+
+
     switch (Simindex)
     {case 0:
         title = new QCPTextElement(ui->customPlot, "Time domain simulation", QFont("sans", 14, QFont::Bold));
@@ -44,6 +46,9 @@ PlotWindow::PlotWindow(QWidget *parent) :
     case 6:
         title = new QCPTextElement(ui->customPlot, "I-V characteristics", QFont("sans", 14, QFont::Bold));
         break;
+    case 10:
+        title = new QCPTextElement(ui->customPlot, "Margin Calculation", QFont("sans", 14, QFont::Bold));
+        break;
     default:
         title = new QCPTextElement(ui->customPlot, "Plotter", QFont("sans", 14, QFont::Bold));
     }
@@ -51,10 +56,10 @@ PlotWindow::PlotWindow(QWidget *parent) :
 
     ui->labelColorShow->setAutoFillBackground(true);
 
-    ui->customPlot->xAxis->setLabelFont(QFont("times", 12));
-    ui->customPlot->xAxis->setTickLabelFont(QFont("times", 10));
-    ui->customPlot->yAxis->setLabelFont(QFont("times", 12));
-    ui->customPlot->yAxis->setTickLabelFont(QFont("times", 10));
+    ui->customPlot->xAxis->setLabelFont(QFont("times", 14));
+    ui->customPlot->xAxis->setTickLabelFont(QFont("times", 12));
+    ui->customPlot->yAxis->setLabelFont(QFont("times", 14));
+    ui->customPlot->yAxis->setTickLabelFont(QFont("times", 12));
 
 
     if (Simindex==1 || Simindex==6){
@@ -72,6 +77,11 @@ PlotWindow::PlotWindow(QWidget *parent) :
         ui->customPlot->xAxis->setLabel("Frequency (GHz)");
         ui->customPlot->yAxis->setLabel("Number of Pulses (#)");
 
+    } else if (Simindex==10){
+
+    ui->customPlot->xAxis->setLabel("Parameters");
+    ui->customPlot->yAxis->setLabel("Margin Percentage");
+
     } else{
 
         ui->customPlot->xAxis->setLabel("Time (ns)");
@@ -82,7 +92,7 @@ PlotWindow::PlotWindow(QWidget *parent) :
 
     ui->customPlot->legend->setVisible(true);
     QFont legendFont = font();
-    legendFont.setPointSize(10);
+    legendFont.setPointSize(14);
     ui->customPlot->legend->setFont(legendFont);
     ui->customPlot->legend->setSelectedFont(legendFont);
     ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
@@ -117,10 +127,12 @@ PlotWindow::PlotWindow(QWidget *parent) :
     ui->checkBox_2->setChecked(true);
 
     //Set the plotter mode.
-    if (columNum>2 && Simindex!=1 && Simindex!=4 && Simindex!=6)
+    if (columNum>2 && Simindex!=1 && Simindex!=4 && Simindex!=6 && Simindex!=10)
         ui->comboBox->setCurrentIndex(2);
-    else
+    else if (Simindex!=10)
         ui->comboBox->setCurrentIndex(0);
+    else
+        ui->comboBox->setCurrentIndex(4);
 
     if (Simindex==1 || Simindex==4 || Simindex==5)
         ui->checkBox->setChecked(true);
@@ -135,7 +147,7 @@ PlotWindow::PlotWindow(QWidget *parent) :
     {
         RawData.clear();
         struct FileDataString readData={"Read function is not working correctly!",{"Plotter error"}};
-        QString DataFile = QDir::currentPath()+OutputFileName;
+        QString DataFile = rootPath+OutputFileName;
         if (!DataFile.isEmpty())
         {
             ui->lineEdit_2->setText(DataFile);
@@ -157,11 +169,11 @@ PlotWindow::PlotWindow(QWidget *parent) :
 
         ui->paramSlide->setValue(0);
         RawData.clear();
-        QString DataFile=QDir::currentPath()+OutputFileName;
+        QString DataFile=rootPath+OutputFileName;
         if (Simindex==2)
-             DataFile = QDir::currentPath()+"/Data/Tmp"+titleVals.at(0)+".dat";
+             DataFile = rootPath+"/Data/Tmp"+titleVals.at(0)+".dat";
         else if (Simindex==3)
-             DataFile = QDir::currentPath()+"/Data/Tmp"+QString::number(0)+"K.dat";
+             DataFile = rootPath+"/Data/Tmp"+QString::number(0)+"K.dat";
 
         struct FileDataString readData={"Read function is not working correctly!",{"Plotter error"}};
 
@@ -340,7 +352,9 @@ void PlotWindow::addPlots(int simstep)
                 }
             }
             addPlotMultiXYXY(x,y,k-1,simstep);
-        }}else{
+        }
+        }
+        else{
             for (int k=0; k<columnSize-1; k+=2)
             {
                 int j=0;
@@ -356,11 +370,40 @@ void PlotWindow::addPlots(int simstep)
                 }
                 addPlotMultiXYXY(x,y,k-1,simstep);
         }}
+    } else if (ui->comboBox->currentIndex()==4)
+    {
+        int paramNums=titleVals.length();
+        QVector<double> MaxVals(paramNums),MinVals(paramNums);
+        QVector<double> errMaxVals(paramNums),errMinVals(paramNums);
+        for (int paramCntr=0;paramCntr<RawData.length();paramCntr++)
+            switch (paramCntr%4)
+            {
+            case 0:
+                MaxVals[paramCntr/4]=RawData.at(paramCntr).toDouble();
+                break;
+            case 1:
+                errMaxVals[(paramCntr-1)/4]=RawData.at(paramCntr).toDouble();
+                break;
+            case 2:
+                MinVals[(paramCntr-2)/4]=RawData.at(paramCntr).toDouble();
+                break;
+            case 3:
+                errMinVals[(paramCntr-3)/4]=RawData.at(paramCntr).toDouble();
+                break;
+            default:
+                break;
+            }
+
+        barPlotter(MaxVals,errMaxVals,MinVals,errMinVals,titleVals);
     }
 
     // Log and linear axises
-    if (ui->checkBox_3->isChecked()==true) setLogarithmic(ui->customPlot);
-    else setLinear(ui->customPlot);
+    if (ui->comboBox->currentIndex()!=4)
+    {
+        if (ui->checkBox_3->isChecked()==true) setLogarithmic(ui->customPlot);
+        else setLinear(ui->customPlot);
+    }
+
 
     //Auto scale method
     ui->customPlot->rescaleAxes();
@@ -918,7 +961,10 @@ void PlotWindow::setLinear(QCustomPlot *customPlot)
   QSharedPointer<QCPAxisTicker> linTicker(new QCPAxisTicker);
   customPlot->yAxis->setTicker(linTicker);
   customPlot->yAxis2->setTicker(linTicker);
-  customPlot->yAxis->setNumberFormat("gb"); // e = exponential, b = beautiful decimal powers
+  if (Simindex!=4)
+    customPlot->yAxis->setNumberFormat("gbc"); // e = exponential, b = beautiful decimal powers
+  else
+    customPlot->yAxis->setNumberFormat("f"); // e = exponential, b = beautiful decimal powers
   customPlot->yAxis->setNumberPrecision(2); // makes sure "1*10^4" is displayed only as "10^4"
 }
 
@@ -1000,9 +1046,9 @@ void PlotWindow::on_paramSlide_valueChanged(int value)
             struct FileDataString readData={"Read function is not working correctly!",{}};
 
 
-            QString DataFile = QDir::currentPath()+"/Data/Tmp"+titleVals.at(simstep*2)+".dat";
+            QString DataFile = rootPath+"/Data/Tmp"+titleVals.at(simstep*2)+".dat";
             if (Simindex==3)
-                DataFile = QDir::currentPath()+"/Data/Tmp"+QString::number(simstep)+"K.dat";
+                DataFile = rootPath+"/Data/Tmp"+QString::number(simstep)+"K.dat";
 
 
             if (!DataFile.isEmpty())
@@ -1027,9 +1073,9 @@ void PlotWindow::on_paramSlide_valueChanged(int value)
                 RawData.clear();
                 struct FileDataString readData={"Read function is not working correctly!",{}};
 
-                QString DataFile = QDir::currentPath()+"/Data/Tmp"+titleVals.at((value)*2)+".dat";
+                QString DataFile = rootPath+"/Data/Tmp"+titleVals.at((value)*2)+".dat";
                 if (Simindex==3)
-                    DataFile = QDir::currentPath()+"/Data/Tmp"+QString::number(value)+"K.dat";
+                    DataFile = rootPath+"/Data/Tmp"+QString::number(value)+"K.dat";
 
 
                 if (!DataFile.isEmpty())
@@ -1065,4 +1111,36 @@ void PlotWindow::on_pushButton_3_clicked()
     //Auto scale method
     ui->customPlot->rescaleAxes();
     ui->customPlot->replot();
+}
+
+void PlotWindow::barPlotter(QVector<double> x,QVector<double> errx,QVector<double> y,QVector<double> erry, QStringList parameterNames)
+{
+
+    QCPStatisticalBox *statistical = new QCPStatisticalBox(ui->customPlot->xAxis, ui->customPlot->yAxis);
+    QBrush boxBrush(QColor(20, 20, 255, 120));
+    boxBrush.setStyle(Qt::Dense4Pattern); // make it look oldschool
+    statistical->setBrush(boxBrush);
+
+     // prepare axes:
+
+    ui->customPlot->yAxis->setNumberFormat("f");
+    ui->customPlot->yAxis->setNumberPrecision(0);
+    ui->customPlot->rescaleAxes();
+    ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+
+    // specify data:
+    for (int tickCntr=0; tickCntr<parameterNames.length();tickCntr++)
+    {
+        statistical->addData(tickCntr,-(erry[tickCntr]+y[tickCntr]),-y[tickCntr],0,x[tickCntr],x[tickCntr]+errx[tickCntr]);
+    }
+
+    // prepare manual x axis labels:
+    ui->customPlot->xAxis->setSubTicks(false);
+    ui->customPlot->xAxis->setTickLength(0, 5);
+    ui->customPlot->xAxis->setTickLabelRotation(0);
+    QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
+    for (int tickCntr=0; tickCntr<parameterNames.length();tickCntr++)
+        textTicker->addTick(tickCntr, parameterNames.at(tickCntr));
+    ui->customPlot->xAxis->setTicker(textTicker);
+
 }

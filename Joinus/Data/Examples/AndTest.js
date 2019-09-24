@@ -154,7 +154,7 @@ XI9               jtl         12         14         43
 
 XI10               SINK        14         43
 *** jsim input file ***
-.tran 0.1PS 1nS 0PS 0.1PS
+.tran 0.1PS 0.8nS 100PS 0.1PS
 .file ANDOUT.DAT
 .print devv XI2_B2
 .print devv XI4_B2

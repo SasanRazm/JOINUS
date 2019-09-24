@@ -3,17 +3,16 @@
 
 #include <QMainWindow>
 #include <QSysInfo>
+#ifdef _WIN32
 #include <ActiveQt>
+#endif
 #include "dialogplot.h"
+#include "autooptim.h"
 #include "jsimsyntax.h"
 
 //QT_BEGIN_NAMESPACE
 //class QTextEdit;
 //QT_END_NAMESPACE
-
-const QString PlotPath = QDir::currentPath()+"/Graphs";
-const QString DataPath = QDir::currentPath()+"/Data";
-const QString WSIMPath = QDir::currentPath()+"/WSIM";
 
 struct FileDataString
 {
@@ -25,6 +24,7 @@ struct ConsoleOutputs {
     QString ConsolErr;
     QString ConsolOut;
 };
+
 struct processedNL{
     QString Vg;
     QString Icrit,Rnorm,Cap;
@@ -64,8 +64,6 @@ public:
 private slots:
     void on_StartPushButton_clicked();
     void on_actionAbout_triggered();
-    void on_WSIMPushBottun_clicked();
-    void on_SQUIDPushBottun_clicked();
     void on_NetlistToolButton_clicked();
     void plotNetlist();
     void GNUplot();
@@ -90,15 +88,25 @@ private slots:
 
 
     void on_actionFont_Properties_triggered();
-
     void on_actionRun_Custom_Plotter_triggered();
-
     void on_actionSet_Temperature_triggered();
+    void on_actionAUTO5_triggered();
+    void on_actionChange_background_color_triggered();
+    void on_action_WSIM_triggered();
+    void on_actionSQUID_MAP_triggered();
+    void on_actionMAR_GINOPT_triggered();
 
+    void on_actionJSIM_manual_triggered();
+
+    void on_actionJ_oSIM_manual_triggered();
+
+    void on_ClearTerminalpushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
     DialogPlot *dialogPlot;
+    //PlotWindow *plotWindow;
+    AutoOptim *autooptim;
     Jsimsyntax *m_jsimsyntax;
 };
 

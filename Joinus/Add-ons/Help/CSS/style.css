@@ -1,0 +1,22 @@
+body{
+	text-align: center;
+	background-image: url(Help/image/nature-flowers-sun.jpg);
+}
+
+ul{
+	font-size: 20px;
+	font-style: italic;
+}
+
+a{
+	color: black;
+}
+
+h3{
+	font-style: italic;
+}
+
+p{
+	font-size: 20px;
+	font-style: italic;
+}

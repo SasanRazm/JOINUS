@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>DialogPlot</class>
  <widget class="QDialog" name="DialogPlot">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1510</width>
-    <height>780</height>
+    <width>1585</width>
+    <height>672</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -16,12 +19,25 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>15850</width>
+    <height>15850</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>JOINUS</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>false</bool>
   </property>
+  <layout class="QHBoxLayout" name="horizontalLayout"/>
  </widget>
  <resources/>
  <connections/>

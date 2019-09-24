@@ -3,21 +3,25 @@
         <file>Data/JoSIM_n.exe</file>
         <file>Data/jsim_n.exe</file>
         <file>Data/si.inp</file>
-    </qresource>
-    <qresource prefix="/WSIM">
-        <file>WSIM/Wsim.exe</file>
-        <file>WSIM/SMP.exe</file>
-        <file>WSIM/Idc.dat</file>
-        <file>WSIM/parameters.dat</file>
+        <file>josim.lib</file>
     </qresource>
     <qresource prefix="/Help">
-        <file>Help/Manual.pdf</file>
-        <file>Help/Manual2.pdf</file>
+        <file>Help/Margin.png</file>
+        <file>Help/Optimizer.PNG</file>
+        <file>Help/Yield.png</file>
+        <file>Help/JOINUS-manual-in-a-nutshell-v2.0.pdf</file>
+        <file>Help/JSIM-manual-v12.0.pdf</file>
+        <file>Help/JoSIM-ReadMe.pdf</file>
     </qresource>
-    <qresource prefix="/WSIM/Help">
-        <file>WSIM/Help/about_Idc.html</file>
-        <file>WSIM/Help/about_parameters_file.html</file>
-        <file>WSIM/Help/about_program.html</file>
-        <file>WSIM/Help/index.html</file>
+    <qresource prefix="/Add-Ons">
+        <file>Add-ons/MCO.exe</file>
+        <file>Add-ons/SMP.exe</file>
+        <file>Add-ons/Wsim.exe</file>
+    </qresource>
+    <qresource prefix="/Add-Ons/Help">
+        <file>Add-ons/Help/about_Idc.html</file>
+        <file>Add-ons/Help/about_parameters_file.html</file>
+        <file>Add-ons/Help/about_program.html</file>
+        <file>Add-ons/Help/index.html</file>
     </qresource>
 </RCC>

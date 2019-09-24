@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QInputDialog>
-#include <qcustomplot.h>
+#include "../SIMGUI/qcustomplot.h"
 #include <QStringList>
 
 extern QColor color;
@@ -47,6 +47,7 @@ private slots:
     void on_toolButton_2_clicked();
     void on_pushButton_2_clicked();
     void on_colorButton_clicked();
+    void barPlotter(QVector<double> x,QVector<double> errx,QVector<double> y,QVector<double> erry, QStringList parameterNames);
 
     void on_paramSlide_valueChanged(int value);
 

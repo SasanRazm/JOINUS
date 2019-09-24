@@ -13,8 +13,8 @@ win32 {
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
-QMAKE_TARGET = JOINUS
-TARGET = JOINUS
+QMAKE_TARGET = JOINUS-V2.0
+TARGET = JOINUS-V2.0
 TEMPLATE = app
 RC_ICONS = icon.ico
 
@@ -39,7 +39,8 @@ SOURCES += \
     myglobalvars.cpp \
     calcvals.cpp \
     simulateall.cpp \
-    jsimsyntax.cpp
+    jsimsyntax.cpp \
+    autooptim.cpp
 
 
 HEADERS += \
@@ -50,13 +51,19 @@ HEADERS += \
     myglobalvars.h \
     calcvals.h \
     simulateall.h \
-    jsimsyntax.h
+    jsimsyntax.h \
+    autooptim.h
 
 FORMS += \
         mainwindow.ui \
     plotwindow.ui \
     dialogplot.ui \
-    dialogsetparam.ui
+    dialogsetparam.ui \
+    autooptim.ui
 
 RESOURCES += \
     simguiresources.qrc
+
+
+INCLUDEPATH += $$PWD/.
+DEPENDPATH += $$PWD/.

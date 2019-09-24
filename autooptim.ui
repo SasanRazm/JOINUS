@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1200</width>
-    <height>618</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,13 +22,13 @@
   <property name="minimumSize">
    <size>
     <width>1200</width>
-    <height>618</height>
+    <height>700</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1200</width>
-    <height>618</height>
+    <width>1418</width>
+    <height>747</height>
    </size>
   </property>
   <property name="font">
@@ -41,7 +41,7 @@
    <cursorShape>PointingHandCursor</cursorShape>
   </property>
   <property name="windowTitle">
-   <string>Optimizer and Margin Analyser</string>
+   <string>Optimizer and margin analyzer</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>false</bool>
@@ -224,7 +224,7 @@
      <item>
       <widget class="QLabel" name="label_Picture">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -254,11 +254,18 @@
      </item>
      <item>
       <widget class="QLabel" name="label_Text">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="font">
         <font>
+         <family>Arial Narrow</family>
          <pointsize>12</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
+         <weight>50</weight>
+         <bold>false</bold>
         </font>
        </property>
        <property name="frameShape">
@@ -299,7 +306,7 @@ with nominal values</string>
      <item>
       <widget class="QGroupBox" name="groupBox_2">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -478,7 +485,7 @@ with nominal values</string>
            <string>Analyze the working margins of the netlist.</string>
           </property>
           <property name="text">
-           <string>Margin Analyzer</string>
+           <string>Margin analyzer</string>
           </property>
          </widget>
         </item>
@@ -488,7 +495,7 @@ with nominal values</string>
            <string>Monte Carlo Optimizer.</string>
           </property>
           <property name="text">
-           <string>Center_Gravity Opt.</string>
+           <string>Center of gravity Opt.</string>
           </property>
          </widget>
         </item>
@@ -498,7 +505,7 @@ with nominal values</string>
            <string>Particle Swarm optimizer method.</string>
           </property>
           <property name="text">
-           <string>Yield Analyzer (Monte-carlo)</string>
+           <string>Monte-Carlo yield analyzer</string>
           </property>
          </widget>
         </item>

@@ -10,12 +10,43 @@
 #include "calcvals.h"
 #include "simulateall.h"
 
+//#ifdef __APPLE__
+//#include <carbon/Carbon.h>
+//#endif
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {  
     ui->setupUi(this);
+
+#ifdef __APPLE__
+    QDir dir = QCoreApplication::applicationDirPath();
+    dir.cdUp();
+    dir.cdUp();
+    dir.cdUp();
+    rootPath = dir.absolutePath();
+    PlotPath = rootPath+"/Graphs";
+    DataPath = rootPath+"/Data";
+    WSIMPath = rootPath+"/Add-ons";
+    TempFileName = rootPath+"/Data/ModiNL.cir";
+    TempOutFile = rootPath+"/Data/TempOut.tmp";
+
+    // Create authorization reference
+//    AuthorizationRef authorizationRef;
+//    OSStatus status;
+
+//    status = AuthorizationCreate(nullptr, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &authorizationRef);
+
+//    char* tool = QApplication::instance()->applicationFilePath().toLocal8Bit().data();
+//    char* args[] = { "STARTUPDATE", nullptr };
+//    FILE* pipe = nullptr;
+
+//    status = AuthorizationExecuteWithPrivileges(authorizationRef, tool, kAuthorizationFlagDefaults, args, &pipe);
+//    QApplication::instance()->quit();
+
+#endif
 
     // Initialize the values for the input and output files
     ui->SaveLineEdit->setText(DataPath+"/Out.dat");
@@ -36,6 +67,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->TerminalPlainTextEdit->setFont(font);
     ui->actionIV_Curve_Statistical_Noise->setChecked(true);
 
+    //Tests For MacOS
+    //Displaying data paths
+//    ui->TerminalPlainTextEdit->appendPlainText("Netlist Path: "+DataPath+"/si.inp");
+//    ui->TerminalPlainTextEdit->appendPlainText("Output file name: "+dir.currentPath()+OutputFileName);
+//    ui->TerminalPlainTextEdit->appendPlainText("JSIM Path: "+dir.absolutePath()+"/JSIM");
+
 
     // Initialize the highlighter for the netlist editor
 
@@ -54,12 +91,14 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::on_StartPushButton_clicked()
 {
     simulateall *simclass=new simulateall;
+
     if (Simindex==4)
-        TempFileName = QDir::currentPath()+"/Data/TempNetlistBER.cir";
+        TempFileName = rootPath+"/Data/TempNetlistBER.cir";
     else if (Simindex==5)
-        TempFileName = QDir::currentPath()+"/Data/TempNetlistFreq.cir";
+        TempFileName = rootPath+"/Data/TempNetlistFreq.cir";
     else
-        TempFileName = QDir::currentPath()+"/Data/ModiNL.cir";
+        TempFileName = rootPath+"/Data/ModiNL.cir";
+
 
     // ConsoleOutputs gives the outputs and errors of the terminal. In windows it is Command Prompt.
     struct ConsoleOutputs simout={"",""};
@@ -98,8 +137,9 @@ void MainWindow::on_StartPushButton_clicked()
     int SimulatorIndex=ui->SimComboBox->currentIndex();
     bool noise= ui->NoiseCheckBox->isChecked();
     QString NetlistFile=ui->NetlistLineEdit->text();
-    QString BERtempfile=QDir::currentPath()+"/Data/TempOutputBER.DAT";
-    QString Freqtempfile=QDir::currentPath()+"/Data/TempOutputFreq.DAT";
+    QString BERtempfile=rootPath+"/Data/TempOutputBER.DAT";
+    QString Freqtempfile=rootPath+"/Data/TempOutputFreq.DAT";
+
     ui->ProgressBar->setValue(0);
 
 
@@ -115,7 +155,7 @@ void MainWindow::on_StartPushButton_clicked()
         ui->SimComboBox->setEnabled(false);
         ui->TypeComboBox->setEnabled(false);
         ui->StartPushButton->setEnabled(false);
-        ui->TerminalPlainTextEdit->appendPlainText("Output file name: "+QDir::currentPath()+OutputFileName);
+        ui->TerminalPlainTextEdit->appendPlainText("Output file name: "+rootPath+OutputFileName);
         ui->TerminalPlainTextEdit->appendPlainText("Column Number: "+QString::number(columNum));
 
 
@@ -143,6 +183,10 @@ void MainWindow::on_StartPushButton_clicked()
             ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
             ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
             ui->ProgressBar->setValue(100);
+            
+            //testing jsim command for MacOS
+            //ui->TerminalPlainTextEdit->appendPlainText(DataPath+"/jsim_n "+TempFileName);
+            
             break;
 
 
@@ -160,7 +204,7 @@ void MainWindow::on_StartPushButton_clicked()
                 ui->ProgressBar->setValue(40);
                 ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
                 ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
-                TempFileName=QDir::currentPath()+"/Data/TempOut1.tmp";
+                TempFileName=rootPath+"/Data/TempOut1.tmp";
 
                 //make new netlist after statistical analysis        
                 mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex,2);
@@ -202,7 +246,7 @@ void MainWindow::on_StartPushButton_clicked()
                 simParams.subParam=initSubParam+"<*>"+calcVal->convertToUnits(calcVal->convertToValues(simParams.minVal)+simstep*stepSize);
 
                 // Change the netlist with the new parameter
-                TempFileName=QDir::currentPath()+"/Data/TempOut"+QString::number(simstep)+".tmp";
+                TempFileName=rootPath+"/Data/TempOut"+QString::number(simstep)+".tmp";
                 QString mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex,IVstatistical);
                 if (mnnerr!="Success")
                     QMessageBox::warning(this,"Error!",mnnerr);
@@ -214,10 +258,10 @@ void MainWindow::on_StartPushButton_clicked()
                     ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
                     ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
 
-                    QString Outtemp=QDir::currentPath()+"/Data/Tmp"+titleVals.at(simstep*2)+".dat";
+                    QString Outtemp=rootPath+"/Data/Tmp"+titleVals.at(simstep*2)+".dat";
                     QFile::remove(Outtemp);
 
-                    bool whileLoopLogic=QFile::copy(QDir::currentPath()+OutputFileName, Outtemp);
+                    bool whileLoopLogic=QFile::copy(rootPath+OutputFileName, Outtemp);
 
                     while (!whileLoopLogic){}                  
 
@@ -243,7 +287,7 @@ void MainWindow::on_StartPushButton_clicked()
                 simParams.tempVal=QString::number(temperature);
 
                 //Change the netlist with the new parameter
-                TempFileName=QDir::currentPath()+"/Data/TempOut"+QString::number(simstep)+".tmp";
+                TempFileName=rootPath+"/Data/TempOut"+QString::number(simstep)+".tmp";
                 QString mnnerr=simclass->make_new_netlist(noise,NetlistFile,simParams,SimulatorIndex,IVstatistical);
                 if (mnnerr!="Success")
                     QMessageBox::warning(this,"Error!",mnnerr);
@@ -256,9 +300,9 @@ void MainWindow::on_StartPushButton_clicked()
                     ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
                     ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
 
-                    QString Outtemp=QDir::currentPath()+"/Data/Tmp"+QString::number(simstep)+"K.dat";
+                    QString Outtemp=rootPath+"/Data/Tmp"+QString::number(simstep)+"K.dat";
                     QFile::remove(Outtemp);
-                   bool whileLoopLogic=QFile::copy(QDir::currentPath()+OutputFileName, Outtemp);
+                   bool whileLoopLogic=QFile::copy(rootPath+OutputFileName, Outtemp);
                    while (!whileLoopLogic){}
                 }
 
@@ -297,9 +341,9 @@ void MainWindow::on_StartPushButton_clicked()
                 }
               }
 
-            if (QFile::exists(QDir::currentPath()+OutputFileName))
-                QFile::remove(QDir::currentPath()+OutputFileName);
-            if(QFile::copy(BERtempfile, QDir::currentPath()+OutputFileName))
+            if (QFile::exists(rootPath+OutputFileName))
+                QFile::remove(rootPath+OutputFileName);
+            if(QFile::copy(BERtempfile, rootPath+OutputFileName))
                 QFile::remove(BERtempfile);
             else
                 break;
@@ -370,9 +414,9 @@ void MainWindow::on_StartPushButton_clicked()
                 }
             }
 
-                if (QFile::exists(QDir::currentPath()+OutputFileName))
-                    QFile::remove(QDir::currentPath()+OutputFileName);
-                if(QFile::copy(Freqtempfile, QDir::currentPath()+OutputFileName))
+                if (QFile::exists(rootPath+OutputFileName))
+                    QFile::remove(rootPath+OutputFileName);
+                if(QFile::copy(Freqtempfile, rootPath+OutputFileName))
                     QFile::remove(Freqtempfile);
                 else
                     break;      
@@ -399,7 +443,7 @@ void MainWindow::on_StartPushButton_clicked()
         ui->SimComboBox->setEnabled(true);
         ui->TypeComboBox->setEnabled(true);
         if (ui->SaveCheckBox->isChecked()==true)
-            Copy_File(ui->SaveLineEdit->text(),QDir::currentPath()+OutputFileName);
+            Copy_File(ui->SaveLineEdit->text(),rootPath+OutputFileName);
 
 
         if (ui->PlotCheckBox->isChecked()==true)
@@ -469,7 +513,7 @@ void MainWindow::GNUplot()
 {
     QProcess process;
     ui->statusBar->showMessage("GNUplot running");
-    QString OutFile=QDir::currentPath()+OutputFileName;
+    QString OutFile=rootPath+OutputFileName;
     QString Commandlines="\"set terminal png;"
             "set title 'JSIM Plot';"
             "set xlabel 'Time(s)';"
@@ -517,7 +561,7 @@ void MainWindow::XMGracePlot()
 {
     QProcess process;
     ui->statusBar->showMessage("XMGrace running");
-    QString OutFile=QDir::currentPath()+OutputFileName;
+    QString OutFile=rootPath+OutputFileName;
     QString Commandlines="-nxy "+OutFile+" -legend load";
     //QString OSname=QSysInfo::productType();
     #ifdef __linux__
@@ -771,6 +815,12 @@ void MainWindow::on_SaveNetListPushBottun_clicked()
     }
 }
 
+void MainWindow::on_ClearTerminalpushButton_clicked()
+{
+    ui->TerminalPlainTextEdit->clear();
+}
+
+
 //Copies the output of the simulations in the user defined folder
 void MainWindow::Copy_File(QString outfilepath, QString OutFile)
 {
@@ -803,7 +853,8 @@ struct SimParams MainWindow::readSimParams()
 void MainWindow::on_TemplateNetListPushBottun_clicked()
 {
     #ifdef __linux__
-        QMessageBox::information(this,"Please see the attached JSIM manual or go to the website: http//:www..com .");
+    QDesktopServices::openUrl(QUrl::fromLocalFile(rootPath+"/Help/JSIM-manual-v12.0.pdf"));
+    //QMessageBox::information(this,"Error","Please see the attached JSIM manual or go to the website: http//:www..com .");
     #elif _WIN32
         QDialog *help_object2 = new QDialog();
         help_object2->setWindowTitle("User Manual");
@@ -818,12 +869,70 @@ void MainWindow::on_TemplateNetListPushBottun_clicked()
         pdf2->setSizePolicy(QSizePolicy ::Expanding , QSizePolicy ::Expanding);
         if(!pdf2->setControl("Adobe PDF Reader"))
             QMessageBox::critical(this, "Error", "Make sure you have Adobe Reader (and its ActiveX) installed!");
-        QString callcommand="LoadFile(\""+QDir::currentPath()+"/Help/Manual.pdf"+"\")";
+        QString callcommand="LoadFile(\""+rootPath+"/Help/JSIM-manual-v12.0.pdf"+"\")";
         pdf2->dynamicCall(callcommand.toStdString().c_str());
         help_object2->exec();
     #else
-        QMessageBox::information(this,"Please see the attached JSIM manual or go to the website: http//:www..com .");
+
+        QDesktopServices::openUrl(QUrl::fromLocalFile(rootPath+"/Help/JSIM-manual-v12.0.pdf"));
+        //QMessageBox::information(this,"Error","Please see the attached JSIM manual or go to the website: http//:www..com .");
     #endif
+}
+
+void MainWindow::on_actionJSIM_manual_triggered()
+{
+#ifdef __linux__
+    QDesktopServices::openUrl(QUrl::fromLocalFile(rootPath+"/Help/JSIM-manual-v12.0.pdf"));
+    //QMessageBox::information(this,"Error","Please see the attached JSIM manual or go to the website: http//:www..com .");
+#elif _WIN32
+    QDialog *help_object2 = new QDialog();
+    help_object2->setWindowTitle("User Manual");
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QRect  screenGeometry = screen->geometry();
+    help_object2->setFixedWidth(screenGeometry.width()/2);
+    help_object2->setFixedHeight(screenGeometry.height()*4/5);
+    QAxWidget *pdf2= new QAxWidget();
+    pdf2->setParent(help_object2);
+    pdf2->setFixedWidth(screenGeometry.width()/2);
+    pdf2->setFixedHeight(screenGeometry.height()*4/5);
+    pdf2->setSizePolicy(QSizePolicy ::Expanding , QSizePolicy ::Expanding);
+    if(!pdf2->setControl("Adobe PDF Reader"))
+        QMessageBox::critical(this, "Error", "Make sure you have Adobe Reader (and its ActiveX) installed!");
+    QString callcommand="LoadFile(\""+rootPath+"/Help/JSIM-manual-v12.0.pdf"+"\")";
+    pdf2->dynamicCall(callcommand.toStdString().c_str());
+    help_object2->exec();
+#else
+    QDesktopServices::openUrl(QUrl::fromLocalFile(rootPath+"/Help/JSIM-manual-v12.0.pdf"));
+    //QMessageBox::information(this,"Error","Please see the attached JSIM manual or go to the website: http//:www..com .");
+#endif
+}
+
+void MainWindow::on_actionJ_oSIM_manual_triggered()
+{
+#ifdef __linux__
+    QDesktopServices::openUrl(QUrl::fromLocalFile(rootPath+"/Help/JoSIM-ReadMe.pdf"));
+    //QMessageBox::information(this,"Error","Please see the attached JSIM manual or go to the website: http//:www..com .");
+#elif _WIN32
+    QDialog *help_object2 = new QDialog();
+    help_object2->setWindowTitle("User Manual");
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QRect  screenGeometry = screen->geometry();
+    help_object2->setFixedWidth(screenGeometry.width()/2);
+    help_object2->setFixedHeight(screenGeometry.height()*4/5);
+    QAxWidget *pdf2= new QAxWidget();
+    pdf2->setParent(help_object2);
+    pdf2->setFixedWidth(screenGeometry.width()/2);
+    pdf2->setFixedHeight(screenGeometry.height()*4/5);
+    pdf2->setSizePolicy(QSizePolicy ::Expanding , QSizePolicy ::Expanding);
+    if(!pdf2->setControl("Adobe PDF Reader"))
+        QMessageBox::critical(this, "Error", "Make sure you have Adobe Reader (and its ActiveX) installed!");
+    QString callcommand="LoadFile(\""+rootPath+"/Help/JoSIM-ReadMe.pdf"+"\")";
+    pdf2->dynamicCall(callcommand.toStdString().c_str());
+    help_object2->exec();
+#else
+    QDesktopServices::openUrl(QUrl::fromLocalFile(rootPath+"/Help/JoSIM-ReadMe.pdf"));
+    //QMessageBox::information(this,"Error","Please see the attached JSIM manual or go to the website: http//:www..com .");
+#endif
 }
 
 //Clear Everything and reset to the new condition
@@ -941,13 +1050,13 @@ void MainWindow::on_SimComboBox_currentIndexChanged(int index)
     if (index==0)
     {
         OutputFileName = "/OUT.DAT";
-        TempFileName = QDir::currentPath()+"/Data/ModiNL.cir";
+        TempFileName = rootPath+"/Data/ModiNL.cir";
         delimator = " ";
     }
     else
     {
         OutputFileName = "/OUT.csv";
-        TempFileName = QDir::currentPath()+"/Data/ModiNL.js";
+        TempFileName = rootPath+"/Data/ModiNL.js";
         delimator = ",";
     }
 }
@@ -955,7 +1064,8 @@ void MainWindow::on_SimComboBox_currentIndexChanged(int index)
 void MainWindow::on_actionManuals_triggered()
 {
 #ifdef __linux__
-    QMessageBox::information(this,"Please see the attached JOINUS manual or go to the website: http//:www..com .");
+    QDesktopServices::openUrl(QUrl::fromLocalFile(rootPath+"/Help/JOINUS-manual-in-a-nutshell-v2.0.pdf"));
+    //QMessageBox::information(this,"Error","Please see the attached JOINUS manual or go to the website: http//:www..com .");
 #elif _WIN32
     QDialog *help_object = new QDialog();
     help_object->setWindowTitle("User Manual");
@@ -970,11 +1080,12 @@ void MainWindow::on_actionManuals_triggered()
     pdf->setSizePolicy(QSizePolicy ::Expanding , QSizePolicy ::Expanding);
     if(!pdf->setControl("Adobe PDF Reader"))
         QMessageBox::critical(this, "Error", "Make sure you have Adobe Reader (and its ActiveX) installed!");
-    QString callcommand="LoadFile(\""+QDir::currentPath()+"/Help/Manual2.pdf"+"\")";
+    QString callcommand="LoadFile(\""+rootPath+"/Help/JOINUS-manual-in-a-nutshell-v2.0.pdf"+"\")";
     pdf->dynamicCall(callcommand.toStdString().c_str());
     help_object->exec();
 #else
-    QMessageBox::information(this,"Please see the attached JOINUS manual or go to the website: http//:www..com .");
+    QDesktopServices::openUrl(QUrl::fromLocalFile(rootPath+"/Help/JOINUS-manual-in-a-nutshell-v2.0.pdf"));
+    //QMessageBox::information(this,"Error","Please see the attached JOINUS manual or go to the website: http//:www..com .");
 #endif
 }
 
@@ -1076,7 +1187,7 @@ void MainWindow::on_action_WSIM_triggered()
 {
     QProcess process;
     #ifdef __linux__
-    process.start("./WSIM/Wsim");
+    process.start("./Add-ons/Wsim");
     process.waitForFinished(-1); // will wait forever until finished
     #elif _WIN32
     process.setProgram("cmd.exe");
@@ -1086,7 +1197,7 @@ void MainWindow::on_action_WSIM_triggered()
                     args->flags &= CREATE_NO_WINDOW;});
     process.startDetached();
     #else
-    process.start("./WSIM/Wsim");
+    process.start(rootPath+"/Add-ons/Wsim");
     process.waitForFinished(-1); // will wait forever until finished
     #endif
 //    QString OSname=QSysInfo::productType();
@@ -1114,7 +1225,7 @@ void MainWindow::on_actionSQUID_MAP_triggered()
     QProcess process;
 
     #ifdef __linux__
-    process.start("./WSIM/SMP");
+    process.start("./Add-ons/SMP");
     process.waitForFinished(-1); // will wait forever until finished
     #elif _WIN32
     process.setProgram("cmd.exe");
@@ -1124,7 +1235,7 @@ void MainWindow::on_actionSQUID_MAP_triggered()
                     args->flags &= CREATE_NO_WINDOW;});
     process.startDetached();
     #else
-    process.start("./WSIM/SMP");
+    process.start(rootPath+"/Add-ons/SMP");
     process.waitForFinished(-1); // will wait forever until finished
     #endif
 //    QString OSname=QSysInfo::productType();
@@ -1152,7 +1263,7 @@ void MainWindow::on_actionMAR_GINOPT_triggered()
     QProcess process;
 
     #ifdef __linux__
-    process.start("./WSIM/MCO");
+    process.start("./Add-ons/MCO");
     process.waitForFinished(-1); // will wait forever until finished
     #elif _WIN32
     process.setProgram("cmd.exe");
@@ -1162,7 +1273,7 @@ void MainWindow::on_actionMAR_GINOPT_triggered()
                     args->flags &= CREATE_NO_WINDOW;});
     process.startDetached();
     #else
-    process.start("./WSIM/MCO");
+    process.start(rootPath+"/Add-ons/MCO");
     process.waitForFinished(-1); // will wait forever until finished
     #endif
 //    QString OSname=QSysInfo::productType();
@@ -1219,246 +1330,250 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionAUTO5_triggered()
 {
     ui->StartPushButton->setEnabled(false);
-    autooptim = new AutoOptim(this);
-    autooptim->setModal(true);
-    QString OptimFile=QDir::currentPath()+"/OptimConfigFile.tmp";
+        autooptim = new AutoOptim(this);
+        autooptim->setModal(true);
+        QString OptimFile=rootPath+"/OptimConfigFile.tmp";
 
-    AutoOptim *autofuns=new AutoOptim;
+        AutoOptim *autofuns=new AutoOptim;
 
-    if(autooptim->exec() == QDialog::Accepted)
-    {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Optimizer & Margin Analyzer", "Start Optimization process?",
-                                      QMessageBox::Yes|QMessageBox::No);
-        if (reply == QMessageBox::Yes) {
+        if(autooptim->exec() == QDialog::Accepted)
+        {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, "Optimizer & Margin Analyzer", "Start Optimization process?",
+                                          QMessageBox::Yes|QMessageBox::No);
+            if (reply == QMessageBox::Yes) {
 
-            ui->ProgressBar->setValue(0);
-            //Start the optimizatioon process here
+                ui->ProgressBar->setValue(0);
+                //Start the optimizatioon process here
 
-            //Reading the values
-            QStringList OptimParams=autofuns->ReadOptimFile(OptimFile);
+                //Reading the values
+                QStringList OptimParams=autofuns->ReadOptimFile(OptimFile);
 
-            //Act on error in configuration
-            if (OptimParams.at(0)=="error")
-            {
-                QMessageBox::warning(this,"Error!","Optimizer cannot continue!");
-                ui->StartPushButton->setEnabled(true);
-                return;
-            }
-
-            //Run the function for selected mode
-
-            //Run function for Bias Margin calculation
-            else if (OptimParams.at(0)=="MS")
-            {
-                Simindex=10;
-                ui->ProgressBar->setValue(20);
-
-                //This commands run the Margin Calculation
-                autofuns->MarginSimulation(OptimParams);
-
-                //Initializing the parameters
-                ui->ProgressBar->setValue(70);
-                QString DataFile=QDir::currentPath()+OutputFileName;
-                QString MSOUT = OptimParams.at(5)+"/MSOUTPUT.DAT";
-                QString MSSTAT = OptimParams.at(5)+"/MSSTATUES.DAT";
-
-                QFile filestatues(MSSTAT);
-                if (!filestatues.exists())
+                //Act on error in configuration
+                if (OptimParams.at(0)=="error")
                 {
-                    QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
-                }
-                else if (!filestatues.open(QFile::ReadOnly | QFile::Text))
-                {
-                    QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
-                }else{
-                    QTextStream instat(&filestatues);
-                    while(!instat.atEnd()) {
-                        QString statline = instat.readLine();
-                        ui->TerminalPlainTextEdit->appendPlainText(statline);
-                    }
-                    filestatues.close();
-                    instat.flush();
+                    QMessageBox::warning(this,"Error!","Optimizer cannot continue!");
+                    ui->StartPushButton->setEnabled(true);
+                    return;
                 }
 
-                QFile::remove(DataFile);
-                QFile::copy(MSOUT,DataFile);
+                //Run the function for selected mode
 
-
-            }
-
-
-
-            //Run function for Optimization (This method uses center of gravity)
-            else if (OptimParams.at(0)=="MCO")
-            {
-
-                // Define Parameters for the Calculation
-                Simindex=10;
-                int IterationNumber = OptimParams.at(7).toInt();
-                double CritCurrent=1e-4;
-                QString DataFile=QDir::currentPath()+OutputFileName;
-                QString MSOUT = OptimParams.at(5)+"/MSOUTPUT.DAT";
-                QString MSSTAT = OptimParams.at(5)+"/MSSTATUES.DAT";
-                QString tempNetlistNominal=OptimParams.at(4)+"/MSNominal.cir";
-                QString ParamFile=OptimParams.at(3);
-
-                autofuns->MarginSimulation(OptimParams);
-
-                //Write the result in terminal
-                QFile filestatues(MSSTAT);
-                if (!filestatues.exists())
+                //Run function for Bias Margin calculation
+                else if (OptimParams.at(0)=="MS")
                 {
-                    QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
-                }
-                else if (!filestatues.open(QFile::ReadOnly | QFile::Text))
-                {
-                    QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
-                }else{
-                    int linecount=0;
-                    QTextStream instat(&filestatues);
-                    while(!instat.atEnd()) {
-                        QString statline = instat.readLine();
-                        if (linecount==0 && statline!="Success")
-                        {
-                            ui->TerminalPlainTextEdit->appendPlainText(statline);
-                            return;
-                        }else
-                        {
-                            if (linecount==1)
-                                CritCurrent=statline.toDouble();
+                    Simindex=10;
+                    ui->ProgressBar->setValue(20);
 
-                            else
-                            ui->TerminalPlainTextEdit->appendPlainText(statline);
-
-                            linecount++;
-                        }
-
-                    }
-                    filestatues.close();
-                    instat.flush();
-                }
-
-                for (int IterCntr=0; IterCntr<IterationNumber;IterCntr++)
-                {
-
-                    //Write new parameter file based on the output
-                    QString tempMSOUT = OptimParams.at(5)+"/MSOUTPUT"+QString::number(IterCntr)+".DAT";
-                    QString tempParamFile=OptimParams.at(4)+"/tempParamFile"+QString::number(IterCntr)+".para";
-                    QFile::remove(tempMSOUT);
-                    QFile::copy(MSOUT,tempMSOUT);
-
-
-                    QVector<QVector<QString>> oldParamVector =  autofuns->paramDataArrange(ParamFile);
-
-
-                    //Change the ParamFile -> OptimParams.at(3) value to match new parametric file.
-                    QStringList newParamValues = autofuns->newParamGen(tempMSOUT, oldParamVector, CritCurrent, OptimParams.at(11).toDouble());
-                    autofuns->newParamFileGen(ParamFile, tempParamFile ,newParamValues);
-                    OptimParams[3]=tempParamFile;
-                    ParamFile=tempParamFile;
-
-                    ui->ProgressBar->setValue(100*((IterCntr+1)/IterationNumber));
-
+                    //This commands run the Margin Calculation
                     autofuns->MarginSimulation(OptimParams);
 
+                    //Initializing the parameters
+                    ui->ProgressBar->setValue(70);
+                    QString DataFile=rootPath+OutputFileName;
+                    QString MSOUT = OptimParams.at(5)+"/MSOUTPUT.DAT";
+                    QString MSSTAT = OptimParams.at(5)+"/MSSTATUES.DAT";
 
-                    qDebug()<< "Iteration Number: " <<QString::number(IterCntr+1)<<'\n';
-
-                    //Write the result in terminal
-                    QFile fileStatues(MSSTAT);
-
-                    if (!fileStatues.exists())
+                    QFile filestatues(MSSTAT);
+                    if (!filestatues.exists())
                     {
                         QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
                     }
-                    else if (!fileStatues.open(QFile::ReadOnly | QFile::Text))
+                    else if (!filestatues.open(QFile::ReadOnly | QFile::Text))
                     {
                         QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
-                    }
-                    else {
-                        int linecount=0;
-                        QTextStream instat2(&fileStatues);
-                        while(!instat2.atEnd()) {
-                            QString statline = instat2.readLine();
-                                if (linecount!=1)
-                                    ui->TerminalPlainTextEdit->appendPlainText(statline);
-                                linecount++;
+                    }else{
+                        QTextStream instat(&filestatues);
+                        while(!instat.atEnd()) {
+                            QString statline = instat.readLine();
+                            ui->TerminalPlainTextEdit->appendPlainText(statline);
                         }
-                        fileStatues.close();
-                        instat2.flush();
-                    }
-                }
-
-
-                qDebug() << "End of simulation" << '\n';
-
-                    QVector<QVector<QString>> displayParamVector =  autofuns->paramDataArrange(ParamFile);
-                    for (int dispCntr=0;dispCntr<displayParamVector.length();dispCntr++)
-                    {
-                        QString displayLine=displayParamVector.at(dispCntr).at(2)+" = "+displayParamVector.at(dispCntr).at(1);
-                        ui->TerminalPlainTextEdit->appendPlainText(displayLine);
+                        filestatues.close();
+                        instat.flush();
                     }
 
                     QFile::remove(DataFile);
                     QFile::copy(MSOUT,DataFile);
-                    //for (int mydelay=0;mydelay<1000;mydelay++){}
 
+
+                }
+
+
+
+                //Run function for Optimization (This method uses center of gravity)
+                else if (OptimParams.at(0)=="MCO")
+                {
+
+                    // Define Parameters for the Calculation
+                    Simindex=10;
+                    int IterationNumber = OptimParams.at(7).toInt();
+                    double CritCurrent=1e-4;
+                    QString DataFile=rootPath+OutputFileName;
+                    QString MSOUT = OptimParams.at(5)+"/MSOUTPUT.DAT";
+                    QString MSSTAT = OptimParams.at(5)+"/MSSTATUES.DAT";
+                    QString tempNetlistNominal=OptimParams.at(4)+"/MSNominal.cir";
+                    QString ParamFile=OptimParams.at(3);
+
+                    autofuns->MarginSimulation(OptimParams);
+
+                    //Write the result in terminal
+                    QFile filestatues(MSSTAT);
+                    if (!filestatues.exists())
+                    {
+                        QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
+                    }
+                    else if (!filestatues.open(QFile::ReadOnly | QFile::Text))
+                    {
+                        QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
+                    }else{
+                        int linecount=0;
+                        QTextStream instat(&filestatues);
+                        while(!instat.atEnd()) {
+                            QString statline = instat.readLine();
+                            if (linecount==0 && statline!="Success")
+                            {
+                                ui->TerminalPlainTextEdit->appendPlainText(statline);
+                                return;
+                            }else
+                            {
+                                if (linecount==1)
+                                    CritCurrent=statline.toDouble();
+
+                                else
+                                ui->TerminalPlainTextEdit->appendPlainText(statline);
+
+                                linecount++;
+                            }
+
+                        }
+                        filestatues.close();
+                        instat.flush();
+                    }
+
+                    for (int IterCntr=0; IterCntr<IterationNumber;IterCntr++)
+                    {
+
+                        //Write new parameter file based on the output
+                        QString tempMSOUT = OptimParams.at(5)+"/MSOUTPUT"+QString::number(IterCntr)+".DAT";
+                        QString tempParamFile=OptimParams.at(4)+"/tempParamFile"+QString::number(IterCntr)+".para";
+                        QFile::remove(tempMSOUT);
+                        QFile::copy(MSOUT,tempMSOUT);
+
+
+                        QVector<QVector<QString>> oldParamVector =  autofuns->paramDataArrange(ParamFile);
+
+
+                        //Change the ParamFile -> OptimParams.at(3) value to match new parametric file.
+                        QStringList newParamValues = autofuns->newParamGen(tempMSOUT, oldParamVector, CritCurrent, OptimParams.at(11).toDouble());
+                        autofuns->newParamFileGen(ParamFile, tempParamFile ,newParamValues);
+                        OptimParams[3]=tempParamFile;
+                        ParamFile=tempParamFile;
+
+                        ui->ProgressBar->setValue(100*((IterCntr+1)/IterationNumber));
+
+                        autofuns->MarginSimulation(OptimParams);
+
+
+                        qDebug()<< "Iteration Number: " <<QString::number(IterCntr+1)<<'\n';
+
+                        //Write the result in terminal
+                        QFile fileStatues(MSSTAT);
+
+                        if (!fileStatues.exists())
+                        {
+                            QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
+                        }
+                        else if (!fileStatues.open(QFile::ReadOnly | QFile::Text))
+                        {
+                            QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
+                        }
+                        else {
+                            int linecount=0;
+                            QTextStream instat2(&fileStatues);
+                            while(!instat2.atEnd()) {
+                                QString statline = instat2.readLine();
+                                    if (linecount!=1)
+                                        ui->TerminalPlainTextEdit->appendPlainText(statline);
+                                    linecount++;
+                            }
+                            fileStatues.close();
+                            instat2.flush();
+                        }
+                    }
+
+
+                    qDebug() << "End of simulation" << '\n';
+
+                        QVector<QVector<QString>> displayParamVector =  autofuns->paramDataArrange(ParamFile);
+                        for (int dispCntr=0;dispCntr<displayParamVector.length();dispCntr++)
+                        {
+                            QString displayLine=displayParamVector.at(dispCntr).at(2)+" = "+displayParamVector.at(dispCntr).at(1);
+                            ui->TerminalPlainTextEdit->appendPlainText(displayLine);
+                        }
+
+                        QFile::remove(DataFile);
+                        QFile::copy(MSOUT,DataFile);
+                        //for (int mydelay=0;mydelay<1000;mydelay++){}
+
+                }
+
+
+                //Run function for Yield calculation
+                else if (OptimParams.at(0)=="YA")
+                {
+
+                    QMessageBox::warning(this,"YeeeHaaaa","Yield Analyzer is running");
+
+
+
+                }
+
+                //End Optim process here
+                ui->ProgressBar->setValue(100);
+
+                dialogPlot = new DialogPlot(this);
+                dialogPlot->show();
             }
-
-
-            //Run function for Yield calculation
-            else if (OptimParams.at(0)=="YA")
-            {
-                QMessageBox::warning(this,"YeeeHaaaa","Yield Analyzer is running");
-            }
-
-            //End Optim process here
-            ui->ProgressBar->setValue(100);
-
-            dialogPlot = new DialogPlot(this);
-            dialogPlot->show();
+            ui->StartPushButton->setEnabled(true);
+        }else
+        {
+            ui->StartPushButton->setEnabled(true);
         }
-        ui->StartPushButton->setEnabled(true);
-    }else
-    {
-        ui->StartPushButton->setEnabled(true);
-    }
 
-    int index = ui->TypeComboBox->currentIndex();
-    switch (index)
-    {
-    case 0:
-        //Time domain calculation
-        Simindex=0;
-        break;
-    case 1:
-        //Parametric Analysis
-        Simindex=2;
-        break;
-    case 2:
-        //Temperatures Analysis
-        Simindex=3;
-        break;
-    case 3:
-        //BER
-        Simindex=4;
-        break;
-    case 4:
-        //Frequency Analysis
-        Simindex=5;
-        break;
-    case 5:
-        //I-V slow
-        Simindex=1;
-        break;
-    case 6:
-        //I-V fast
-        Simindex=6;
-        break;
-    default:
-        Simindex=0;
-        break;
-    }
+        int index = ui->TypeComboBox->currentIndex();
+        switch (index)
+        {
+        case 0:
+            //Time domain calculation
+            Simindex=0;
+            break;
+        case 1:
+            //Parametric Analysis
+            Simindex=2;
+            break;
+        case 2:
+            //Temperatures Analysis
+            Simindex=3;
+            break;
+        case 3:
+            //BER
+            Simindex=4;
+            break;
+        case 4:
+            //Frequency Analysis
+            Simindex=5;
+            break;
+        case 5:
+            //I-V slow
+            Simindex=1;
+            break;
+        case 6:
+            //I-V fast
+            Simindex=6;
+            break;
+        default:
+            Simindex=0;
+            break;
+        }
 
 }

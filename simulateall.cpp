@@ -10,7 +10,6 @@
 #include <QVector>
 
 
-
 simulateall::simulateall()
 {
     //Define variable WaitTime
@@ -140,7 +139,7 @@ struct ConsoleOutputs simulateall::simulateivcurve(QString FileName, int Simulat
 
     bool validDatax=true;
     bool validDatay=true;
-    QString OutFile= QDir::currentPath()+OutputFileName;
+    QString OutFile= rootPath+OutputFileName;
     struct ConsoleOutputs out = simulatenetlist(FileName,SimulatorIndex);
 
     // copy the output to tempfile and delete the outputfile
@@ -212,7 +211,7 @@ struct ConsoleOutputs simulateall::simulateivcurve(QString FileName, int Simulat
         if (IVstatistical)
         {
             int sumWaitTime=0;
-            QFile waitfile(QDir::currentPath()+"/testOutPut.DAT");
+            QFile waitfile(rootPath+"/testOutPut.DAT");
             if (!waitfile.open(QFile::ReadOnly | QFile::Text))
             {
                 return {"Problem with permissions!","There is a problem in file creation. Check the permissions!"};
@@ -291,7 +290,7 @@ struct ConsoleOutputs simulateall::simulateivtest(QString FileName, int Simulato
 {
     QVector<double> I(points*loopCnt);
     QVector<double> V(points*loopCnt);
-    QString testingIV= QDir::currentPath()+"/Data/testingIV.tmp";
+    QString testingIV= rootPath+"/Data/testingIV.tmp";
 
     //The vector for different waittimes
     QVector<int> waittimevals(points*loopCnt);
@@ -304,8 +303,8 @@ struct ConsoleOutputs simulateall::simulateivtest(QString FileName, int Simulato
 
     bool validDatax=true;
     bool validDatay=true;
-    QString OutFile= QDir::currentPath()+OutputFileName;
-    QString testOutFile= QDir::currentPath()+"/testOutPut.DAT";
+    QString OutFile= rootPath+OutputFileName;
+    QString testOutFile= rootPath+"/testOutPut.DAT";
 
     struct ConsoleOutputs out = simulatenetlist(FileName,SimulatorIndex);
 
@@ -448,7 +447,7 @@ struct ConsoleOutputs simulateall::simulateivnew(QString FileName, int Simulator
 
     bool validDatax=true;
     bool validDatay=true;
-    QString OutFile= QDir::currentPath()+OutputFileName;
+    QString OutFile= rootPath+OutputFileName;
     struct ConsoleOutputs out = simulatenetlist(FileName,SimulatorIndex);
 
     // copy the output to tempfile and delete the outputfile
@@ -562,12 +561,15 @@ QVector<double> simulateall::movingAverage(QVector<double> datain,int windowSize
 //Run the simulator for the input netlist and generate the output
 struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int SimulatorIndex)
 {
-    QString OutFile= QDir::currentPath()+OutputFileName;
+    QString OutFile= rootPath+OutputFileName;
     //QString OutFile= "."+OutputFileName;
 
     QString simstderr="";
     QString simstdout="";
-//    QString commandline=DataPath+"/jsim_n.exe "+FileName;
+    QString programName=DataPath+"/jsim_n";
+    QString commandline=DataPath+"/jsim_n "+FileName;
+    //QString commandline=DataPath+"/jsim "+FileName +" "+OutFile;
+
 
     QProcess process;
     //QString OSname=QSysInfo::productType();
@@ -575,7 +577,7 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
     switch(SimulatorIndex){
     case 0:
         #ifdef __linux__
-                    process.start("./jsim_n "+FileName);
+                    process.start("./Data/jsim_n "+FileName);
                     process.waitForFinished(-1); // will wait forever until finished
         #elif _WIN32
 
@@ -592,8 +594,11 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
                     process.waitForFinished(-1);
 
         #else
-                    process.start("./jsim_n "+FileName);
-                    process.waitForFinished(-1); // will wait forever until finished
+
+            //process.start(commandline);//"sh", QStringList() << "-c" << "ifconfig | grep inet"
+            process.start("/bin/sh", QStringList() << "-c" << commandline);
+            process.waitForFinished(-1); // will wait forever until finished
+
         #endif
 //        if (OSname=="windows"){
 //            process.setProgram("cmd.exe");
@@ -613,8 +618,9 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
         delimator=" ";
         break;
     case 1:
+        commandline=DataPath+"/JoSIM_n -o "+ OutFile +" "+FileName;
         #ifdef __linux__
-                    process.start("./JoSIM -o "+OutFile+" "+FileName);
+                    process.start("./Data/JoSIM_n -o "+OutFile+" "+FileName);
                     process.waitForFinished(-1); // will wait forever until finished
         #elif _WIN32
                     process.setProgram("cmd.exe");
@@ -626,7 +632,7 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
                     process.waitForFinished(-1);
 
         #else
-                    process.start("./JoSIM -o "+OutFile+" "+FileName);
+                    process.start(commandline);
                     process.waitForFinished(-1); // will wait forever until finished
         #endif
 //        if (OSname=="windows"){
@@ -656,8 +662,8 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
 // BER calculations are done here
 struct ConsoleOutputs simulateall::simulateBER(int SimulatorIndex,float Multiplyer,double SubParamVal)
 {
-    QString OutFile= QDir::currentPath()+OutputFileName;
-    //TempFileName=QDir::currentPath()+"/Data/TempNetlistBER.tmp";
+    QString OutFile= rootPath+OutputFileName;
+    //TempFileName=rootPath+"/Data/TempNetlistBER.tmp";
     ConsoleOutputs simstd={"",""};
     float BER=100;
     long DataIn=1;
@@ -665,7 +671,7 @@ struct ConsoleOutputs simulateall::simulateBER(int SimulatorIndex,float Multiply
 
     simstd=simulatenetlist(TempFileName,SimulatorIndex);
 
-    QFile file(QDir::currentPath()+OutputFileName);
+    QFile file(rootPath+OutputFileName);
     QStringList lastline;
     QStringList PhaseData;
 
@@ -709,7 +715,7 @@ struct ConsoleOutputs simulateall::simulateBER(int SimulatorIndex,float Multiply
     }
 
 
-    QString BERtempfile=QDir::currentPath()+"/Data/TempOutputBER.DAT";
+    QString BERtempfile=rootPath+"/Data/TempOutputBER.DAT";
     QFile file2(BERtempfile);
 
     if (!file2.open(QFile::WriteOnly | QFile::Text | QFile::Append)){
@@ -734,14 +740,14 @@ struct ConsoleOutputs simulateall::simulateBER(int SimulatorIndex,float Multiply
 //Frequency response calculations are done here
 struct ConsoleOutputs simulateall::simulateFreq(int SimulatorIndex,QVector<double> Multiplyers,double SubParamVal)
 {
-    QString OutFile= QDir::currentPath()+OutputFileName;
-    //TempFileName=QDir::currentPath()+"/Data/TempNetlistFreq.tmp";
+    QString OutFile= rootPath+OutputFileName;
+    //TempFileName=rootPath+"/Data/TempNetlistFreq.tmp";
     ConsoleOutputs simstd={"",""};
     QVector<long> DataVals;
 
     simstd=simulatenetlist(TempFileName,SimulatorIndex);
 
-    QFile file(QDir::currentPath()+OutputFileName);
+    QFile file(rootPath+OutputFileName);
     QStringList lastline;
     QStringList PhaseData;
 
@@ -770,7 +776,7 @@ struct ConsoleOutputs simulateall::simulateFreq(int SimulatorIndex,QVector<doubl
     lastline.clear();
     PhaseData.clear();
 
-    QString Freqtempfile=QDir::currentPath()+"/Data/TempOutputFreq.DAT";
+    QString Freqtempfile=rootPath+"/Data/TempOutputFreq.DAT";
     QFile file2(Freqtempfile);
 
     if (!file2.open(QFile::WriteOnly | QFile::Text | QFile::Append)){
@@ -949,7 +955,7 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
                                 else if (IVstatistical==2)
                                 {
                                     //Load the datafile containing the infornmation for Waittimes
-                                    QString testOutFile= QDir::currentPath()+"/testOutPut.DAT";
+                                    QString testOutFile= rootPath+"/testOutPut.DAT";
                                     QFile newfile(testOutFile);
                                     if (!newfile.open(QFile::ReadOnly | QFile::Text)){
                                         return newfile.errorString();

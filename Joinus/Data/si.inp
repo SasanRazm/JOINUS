@@ -22,7 +22,7 @@ I1               1         0   SIN(0ps 0.3mA 200GHZ 0us 0)
 
 
 *** jsim input file ***
-.tran 0.5ps 150PS 100PS 0.1PS
+.tran 0.1ps 150PS 100PS 0.1PS
 .FILE OUT.DAT
 .PRINT DEVV Rsource
 .PRINT nodev 1 2

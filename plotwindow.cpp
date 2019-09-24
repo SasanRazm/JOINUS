@@ -147,7 +147,7 @@ PlotWindow::PlotWindow(QWidget *parent) :
     {
         RawData.clear();
         struct FileDataString readData={"Read function is not working correctly!",{"Plotter error"}};
-        QString DataFile = QDir::currentPath()+OutputFileName;
+        QString DataFile = rootPath+OutputFileName;
         if (!DataFile.isEmpty())
         {
             ui->lineEdit_2->setText(DataFile);
@@ -169,11 +169,11 @@ PlotWindow::PlotWindow(QWidget *parent) :
 
         ui->paramSlide->setValue(0);
         RawData.clear();
-        QString DataFile=QDir::currentPath()+OutputFileName;
+        QString DataFile=rootPath+OutputFileName;
         if (Simindex==2)
-             DataFile = QDir::currentPath()+"/Data/Tmp"+titleVals.at(0)+".dat";
+             DataFile = rootPath+"/Data/Tmp"+titleVals.at(0)+".dat";
         else if (Simindex==3)
-             DataFile = QDir::currentPath()+"/Data/Tmp"+QString::number(0)+"K.dat";
+             DataFile = rootPath+"/Data/Tmp"+QString::number(0)+"K.dat";
 
         struct FileDataString readData={"Read function is not working correctly!",{"Plotter error"}};
 
@@ -1046,9 +1046,9 @@ void PlotWindow::on_paramSlide_valueChanged(int value)
             struct FileDataString readData={"Read function is not working correctly!",{}};
 
 
-            QString DataFile = QDir::currentPath()+"/Data/Tmp"+titleVals.at(simstep*2)+".dat";
+            QString DataFile = rootPath+"/Data/Tmp"+titleVals.at(simstep*2)+".dat";
             if (Simindex==3)
-                DataFile = QDir::currentPath()+"/Data/Tmp"+QString::number(simstep)+"K.dat";
+                DataFile = rootPath+"/Data/Tmp"+QString::number(simstep)+"K.dat";
 
 
             if (!DataFile.isEmpty())
@@ -1073,9 +1073,9 @@ void PlotWindow::on_paramSlide_valueChanged(int value)
                 RawData.clear();
                 struct FileDataString readData={"Read function is not working correctly!",{}};
 
-                QString DataFile = QDir::currentPath()+"/Data/Tmp"+titleVals.at((value)*2)+".dat";
+                QString DataFile = rootPath+"/Data/Tmp"+titleVals.at((value)*2)+".dat";
                 if (Simindex==3)
-                    DataFile = QDir::currentPath()+"/Data/Tmp"+QString::number(value)+"K.dat";
+                    DataFile = rootPath+"/Data/Tmp"+QString::number(value)+"K.dat";
 
 
                 if (!DataFile.isEmpty())

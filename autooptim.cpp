@@ -27,7 +27,7 @@ AutoOptim::AutoOptim(QWidget *parent) :
     //Finished setting background
 
 
-    QString OptimFile=QDir::currentPath()+"/OptimConfigFile.tmp";
+    QString OptimFile=rootPath+"/OptimConfigFile.tmp";
     QFile optimFile(OptimFile);
     if (optimFile.exists())
     {
@@ -66,7 +66,7 @@ AutoOptim::AutoOptim(QWidget *parent) :
 
 void AutoOptim::on_buttonBox_accepted()
 {
-    QString OptimFile=QDir::currentPath()+"/OptimConfigFile.tmp";
+    QString OptimFile=rootPath+"/OptimConfigFile.tmp";
     QFile file(OptimFile);
 
     if (!file.open(QFile::WriteOnly | QFile::Text)){
@@ -202,7 +202,7 @@ void AutoOptim::MarginSimulation(QStringList OptimParams)
     struct processedNL aa= simclass->processNetlist(TempFileName);
     //Now aa.commands contain the netlist values.
     OutputFileName = aa.OutFileName;
-    QString DataFile = QDir::currentPath()+OutputFileName;
+    QString DataFile = rootPath+OutputFileName;
     columNum = aa.columNumb;
     timestep = aa.tstep;
     double CritCurrent=values->convertToValues(aa.Icrit); //To calculate shunt value!
@@ -769,7 +769,7 @@ void AutoOptim::Yield_Analysis(QStringList OptimParams)
     struct processedNL aa= simclass->processNetlist(TempFileName);
     //Now aa.commands contain the netlist values.
     OutputFileName = aa.OutFileName;
-    QString DataFile = QDir::currentPath()+OutputFileName;
+    QString DataFile = rootPath+OutputFileName;
     columNum = aa.columNumb;
     timestep = aa.tstep;
     double CritCurrent=values->convertToValues(aa.Icrit); //To calculate shunt value!
@@ -871,7 +871,7 @@ void AutoOptim::on_buttonBox_helpRequested()
 
 void AutoOptim::on_TestButton_clicked()
 {
-    QString OptimFile=QDir::currentPath()+"/OptimConfigFile.tmp";
+    QString OptimFile=rootPath+"/OptimConfigFile.tmp";
     on_buttonBox_accepted();
     QStringList OptimParams=ReadOptimFile(OptimFile);
     QString netlistfile=OptimParams.at(1);
@@ -889,7 +889,7 @@ void AutoOptim::on_TestButton_clicked()
     //get params from netlist
     struct processedNL aa= simclass->processNetlist(TempFileName);
     OutputFileName = aa.OutFileName;
-    QString DataFile = QDir::currentPath()+OutputFileName;
+    QString DataFile = rootPath+OutputFileName;
     columNum = aa.columNumb;
     timestep = aa.tstep;
     double CritCurrent=values->convertToValues(aa.Icrit);
@@ -928,12 +928,12 @@ void AutoOptim::on_TestButton_clicked()
 void AutoOptim::on_radioButtonMargin_clicked()
 {
    ui->label_Text->setText("Margin calculation method:\n"
-                         "Nominal margins are set to [-90% - +200%]\n"
-                         "One parameter is swept while all other \n"
-                         "parameters remain at nominal value. \n"
-                         "The margin analyzer stops when the \n"
-                         "step to the next parameter value is below \n"
-                         "the specified maximum margin uncertainty. ");
+                         "Nominal margins are set to [-90% - +200%]    \n"
+                         "One parameter is swept while all other       \n"
+                         "parameters remain at nominal value.          \n"
+                         "The margin analyzer stops when the           \n"
+                         "step to the next parameter value is below    \n"
+                         "the specified maximum margin uncertainty.    ");
    QPixmap pix;
    if (pix.load(":/Help/Help/Margin.png")){
        pix = pix.scaled(ui->label_Picture->size(),Qt::KeepAspectRatio);
@@ -943,15 +943,15 @@ void AutoOptim::on_radioButtonMargin_clicked()
 
 void AutoOptim::on_radioButtonOptimMC_clicked()
 {
-    ui->label_Text->setText("The optimization of parameters:\n"
-                            "Nominal margins are calculated\n"
-                            "The parameters are set at the center. \n"
-                            "Margins are calculated again with new \n"
-                            "parameter values. If the margins are \n"
-                            "improved, the parameters are kept, else \n"
-                            "new centers are selected and the program \n"
-                            "continues to reach the maximum margin \n"
-                            "values. ");
+    ui->label_Text->setText("Optimization of parameters:\n"
+                            "Nominal margins are calculated first with    \n"
+                            "parameters set at their nominal values.      \n"
+                            "Margins are calculated again with new        \n"
+                            "parameter values. If the margins are         \n"
+                            "improved, the new parameters are kept,       \n"
+                            "otherwise new values are selected. The       \n"
+                            "routines continues until the best margins    \n"
+                            "are reached. ");
     QPixmap pix;
     if (pix.load(":/Help/Help/Optimizer.PNG")){
         pix = pix.scaled(ui->label_Picture->size(),Qt::KeepAspectRatio);
@@ -961,16 +961,22 @@ void AutoOptim::on_radioButtonOptimMC_clicked()
 
 void AutoOptim::on_radioButtonYield_clicked()
 {
-    ui->label_Text->setText("Yield analyzes of the circuit:\n"
-                            "An standard deviation is selected. \n"
-                            "Distributes parameters over a Gaussian \n"
-                            "distributes. New netlist is ssimulated.\n"
-                            "This is done many times for this \n"
-                            "deviation. Then the number of working\n"
-                            "points give us the yield of the circuit\n"
-                            "at that deviation. Standard deviation\n"
-                            "is increased and continue until number\n"
-                            "of steps.");
+    ui->label_Text->setText("Yield analyzing method:\n"
+                            "1- A standard deviation of a Gaussian distribution\n"
+                            "   is selected for parameters under study. \n"
+                            "2- Values of all chosen parameters are picked randomly\n"
+                            "   within this distribution.\n"
+                            "3- They are inserted in a new netlist.\n"
+                            "4- Simulation is performed and the correct operation\n"
+                            "   of the circuit is checked (pass/fail).\n"
+                            "5- Steps 2 to 4 are run multiple times to estimate statistically\n"
+                            "   the yield of thecircuit, which is the proportion of sets of\n"
+                            "   parameters that correspond to circuits operating correctly.\n"
+                            "6- A higher standard deviation is chosen and the full \n"
+                            "   procedure from step 1 is started again.\n"
+                            "7- The yield with standard deviation curve is\n"
+                            "   plotted and can be saved."
+                            );
     QPixmap pix;
     if (pix.load(":/Help/Help/Yield.png")){
         pix = pix.scaled(ui->label_Picture->size(),Qt::KeepAspectRatio);

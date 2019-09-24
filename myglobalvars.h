@@ -10,6 +10,10 @@ QT_END_NAMESPACE
 extern QString OutputFileName;
 extern QString TempFileName;
 extern QString TempOutFile;
+extern QString PlotPath;
+extern QString DataPath;
+extern QString WSIMPath;
+extern QString rootPath;
 extern QString delimator;
 extern QStringList RawData;
 extern QStringList titleVals;

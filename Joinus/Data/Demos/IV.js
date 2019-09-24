@@ -7,10 +7,10 @@ RB01       1        3          4.85
 LPR01      3        4          0.2p
 Rsource    4        0          1ohm
 I0         0        1   	   PWL(0ps 0mA 100ps 1mA)
-I1        1         0   SIN(0ps 0.2mA 250GHZ 0us 0)
+I1        1         0   SIN(0ps 0.3mA 140GHZ 0us 0)
 
 
-.tran 0.1ps 150PS 1PS 0.1PS
+.tran 0.2ps 150PS 1PS 0.1PS
 .FILE OUT.DAT
 .PRINT DEVV Rsource
 .PRINT nodev 1 4  

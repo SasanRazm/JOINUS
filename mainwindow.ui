@@ -163,6 +163,15 @@
        </color>
       </brush>
      </colorrole>
+     <colorrole role="PlaceholderText">
+      <brush brushstyle="NoBrush">
+       <color alpha="128">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
     </active>
     <inactive>
      <colorrole role="WindowText">
@@ -294,6 +303,15 @@
      <colorrole role="ToolTipText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="PlaceholderText">
+      <brush brushstyle="NoBrush">
+       <color alpha="128">
         <red>0</red>
         <green>0</green>
         <blue>0</blue>
@@ -437,6 +455,15 @@
        </color>
       </brush>
      </colorrole>
+     <colorrole role="PlaceholderText">
+      <brush brushstyle="NoBrush">
+       <color alpha="128">
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
+      </brush>
+     </colorrole>
     </disabled>
    </palette>
   </property>
@@ -450,7 +477,7 @@
    <enum>Qt::DefaultContextMenu</enum>
   </property>
   <property name="windowTitle">
-   <string>JOINUS - JOsephson INterface Utility Software</string>
+   <string>JOINUS 2.0- JOsephson INterface Utility Software</string>
   </property>
   <property name="toolButtonStyle">
    <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -472,9 +499,8 @@
              <widget class="QLabel" name="label">
               <property name="font">
                <font>
-                <pointsize>11</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
                </font>
               </property>
               <property name="text">
@@ -500,6 +526,12 @@
             </item>
             <item>
              <widget class="QComboBox" name="SimComboBox">
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="statusTip">
                <string>Choose Simulator Executable File</string>
               </property>
@@ -510,7 +542,7 @@
               </item>
               <item>
                <property name="text">
-                <string>JoSIM (V2.2)</string>
+                <string>JoSIM (V2.3)</string>
                </property>
               </item>
              </widget>
@@ -539,9 +571,8 @@
              <widget class="QLabel" name="label_2">
               <property name="font">
                <font>
-                <pointsize>11</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
                </font>
               </property>
               <property name="text">
@@ -583,9 +614,8 @@
              <widget class="QLabel" name="label_3">
               <property name="font">
                <font>
-                <pointsize>11</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
                </font>
               </property>
               <property name="text">
@@ -611,6 +641,12 @@
             </item>
             <item>
              <widget class="QComboBox" name="TypeComboBox">
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="statusTip">
                <string>Choose Simulatoin Type From List</string>
               </property>
@@ -677,9 +713,8 @@
              <widget class="QCheckBox" name="NoiseCheckBox">
               <property name="font">
                <font>
-                <pointsize>11</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
                </font>
               </property>
               <property name="statusTip">
@@ -709,7 +744,8 @@
                   <widget class="QLabel" name="label_11">
                    <property name="font">
                     <font>
-                     <pointsize>9</pointsize>
+                     <family>Arial</family>
+                     <pointsize>10</pointsize>
                     </font>
                    </property>
                    <property name="text">
@@ -745,7 +781,8 @@
                   <widget class="QLabel" name="label_12">
                    <property name="font">
                     <font>
-                     <pointsize>9</pointsize>
+                     <family>Arial</family>
+                     <pointsize>10</pointsize>
                     </font>
                    </property>
                    <property name="frameShape">
@@ -804,7 +841,8 @@
                   <widget class="QLabel" name="label_9">
                    <property name="font">
                     <font>
-                     <pointsize>9</pointsize>
+                     <family>Arial</family>
+                     <pointsize>10</pointsize>
                     </font>
                    </property>
                    <property name="text">
@@ -835,7 +873,8 @@
                   <widget class="QLabel" name="label_10">
                    <property name="font">
                     <font>
-                     <pointsize>9</pointsize>
+                     <family>Arial</family>
+                     <pointsize>10</pointsize>
                     </font>
                    </property>
                    <property name="text">
@@ -886,7 +925,8 @@
                   <widget class="QLabel" name="label_7">
                    <property name="font">
                     <font>
-                     <pointsize>9</pointsize>
+                     <family>Arial</family>
+                     <pointsize>10</pointsize>
                     </font>
                    </property>
                    <property name="text">
@@ -917,7 +957,8 @@
                   <widget class="QLabel" name="label_8">
                    <property name="font">
                     <font>
-                     <pointsize>9</pointsize>
+                     <family>Arial</family>
+                     <pointsize>10</pointsize>
                     </font>
                    </property>
                    <property name="text">
@@ -957,9 +998,8 @@
              <widget class="QCheckBox" name="PlotCheckBox">
               <property name="font">
                <font>
-                <pointsize>11</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
                </font>
               </property>
               <property name="statusTip">
@@ -975,6 +1015,12 @@
             </item>
             <item>
              <widget class="QComboBox" name="PlotComboBox">
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="statusTip">
                <string>Choose Your Plotter from List.</string>
               </property>
@@ -1003,9 +1049,8 @@
              <widget class="QCheckBox" name="SaveCheckBox">
               <property name="font">
                <font>
-                <pointsize>11</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
                </font>
               </property>
               <property name="text">
@@ -1050,7 +1095,8 @@
               </property>
               <property name="font">
                <font>
-                <pointsize>10</pointsize>
+                <family>Arial</family>
+                <pointsize>14</pointsize>
                </font>
               </property>
               <property name="statusTip">
@@ -1172,7 +1218,26 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="ClearTerminalpushButton">
+            <property name="font">
+             <font>
+              <family>Arial</family>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Clear Terminal</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="TemplateNetListPushBottun">
+            <property name="font">
+             <font>
+              <family>Arial</family>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
             <property name="toolTip">
              <string>Opens the help file for JSIIM and Auto5.</string>
             </property>
@@ -1183,6 +1248,12 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
           </item>
           <item>
            <widget class="QPushButton" name="SaveNetListPushBottun">
+            <property name="font">
+             <font>
+              <family>Arial</family>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
             <property name="toolTip">
              <string>Saves the changes to the netlist.</string>
             </property>
@@ -1200,6 +1271,12 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>14</pointsize>
+           </font>
           </property>
           <property name="cursor" stdset="0">
            <cursorShape>IBeamCursor</cursorShape>
@@ -1277,6 +1354,8 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
     </property>
     <addaction name="actionAbout"/>
     <addaction name="actionManuals"/>
+    <addaction name="actionJSIM_manual"/>
+    <addaction name="actionJ_oSIM_manual"/>
     <addaction name="separator"/>
     <addaction name="actionMore_Info"/>
     <addaction name="action_Wizard"/>
@@ -1330,7 +1409,7 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
   </action>
   <action name="actionManuals">
    <property name="text">
-    <string>User &amp;manual</string>
+    <string>JOINUS user &amp;manual</string>
    </property>
   </action>
   <action name="actionMore_Info">
@@ -1458,10 +1537,13 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
   </action>
   <action name="action_WSIM">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>&amp;WSIM</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionSQUID_MAP">
@@ -1474,10 +1556,13 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
   </action>
   <action name="actionMAR_GINOPT">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>MAR&amp;GINOPT</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="action_Wizard">
@@ -1486,6 +1571,16 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
    </property>
    <property name="text">
     <string>&amp;Wizard</string>
+   </property>
+  </action>
+  <action name="actionJ_oSIM_manual">
+   <property name="text">
+    <string>J&amp;oSIM manual</string>
+   </property>
+  </action>
+  <action name="actionJSIM_manual">
+   <property name="text">
+    <string>&amp;JSIM manual</string>
    </property>
   </action>
  </widget>

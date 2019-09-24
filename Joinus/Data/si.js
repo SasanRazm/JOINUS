@@ -22,7 +22,8 @@ I1               1         0   SIN(0ps 0.2mA 60GHZ 0us 0)
 
 *** josim input file ***
 .tran 0.2ps 500PS 0.1PS 0.1PS
-.FILE OUT.DAT  *** JoSIM will not see this command
+*** JoSIM will not see this command
+.FILE OUT.DAT
 .PRINT DEVI Rsource
 .PRINT nodev 1 2
 .PRINT DEVI RS8

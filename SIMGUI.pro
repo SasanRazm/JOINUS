@@ -13,8 +13,8 @@ win32 {
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
-QMAKE_TARGET = JOINUS
-TARGET = JOINUS
+QMAKE_TARGET = JOINUS-V2.0
+TARGET = JOINUS-V2.0
 TEMPLATE = app
 RC_ICONS = icon.ico
 
@@ -63,3 +63,7 @@ FORMS += \
 
 RESOURCES += \
     simguiresources.qrc
+
+
+INCLUDEPATH += $$PWD/.
+DEPENDPATH += $$PWD/.

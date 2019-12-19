@@ -1,0 +1,8 @@
+Vo(millivolt) 5
+p 5
+Vp(millivolt) {1 0 0 0}
+fip {0 0 0 0 0}
+Alpha {1.20898 0 0 0 0}
+LO(GHz) 200
+J 2
+k 0

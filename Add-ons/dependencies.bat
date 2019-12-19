@@ -1,0 +1,2 @@
+windeployqt.exe --quick .
+pause

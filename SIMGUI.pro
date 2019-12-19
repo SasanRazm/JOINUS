@@ -1,6 +1,8 @@
 #-------------------------------------------------
 #
 # Project created by QtCreator 2018-08-27T11:19:06
+# Project is created by Sasan Razmkhah as part of
+# the ColdFlux project.
 #
 #-------------------------------------------------
 
@@ -10,13 +12,19 @@ win32 {
     QT       +=axcontainer
 }
 
+macx {
+
+CONFIG+=app_bundle
+
+}
+
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
-QMAKE_TARGET = JOINUS-V2.0
-TARGET = JOINUS-V2.0
+QMAKE_TARGET = JOINUS-V2.1.1
+TARGET = JOINUS-V2.1.1
 TEMPLATE = app
-RC_ICONS = icon.ico
+RC_ICONS = IconJOINUS2.ico
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -30,36 +38,47 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    inductexgui.cpp \
+    joinuscapture.cpp \
         main.cpp \
         mainwindow.cpp \
+    plotwindow3d.cpp \
     qcustomplot.cpp \
     plotwindow.cpp \
     readoutdata.cpp \
     dialogplot.cpp \
     myglobalvars.cpp \
     calcvals.cpp \
+    setparamsdialog.cpp \
     simulateall.cpp \
     jsimsyntax.cpp \
     autooptim.cpp
 
 
 HEADERS += \
+    inductexgui.h \
+    joinuscapture.h \
         mainwindow.h \
+    plotwindow3d.h \
     qcustomplot.h \
     plotwindow.h \
     dialogplot.h \
     myglobalvars.h \
     calcvals.h \
+    setparamsdialog.h \
     simulateall.h \
     jsimsyntax.h \
     autooptim.h
 
 FORMS += \
+    inductexgui.ui \
+    joinuscapture.ui \
         mainwindow.ui \
     plotwindow.ui \
     dialogplot.ui \
-    dialogsetparam.ui \
-    autooptim.ui
+    autooptim.ui \
+    plotwindow3d.ui \
+    setparamsdialog.ui
 
 RESOURCES += \
     simguiresources.qrc

@@ -20,7 +20,7 @@ private:
     Ui::DialogPlot *ui;
     //void barPlotter();
     //QStringList readmyData(QString DataFile,QString delim);
-    PlotWindow *plotWindow;
+    //PlotWindow *plotWindow;
 };
 
 #endif // DIALOGPLOT_H

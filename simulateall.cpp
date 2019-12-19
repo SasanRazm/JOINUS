@@ -19,7 +19,7 @@ simulateall::simulateall()
 }
 
 
-// Process the netlist and extact the parameters determined by the user.
+// Process the netlist and extract the parameters determined by the user.
 struct processedNL simulateall::processNetlist(QString FileName)
 {
     int columNumb=1;
@@ -30,6 +30,8 @@ struct processedNL simulateall::processNetlist(QString FileName)
     QString Cap="0.218p";
     QString OutFileName="/OUT.DAT";
     QStringList Commands;
+
+    Legends.clear();
 
     QFile file(FileName);
     Commands.clear();
@@ -49,7 +51,25 @@ struct processedNL simulateall::processNetlist(QString FileName)
         QString line = in.readLine();
         QStringList temp = line.split('*');
         if (!temp.at(0).isEmpty())
+        {
             Commands.append(temp.at(0));
+
+            //Adding the legends to the graph.
+            if (temp.at(0).contains("print",Qt::CaseInsensitive))
+            {
+                if (temp.length()==1)
+                {
+                   QStringList tempstr=temp.at(0).split(' ');
+                   int tempcntr=1;
+                    while(tempstr.at(tempstr.length()-tempcntr).isEmpty())
+                        tempcntr++;
+                    Legends.append(tempstr.at(tempstr.length()-tempcntr));
+                }
+                else
+                   Legends.append(temp.last());
+            }
+
+        }
         temp.clear();
     }
     int j=0;
@@ -139,7 +159,7 @@ struct ConsoleOutputs simulateall::simulateivcurve(QString FileName, int Simulat
 
     bool validDatax=true;
     bool validDatay=true;
-    QString OutFile= rootPath+OutputFileName;
+    QString OutFile= documentFolderPath+OutputFileName;
     struct ConsoleOutputs out = simulatenetlist(FileName,SimulatorIndex);
 
     // copy the output to tempfile and delete the outputfile
@@ -211,7 +231,7 @@ struct ConsoleOutputs simulateall::simulateivcurve(QString FileName, int Simulat
         if (IVstatistical)
         {
             int sumWaitTime=0;
-            QFile waitfile(rootPath+"/testOutPut.DAT");
+            QFile waitfile(documentFolderPath+"/testOutPut.DAT");
             if (!waitfile.open(QFile::ReadOnly | QFile::Text))
             {
                 return {"Problem with permissions!","There is a problem in file creation. Check the permissions!"};
@@ -290,7 +310,7 @@ struct ConsoleOutputs simulateall::simulateivtest(QString FileName, int Simulato
 {
     QVector<double> I(points*loopCnt);
     QVector<double> V(points*loopCnt);
-    QString testingIV= rootPath+"/Data/testingIV.tmp";
+    QString testingIV= DataPath+"/testingIV.tmp";
 
     //The vector for different waittimes
     QVector<int> waittimevals(points*loopCnt);
@@ -303,8 +323,8 @@ struct ConsoleOutputs simulateall::simulateivtest(QString FileName, int Simulato
 
     bool validDatax=true;
     bool validDatay=true;
-    QString OutFile= rootPath+OutputFileName;
-    QString testOutFile= rootPath+"/testOutPut.DAT";
+    QString OutFile= documentFolderPath+OutputFileName;
+    QString testOutFile= documentFolderPath+"/testOutPut.DAT";
 
     struct ConsoleOutputs out = simulatenetlist(FileName,SimulatorIndex);
 
@@ -447,7 +467,7 @@ struct ConsoleOutputs simulateall::simulateivnew(QString FileName, int Simulator
 
     bool validDatax=true;
     bool validDatay=true;
-    QString OutFile= rootPath+OutputFileName;
+    QString OutFile= documentFolderPath+OutputFileName;
     struct ConsoleOutputs out = simulatenetlist(FileName,SimulatorIndex);
 
     // copy the output to tempfile and delete the outputfile
@@ -561,43 +581,135 @@ QVector<double> simulateall::movingAverage(QVector<double> datain,int windowSize
 //Run the simulator for the input netlist and generate the output
 struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int SimulatorIndex)
 {
-    QString OutFile= rootPath+OutputFileName;
+    QString OutFile= documentFolderPath+OutputFileName;
+    QFile OutFileJsim(OutFile);
+
+#ifdef __APPLE__
+    QDir dir = QCoreApplication::applicationDirPath();
+    dir.cdUp();
+    dir.cdUp();
+    dir.cdUp();
+    QString secondRunFPath = dir.absolutePath()+"/"+OutputFileName;
+#endif
+
+
     //QString OutFile= "."+OutputFileName;
 
     QString simstderr="";
     QString simstdout="";
-    QString programName=DataPath+"/jsim_n";
-    QString commandline=DataPath+"/jsim_n "+FileName;
-    //QString commandline=DataPath+"/jsim "+FileName +" "+OutFile;
+    QString programName=simEngine+"/jsim_n";
+    QString commandline=simEngine+"/jsim_n "+FileName;
+    qDebug()<< commandline;
 
 
-    QProcess process;
+    QObject *parent = nullptr;
+    QProcess *process=new QProcess(parent);
+    QProcess JsimProcess;
+
     //QString OSname=QSysInfo::productType();
 
     switch(SimulatorIndex){
     case 0:
         #ifdef __linux__
-                    process.start("./Data/jsim_n "+FileName);
-                    process.waitForFinished(-1); // will wait forever until finished
+                    process->start(commandline);
+                    process->waitForFinished(-1); // will wait forever until finished
+                    if (QFile(OutFile).exists())
+                        QFile(OutFile).remove();
+                    QFile::copy(rootPath+OutputFileName,OutFile);
         #elif _WIN32
 
 //        QProcess::execute(commandline);
 
-                    process.setProgram("cmd.exe");
-                    process.setArguments({"/c",DataPath+"/jsim_n.exe", FileName});
-                    process.setCreateProcessArgumentsModifier([] (
+                    process->setProgram("cmd.exe");
+                    process->setArguments({"/c",simEngine+"/jsim_n.exe", FileName});
+                    process->setCreateProcessArgumentsModifier([] (
                         QProcess::CreateProcessArguments *args) {
                                     args->flags &= CREATE_NO_WINDOW;});
                     //qint64 pid;
-                    //process.startDetached(&pid);
-                    process.start();
-                    process.waitForFinished(-1);
+                    //process->startDetached(&pid);
+                    process->start();
+                    while (!process->waitForFinished(100))
+                    {
+                        if (!runProcess)
+                        {
+                            process->terminate();
+                            if (!process->waitForFinished(1000))
+                                process->kill();
+                            break;
+                        }
+                    }
+
+                    if (QFile(OutFile).exists())
+                        QFile(OutFile).remove();
+                    QFile::copy(rootPath+OutputFileName,OutFile);
+        #elif __APPLE__
+
+                    //process.start("chmod +x "+programName);
+                    //process.start("/bin/sh", QStringList() << "-c" << commandline);
+                    if (OutFileJsim.exists())
+                        OutFileJsim.remove();
+
+                    //process->startDetached(commandline);
+
+                    JsimProcess.start(commandline);
+                    while (!JsimProcess.waitForFinished(100))
+                    {
+                        if (!runProcess)
+                        {
+                            JsimProcess.terminate();
+                            if (!JsimProcess.waitForFinished(1000))
+                                JsimProcess.kill();
+                            break;
+                        }
+                    }
+
+                    //JsimProcess.waitForFinished(-1); // will wait forever until finished
+
+                        if (!QFile(secondRunFPath).exists())
+                        {
+                            if (!OutFileJsim.open(QFile::WriteOnly | QFile::Text))
+                                 simstderr=OutFileJsim.errorString();
+
+                            else{
+                                    QTextStream stream(&OutFileJsim);
+                                    simstdout = JsimProcess.readAllStandardOutput();
+
+                                    if (!simstdout.isEmpty())
+                                    {
+                                        QStringList spoiledData=simstdout.split('\n');
+                                        //trim output to only keep the data!
+                                        //Data is between 2 lines with time and loop in them
+                                        for (int spoiledDataCntr=0;spoiledDataCntr<spoiledData.length();spoiledDataCntr++)
+                                        {
+                                            if (spoiledData.at(spoiledDataCntr).contains("time "))
+                                            {
+                                                spoiledDataCntr++;
+                                                while (!spoiledData.at(spoiledDataCntr).contains("loop ") && spoiledDataCntr<spoiledData.length()-1)
+                                                {
+                                                    stream<<spoiledData.at(spoiledDataCntr)<<'\n';
+                                                    spoiledDataCntr++;
+                                                }
+
+                                                if (!spoiledData.at(spoiledDataCntr).contains("loop ")){
+                                                    simstderr = JsimProcess.readAllStandardError();
+                                                    stream.flush();
+                                                    OutFileJsim.close();
+                                                    return {simstdout,simstderr};
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                    stream.flush();
+                                    OutFileJsim.close(); 
+                            }
+
+                        } else
+                            QFile::copy(secondRunFPath,OutFile);
 
         #else
-
-            //process.start(commandline);//"sh", QStringList() << "-c" << "ifconfig | grep inet"
-            process.start("/bin/sh", QStringList() << "-c" << commandline);
-            process.waitForFinished(-1); // will wait forever until finished
+            process->start(commandline);
+            process->waitForFinished(-1); // will wait forever until finished
 
         #endif
 //        if (OSname=="windows"){
@@ -613,27 +725,39 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
 //            process.start("./jsim_n "+FileName);
 //            process.waitForFinished(-1); // will wait forever until finished
 //        }
-        simstdout = process.readAllStandardOutput();
-        simstderr = process.readAllStandardError();
-        delimator=" ";
-        break;
+
+
+            #ifdef __APPLE__
+            simstdout="Simulation succeessful. Output generated!\n";
+            #else
+            simstdout = process->readAllStandardOutput();
+            #endif
+
+            simstderr = process->readAllStandardError();
+            delimator=" ";
+            break;
     case 1:
-        commandline=DataPath+"/JoSIM_n -o "+ OutFile +" "+FileName;
+        commandline=simEngine+"/JoSIM_n -o "+ OutFile +" "+FileName;
+        //commandline=":/Data/Data/JoSIM_n -o "+ OutFile +" "+FileName;
         #ifdef __linux__
-                    process.start("./Data/JoSIM_n -o "+OutFile+" "+FileName);
-                    process.waitForFinished(-1); // will wait forever until finished
+                    process->start(commandline);
+                    process->waitForFinished(-1); // will wait forever until finished
         #elif _WIN32
-                    process.setProgram("cmd.exe");
-                    process.setArguments({"/c",DataPath+"/JoSIM_n.exe","-o", OutFile,FileName});
-                    process.setCreateProcessArgumentsModifier([] (
+                    process->setProgram("cmd.exe");
+                    process->setArguments({"/c",simEngine+"/JoSIM_n.exe","-o", OutFile,FileName});
+                    process->setCreateProcessArgumentsModifier([] (
                         QProcess::CreateProcessArguments *args) {
                                     args->flags &= CREATE_NO_WINDOW;});
-                    process.start();
-                    process.waitForFinished(-1);
+                    process->start();
+                    process->waitForFinished(-1);
+
+        #elif __APPLE__
+            process->start(commandline);
+            process->waitForFinished(-1); // will wait forever until finished
 
         #else
-                    process.start(commandline);
-                    process.waitForFinished(-1); // will wait forever until finished
+                    process->start(commandline);
+                    process->waitForFinished(-1); // will wait forever until finished
         #endif
 //        if (OSname=="windows"){
 //            process.setProgram("cmd.exe");
@@ -648,8 +772,8 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
 //            process.start("./JoSIM -o "+OutFile+" "+FileName);
 //            process.waitForFinished(-1); // will wait forever until finished
 //        }
-        simstdout = process.readAllStandardOutput();
-        simstderr = process.readAllStandardError();
+        simstdout = process->readAllStandardOutput();
+        simstderr = process->readAllStandardError();
         delimator=",";
         break;
     default:
@@ -662,7 +786,7 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
 // BER calculations are done here
 struct ConsoleOutputs simulateall::simulateBER(int SimulatorIndex,float Multiplyer,double SubParamVal)
 {
-    QString OutFile= rootPath+OutputFileName;
+    QString OutFile= documentFolderPath+OutputFileName;
     //TempFileName=rootPath+"/Data/TempNetlistBER.tmp";
     ConsoleOutputs simstd={"",""};
     float BER=100;
@@ -671,7 +795,7 @@ struct ConsoleOutputs simulateall::simulateBER(int SimulatorIndex,float Multiply
 
     simstd=simulatenetlist(TempFileName,SimulatorIndex);
 
-    QFile file(rootPath+OutputFileName);
+    QFile file(documentFolderPath+OutputFileName);
     QStringList lastline;
     QStringList PhaseData;
 
@@ -715,7 +839,7 @@ struct ConsoleOutputs simulateall::simulateBER(int SimulatorIndex,float Multiply
     }
 
 
-    QString BERtempfile=rootPath+"/Data/TempOutputBER.DAT";
+    QString BERtempfile=DataPath+"/TempOutputBER.DAT";
     QFile file2(BERtempfile);
 
     if (!file2.open(QFile::WriteOnly | QFile::Text | QFile::Append)){
@@ -740,14 +864,14 @@ struct ConsoleOutputs simulateall::simulateBER(int SimulatorIndex,float Multiply
 //Frequency response calculations are done here
 struct ConsoleOutputs simulateall::simulateFreq(int SimulatorIndex,QVector<double> Multiplyers,double SubParamVal)
 {
-    QString OutFile= rootPath+OutputFileName;
+    QString OutFile= documentFolderPath+OutputFileName;
     //TempFileName=rootPath+"/Data/TempNetlistFreq.tmp";
     ConsoleOutputs simstd={"",""};
     QVector<long> DataVals;
 
     simstd=simulatenetlist(TempFileName,SimulatorIndex);
 
-    QFile file(rootPath+OutputFileName);
+    QFile file(documentFolderPath+OutputFileName);
     QStringList lastline;
     QStringList PhaseData;
 
@@ -776,7 +900,7 @@ struct ConsoleOutputs simulateall::simulateFreq(int SimulatorIndex,QVector<doubl
     lastline.clear();
     PhaseData.clear();
 
-    QString Freqtempfile=rootPath+"/Data/TempOutputFreq.DAT";
+    QString Freqtempfile=DataPath+"/TempOutputFreq.DAT";
     QFile file2(Freqtempfile);
 
     if (!file2.open(QFile::WriteOnly | QFile::Text | QFile::Append)){
@@ -955,7 +1079,7 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
                                 else if (IVstatistical==2)
                                 {
                                     //Load the datafile containing the infornmation for Waittimes
-                                    QString testOutFile= rootPath+"/testOutPut.DAT";
+                                    QString testOutFile= documentFolderPath+"/testOutPut.DAT";
                                     QFile newfile(testOutFile);
                                     if (!newfile.open(QFile::ReadOnly | QFile::Text)){
                                         return newfile.errorString();
@@ -1290,9 +1414,13 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
                         //This part finds the lines with "ohm" in them and add the noise line to them
 
 
+
+
                     bool addnoisecond=noise
                                 & netlist.Commands.at(fcntr).contains("ohm",Qt::CaseInsensitive)
-                                & !netlist.Commands.at(fcntr).contains("source",Qt::CaseInsensitive)
+                                & !netlist.Commands.at(fcntr).contains("nonoise",Qt::CaseInsensitive)
+                            //Add the old Rz format and mention it to the user!
+                                & !netlist.Commands.at(fcntr).contains("z",Qt::CaseInsensitive)
                                 & !netlist.Commands.at(fcntr).contains("model",Qt::CaseInsensitive);
 
                         if (addnoisecond)

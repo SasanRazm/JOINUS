@@ -55,6 +55,12 @@
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QLabel" name="label">
+           <property name="font">
+            <font>
+             <family>Arial</family>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>Netlist file :                                </string>
            </property>
@@ -62,6 +68,11 @@
          </item>
          <item>
           <widget class="QLineEdit" name="lineEditNetlist">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="whatsThis">
             <string>Netlist file with the handle for parameters.</string>
            </property>
@@ -80,6 +91,12 @@
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
           <widget class="QLabel" name="label_4">
+           <property name="font">
+            <font>
+             <family>Arial</family>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>Reference file for netlist outputs :</string>
            </property>
@@ -87,6 +104,11 @@
          </item>
          <item>
           <widget class="QLineEdit" name="lineEditSolution">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="whatsThis">
             <string>at least one solution point for the reference of the analyzer. More solutions give accurate result.</string>
            </property>
@@ -105,6 +127,12 @@
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
           <widget class="QLabel" name="label_5">
+           <property name="font">
+            <font>
+             <family>Arial</family>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>File of netlist variables  :             </string>
            </property>
@@ -112,6 +140,11 @@
          </item>
          <item>
           <widget class="QLineEdit" name="lineEditParam">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="whatsThis">
             <string>The parameters with minimum, stepsize and maximum value.</string>
            </property>
@@ -130,6 +163,12 @@
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="QLabel" name="label_2">
+           <property name="font">
+            <font>
+             <family>Arial</family>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>Temporary folder :                     </string>
            </property>
@@ -137,6 +176,11 @@
          </item>
          <item>
           <widget class="QLineEdit" name="lineEditTempF">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="whatsThis">
             <string>Temporary folder for storing simulation files. The folder size could get large!</string>
            </property>
@@ -155,6 +199,12 @@
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
           <widget class="QLabel" name="label_3">
+           <property name="font">
+            <font>
+             <family>Arial</family>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>Output folder :                           </string>
            </property>
@@ -162,6 +212,11 @@
          </item>
          <item>
           <widget class="QLineEdit" name="lineEditOutF">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="whatsThis">
             <string>Output files are stored here.</string>
            </property>
@@ -188,6 +243,12 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
          <property name="whatsThis">
           <string>Reset will clear all the fields!</string>
          </property>
@@ -206,6 +267,12 @@
         <widget class="QCheckBox" name="checkBoxNoise">
          <property name="enabled">
           <bool>true</bool>
+         </property>
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>10</pointsize>
+          </font>
          </property>
          <property name="whatsThis">
           <string>If checked, Resistors will have thermal noise sources on them.</string>
@@ -245,7 +312,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="simguiresources.qrc">:/Help/Help/Margin.png</pixmap>
+        <pixmap>:/Help/Help/Margin.png</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -262,8 +329,8 @@
        </property>
        <property name="font">
         <font>
-         <family>Arial Narrow</family>
-         <pointsize>12</pointsize>
+         <family>Arial</family>
+         <pointsize>10</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -293,6 +360,12 @@ the specified maximum margin uncertainty. </string>
      </item>
      <item>
       <widget class="QPushButton" name="TestButton">
+       <property name="font">
+        <font>
+         <family>Arial</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Simulate netlist 
 with nominal values</string>
@@ -311,6 +384,12 @@ with nominal values</string>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="font">
+        <font>
+         <family>Arial</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
        <property name="whatsThis">
         <string>Parameters for analyzer</string>
        </property>
@@ -324,6 +403,12 @@ with nominal values</string>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
             <item>
              <widget class="QLabel" name="label_6">
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Standard deviation of parameter [%] :</string>
               </property>
@@ -337,6 +422,12 @@ with nominal values</string>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="whatsThis">
                <string>Variations of the parameters based on the data from foundry.</string>
               </property>
@@ -348,6 +439,12 @@ with nominal values</string>
            <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
              <widget class="QLabel" name="label_10">
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Standard deviation of junctions [%]:</string>
               </property>
@@ -361,6 +458,12 @@ with nominal values</string>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="whatsThis">
                <string>Variations of the critical current of the junction base on the foundry data.</string>
               </property>
@@ -372,6 +475,12 @@ with nominal values</string>
            <layout class="QHBoxLayout" name="horizontalLayout_10">
             <item>
              <widget class="QLabel" name="label_9">
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Maximum uncertainty of margins [%] : </string>
               </property>
@@ -384,6 +493,12 @@ with nominal values</string>
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
               </property>
               <property name="whatsThis">
                <string>The error percentage acceptable for analyzis of the grayzone. This value effect the speed of simulation!</string>
@@ -400,6 +515,12 @@ with nominal values</string>
            <layout class="QHBoxLayout" name="horizontalLayout_8">
             <item>
              <widget class="QLabel" name="label_7">
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Number of iterations :</string>
               </property>
@@ -413,6 +534,12 @@ with nominal values</string>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="whatsThis">
                <string>Number of iterations for optimizer program. this number effect the speed directly.</string>
               </property>
@@ -424,6 +551,12 @@ with nominal values</string>
            <layout class="QHBoxLayout" name="horizontalLayout_9">
             <item>
              <widget class="QLabel" name="label_8">
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Temperature [K]:</string>
               </property>
@@ -437,6 +570,12 @@ with nominal values</string>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="whatsThis">
                <string>Ambient temperature of the chip surface.</string>
               </property>
@@ -448,6 +587,12 @@ with nominal values</string>
            <layout class="QHBoxLayout" name="horizontalLayout_12">
             <item>
              <widget class="QLabel" name="label_11">
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Rn*Ic (uV) :</string>
               </property>
@@ -460,6 +605,12 @@ with nominal values</string>
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <family>Arial</family>
+                <pointsize>10</pointsize>
+               </font>
               </property>
               <property name="whatsThis">
                <string>This value depends on your fabrication process. Leave the default value if you are not sure.</string>
@@ -475,12 +626,24 @@ with nominal values</string>
      </item>
      <item>
       <widget class="QGroupBox" name="groupBox">
+       <property name="font">
+        <font>
+         <family>Arial</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
        <property name="title">
         <string>Method</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QRadioButton" name="radioButtonMargin">
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
           <property name="whatsThis">
            <string>Analyze the working margins of the netlist.</string>
           </property>
@@ -491,6 +654,12 @@ with nominal values</string>
         </item>
         <item>
          <widget class="QRadioButton" name="radioButtonOptimMC">
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
           <property name="whatsThis">
            <string>Monte Carlo Optimizer.</string>
           </property>
@@ -501,6 +670,12 @@ with nominal values</string>
         </item>
         <item>
          <widget class="QRadioButton" name="radioButtonYield">
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
           <property name="whatsThis">
            <string>Particle Swarm optimizer method.</string>
           </property>
@@ -516,9 +691,7 @@ with nominal values</string>
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="simguiresources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

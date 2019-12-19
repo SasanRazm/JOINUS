@@ -37,8 +37,20 @@
   <property name="sizeGripEnabled">
    <bool>false</bool>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout"/>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="PlotWindow" name="widgetMain" native="true"/>
+   </item>
+  </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWindow</class>
+   <extends>QWidget</extends>
+   <header location="global">plotwindow.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

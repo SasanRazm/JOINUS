@@ -2,6 +2,7 @@
 #include <QTextCharFormat>
 #include <QBrush>
 #include <QColor>
+#include <QDate>
 
 Jsimsyntax::Jsimsyntax(QTextDocument *parent)
     : QSyntaxHighlighter(parent)
@@ -26,7 +27,7 @@ Jsimsyntax::Jsimsyntax(QTextDocument *parent)
     QStringList elementPatterns;
     elementPatterns << "^L\\S+" << "^R\\S+" << "^C\\S+"
                     << "^K\\S+" << "^B\\S+" << "^I\\S+"
-                    << "^V\\S+" << "^X\\S+";
+                    << "^V\\S+" << "^X\\S+" <<"^P\\S+";
     for (const QString &pattern : elementPatterns) {
         rule.pattern = QRegularExpression(pattern);
         rule.pattern.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
@@ -96,6 +97,55 @@ void Jsimsyntax::highlightBlock(const QString &text)
         }
     }
 
+}
 
+QStringList Jsimsyntax::convertToJSIM(QStringList netlistCommands)
+{
+    QStringList NoCommentCommands;
+    QStringList NewCommands;
+    QStringList NewCommandswithCommands;
+
+
+    for (int lineCNTR=0;lineCNTR<netlistCommands.length();lineCNTR++)
+    {
+        QStringList temp = netlistCommands.at(lineCNTR).split('*');
+        if (!temp.at(0).isEmpty())
+            NoCommentCommands.append(temp.at(0));
+        temp.clear();
+    }
+
+    for (int cmdCNTR=0;cmdCNTR<NoCommentCommands.length();cmdCNTR++){
+
+        QString newConvertLine=NoCommentCommands.at(cmdCNTR);
+
+        //Do the changes to the netlist here
+
+
+        NewCommands.append(newConvertLine);
+    }
+
+    int fileIndex=0;
+    NewCommandswithCommands.append("*** Converted netlist to JSIM format at " + QDate::currentDate().toString()+" ***");
+    for (int lineCNTR=0;lineCNTR<netlistCommands.length();lineCNTR++)
+        {
+
+
+        if (netlistCommands.at(lineCNTR).contains(NoCommentCommands.at(fileIndex)) && fileIndex<NewCommands.length())
+            {
+                QString NewLine=netlistCommands.at(lineCNTR);
+                NewLine.replace(NoCommentCommands.at(fileIndex),NewCommands.at(fileIndex),Qt::CaseInsensitive);
+                NewCommandswithCommands.append(NewLine);
+                //qDebug()<<QString::number(fileIndex)<<" : "<<NewLine;
+                fileIndex++;
+            }
+            else
+            {
+                NewCommandswithCommands.append(netlistCommands.at(lineCNTR));
+                //qDebug()<<netlistCommands.at(lineCNTR);
+            }
+
+        }
+
+    return NewCommandswithCommands;
 }
 

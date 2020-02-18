@@ -495,7 +495,7 @@
          <widget class="QLabel" name="label">
           <property name="font">
            <font>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="text">
@@ -524,7 +524,7 @@
           <property name="font">
            <font>
             <family>Tahoma</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="statusTip">
@@ -567,7 +567,7 @@
           <property name="font">
            <font>
             <family>Arial</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="text">
@@ -586,7 +586,7 @@
           <property name="font">
            <font>
             <family>Tahoma</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="statusTip">
@@ -616,7 +616,7 @@
           <property name="font">
            <font>
             <family>Arial</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="text">
@@ -645,7 +645,7 @@
           <property name="font">
            <font>
             <family>Tahoma</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="statusTip">
@@ -717,7 +717,7 @@
             <property name="font">
              <font>
               <family>Arial</family>
-              <pointsize>10</pointsize>
+              <pointsize>12</pointsize>
              </font>
             </property>
             <property name="statusTip">
@@ -733,7 +733,7 @@
             <property name="font">
              <font>
               <family>Arial</family>
-              <pointsize>10</pointsize>
+              <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
@@ -775,7 +775,7 @@
                <property name="font">
                 <font>
                  <family>Arial</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -794,7 +794,7 @@
                <property name="font">
                 <font>
                  <family>Tahoma</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="toolTip">
@@ -819,7 +819,7 @@
                <property name="font">
                 <font>
                  <family>Arial</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="frameShape">
@@ -841,7 +841,7 @@
                <property name="font">
                 <font>
                  <family>Tahoma</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="toolTip">
@@ -886,7 +886,7 @@
                <property name="font">
                 <font>
                  <family>Arial</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -905,7 +905,7 @@
                <property name="font">
                 <font>
                  <family>Tahoma</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="toolTip">
@@ -930,7 +930,7 @@
                <property name="font">
                 <font>
                  <family>Arial</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -949,7 +949,7 @@
                <property name="font">
                 <font>
                  <family>Tahoma</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="toolTip">
@@ -994,7 +994,7 @@
                <property name="font">
                 <font>
                  <family>Arial</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -1013,7 +1013,7 @@
                <property name="font">
                 <font>
                  <family>Tahoma</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="toolTip">
@@ -1038,7 +1038,7 @@
                <property name="font">
                 <font>
                  <family>Arial</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -1057,7 +1057,7 @@
                <property name="font">
                 <font>
                  <family>Tahoma</family>
-                 <pointsize>10</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="toolTip">
@@ -1085,7 +1085,7 @@
           <property name="font">
            <font>
             <family>Arial</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="statusTip">
@@ -1104,7 +1104,7 @@
           <property name="font">
            <font>
             <family>Tahoma</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="statusTip">
@@ -1136,7 +1136,7 @@
           <property name="font">
            <font>
             <family>Arial</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="text">
@@ -1155,7 +1155,7 @@
           <property name="font">
            <font>
             <family>Tahoma</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="statusTip">
@@ -1267,7 +1267,7 @@
           <property name="font">
            <font>
             <family>Arial</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="frameShape">
@@ -1405,7 +1405,7 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
           <property name="font">
            <font>
             <family>Arial</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="toolTip">
@@ -1421,7 +1421,7 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
           <property name="font">
            <font>
             <family>Arial</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="toolTip">
@@ -1452,7 +1452,7 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
           <property name="font">
            <font>
             <family>Arial</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="toolTip">
@@ -1468,7 +1468,7 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
           <property name="font">
            <font>
             <family>Arial</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="toolTip">

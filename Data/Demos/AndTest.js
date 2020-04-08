@@ -1,17 +1,10 @@
 **** **** **** **** **** **** **** **** **** **** **** 
-*JSIM control file for CADENCE by kameda@cq.jp.nec.com
+* AndTest.js
 **** **** **** **** **** **** **** **** **** **** ****
 
 *JSIM model
 .model jjmod jj(Rtype=1, Vg=2.8mV, Cap=0.218pF, R0=200ohm, Rn=17ohm, Icrit=0.1mA)
 
-*** netlist file ***
-**** **** **** **** **** **** **** ****+
-*** Lib : sasan
-*** Cell: dcsfqjsim
-*** View: schematic
-*** Dec 29 16:41:23 2017
-**** **** **** **** **** **** **** ****
 
 *** sink
 .subckt SINK          1        19

@@ -1,0 +1,178 @@
+**** **** **** **** **** **** **** **** **** **** **** 
+*ControlTFF.js
+**** **** **** **** **** **** **** **** **** **** ****
+
+*JSIM model
+.model jjmod jj(Rtype=1, Vg=2.8mV, Cap=0.218pF, R0=200ohm, Rn=17ohm, Icrit=0.1mA)
+
+*** dcsfq13
+.subckt dcsfq13          1          2         5
+***       din      dout
+R1                 5         4  16.00ohm
+R2                 5         6  10.00ohm
+B3                 7         8  jjmod area=1.50
+RS3                7         8   2.49ohm *SHUNT=3.73
+B4                 9        10  jjmod area=1.96
+RS4                9        10   1.90ohm *SHUNT=3.73
+B1                11        12  jjmod area=1.32
+RS1               11        12   2.83ohm *SHUNT=3.73
+B2                11        13  jjmod area=1.00
+RS2               11        13   3.73ohm *SHUNT=3.73
+B5                14        15  jjmod area=1.96
+RS5               14        15   1.90ohm *SHUNT=3.73
+LP3                8         0   0.195pH fcheck
+L6                 7        16   1.323pH fcheck
+L3                17        12   1.755pH fcheck
+L2                17         0   8.005pH fcheck
+LP4               10         0   0.260pH fcheck
+LP5               15         0   0.237pH fcheck
+L1                 1        17   0.811pH fcheck
+L8                 9        14   2.948pH fcheck
+L7                16         9   1.110pH fcheck
+L9                14         2   1.609pH fcheck
+L4                11        18   0.500pH fcheck
+L5                18         7   3.247pH fcheck
+LPR2               6        16   0.286pH fcheck
+LP2               13         0   0.473pH fcheck
+LPR1               4        18   0.980pH fcheck
+.ends
+
+*** TFF
+.subckt TFF          1         14         15        17
+***       din     dout0     dout1
+L10               18        14   1.544pH fcheck
+L11                8        15   2.350pH fcheck
+LP7               19         0   0.190pH fcheck
+L8                 7        18   3.097pH fcheck
+L9                20         8   4.685pH fcheck
+LP6               13         0   0.211pH fcheck
+LPR2              21         7   0.520pH fcheck
+L7                22         7   0.653pH fcheck
+LP8               23        24   0.406pH fcheck
+L12               25        22   0.003pH fcheck
+L13               26        20   0.003pH fcheck
+L5                23        22   3.146pH fcheck  
+L6                20        23   3.214pH fcheck  
+LP5               27         0   0.229pH fcheck
+LP4               28         0   0.302pH fcheck
+L2                29         9   1.019pH fcheck
+L4                12         9   1.932pH fcheck  
+L3                 9        30   1.851pH fcheck  
+L1                31        29   2.369pH fcheck
+LP1               32         0   0.130pH fcheck
+LPR1              33        31   0.247pH fcheck
+LPDIN              1        31   0.218pH fcheck
+RD                24         0   2.00ohm           
+R2                17        21  16.67ohm
+R1                17        33   8.34ohm
+B7                 8        19  jjmod area=2.18
+RS7                8        19   1.71ohm *SHUNT=3.73
+B6                18        13  jjmod area=2.18
+RS6               18        13   1.71ohm *SHUNT=3.73
+B5                26        27  jjmod area=1.96
+RS5               26        27   1.90ohm *SHUNT=3.73
+B3                26        12  jjmod area=1.32      
+RS3               26        12   2.83ohm *SHUNT=3.73 
+B2                25        30  jjmod area=1.84      
+RS2               25        30   2.03ohm *SHUNT=3.73 
+B4                25        28  jjmod area=1.10
+RS4               25        28   3.39ohm *SHUNT=3.73
+B1                29        32  jjmod area=2.18
+RS1               29        32   1.71ohm *SHUNT=3.73
+K1                L5        L6   -0.14
+.ends
+
+*** sfqdc14
+.subckt sfqdc14          1          2         3
+***       din      dout
+R7                10         0   1.95ohm
+R5                 3        12   9.78ohm
+R2                 3        14  14.76ohm
+R1                 3        16   8.34ohm *FIX
+R4                 3        18  17.52ohm
+R6                 3        20   5.70ohm
+R3                 3         4  14.28ohm
+B7                21        22  jjmod area=2.56
+RS7               21        22   1.46ohm *SHUNT=3.73
+B8                23        24  jjmod area=1.32
+RS8               23        24   2.83ohm *SHUNT=3.73
+B6                25        26  jjmod area=2.33
+RS6               25        26   1.60ohm *SHUNT=3.73
+B3                27        28  jjmod area=1.96
+RS3               27        28   1.90ohm *SHUNT=3.73
+B4                29        30  jjmod area=1.44
+RS4               29        30   2.59ohm *SHUNT=3.73
+B5                31        22  jjmod area=1.44
+RS5               31        22   2.59ohm *SHUNT=3.73
+B9                32        33  jjmod area=1.32
+RS9               32        33   2.83ohm *SHUNT=3.73
+B1                34        35  jjmod area=1.96
+RS1               34        35   1.90ohm *SHUNT=3.73
+B2                36        37  jjmod area=1.96
+RS2               36        37   1.90ohm *SHUNT=3.73
+LPR7              38        10   0.387pH fcheck
+L15               39         2   7.340pH fcheck
+LPR5              12        32   1.240pH fcheck
+L12               39        32   0.100pH fcheck
+L11               23        39   0.100pH fcheck
+LP7               21         0   0.949pH fcheck
+LP6               25         0   0.972pH fcheck
+L10               22        38   5.681pH fcheck
+L17               38        24   0.001pH fcheck
+L9                26        24   5.247pH fcheck
+L16               30        26   0.614pH fcheck
+LP3               28         0   0.234pH fcheck
+L5                27        40   2.839pH fcheck
+LPR1              16         5   0.242pH fcheck
+LPR6              20        41   0.200pH fcheck
+L13               33        41   1.872pH fcheck
+L1                 5        34   1.895pH fcheck
+L14               41         0   0.741pH fcheck
+L7                42        29   0.863pH fcheck
+LPIN               1         5   0.263pH fcheck
+L8                42        31   1.596pH fcheck
+L6                40        42   0.263pH fcheck
+L3                36        43   1.591pH fcheck
+L4                43        27   1.570pH fcheck
+L2                34        36   3.471pH fcheck
+LPR3               4        40   0.281pH fcheck
+LP1               35         0   0.198pH fcheck
+LPR4              18        30   0.426pH fcheck
+LP2               37         0   0.205pH fcheck
+LPR2              14        43   0.416pH fcheck
+.ends
+
+*** top cell: DC/SFQ->TFF->SFQ/DC
+XI1    dcsfq13    1    3   2
+XI2    TFF        3    4   5   2
+XI3    sfqdc14    4    6   2
+XI4    sfqdc14    5    7   2
+RQ0               6        0   50ohm 
+RQ1               7        0   50ohm 
+
+V0                1         0  PULSE(0.0mV  1.034mV   0ps   1.0ps   1.0ps   1.0ps   50.0ps)
+V1                2         0  PWL(0ps 0mv 10ps 2.5mv)
+
+*** jsim input file ***
+.tran 0.1PS 400PS 10PS 0.1PS
+.file OUTJOINUS.DAT
+.print devv XI2_B1   *Input pulse
+.print devv XI2_B6   *Q0_pulse
+.print devv XI2_B7   *Q1_pulse
+
+*.print devv V1		 *Input signal
+*.print devv RQ0		 *Q0 OUT
+*.print devv RQ1	     *Q1 OUT
+
+***I_V characteristic example 
+*.model jmitll jj(rtype=1, vg=2.8mV, cap=0.07pF, r0=160ohm, rn=16ohm, icrit=0.1mA)
+*B01        1        2          jmitll     area=2
+*LP01       2        4          0.05p    
+*RB01       1        3          4.85     
+*LPR01      3        4          0.2p
+*Rnonoise    4        0          1ohm
+*I0         0        1   	   PWL(0ps 0mA 100ps 1mA)
+*.tran 0.2ps 150PS 1PS 0.1PS
+*.FILE OUT.DAT
+*.PRINT DEVI Rnonoise
+*.PRINT nodev 1 4

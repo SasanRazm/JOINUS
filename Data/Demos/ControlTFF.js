@@ -1,17 +1,10 @@
 **** **** **** **** **** **** **** **** **** **** **** 
-*JSIM control file for CADENCE by kameda@cq.jp.nec.com
+*ControlTFF.js
 **** **** **** **** **** **** **** **** **** **** ****
 
 *JSIM model
 .model jjmod jj(Rtype=1, Vg=2.8mV, Cap=0.218pF, R0=200ohm, Rn=17ohm, Icrit=0.1mA)
 
-*** netlist file ***
-**** **** **** **** **** **** **** ****+
-*** Lib : sasan
-*** Cell: SLTFFTest
-*** View: schematic
-*** Aug 15 03:47:27 2018
-**** **** **** **** **** **** **** ****
 
 *** jtl
 .subckt jtl          1          2         3

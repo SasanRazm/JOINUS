@@ -1,17 +1,10 @@
 **** **** **** **** **** **** **** **** **** **** **** 
-*JSIM control file for CADENCE by kameda@cq.jp.nec.com
+*CounterSpeed.js
 **** **** **** **** **** **** **** **** **** **** ****
 
 *JSIM model
 .model jjmod jj(Rtype=1, Vg=2.8mV, Cap=0.218pF, R0=200ohm, Rn=17ohm, Icrit=0.1mA)
 
-*** netlist file ***
-**** **** **** **** **** **** **** ****+
-*** Lib : sasan
-*** Cell: SLTFFTest
-*** View: schematic
-*** Aug 15 03:47:27 2018
-**** **** **** **** **** **** **** ****
 
 *** jtl
 .subckt jtl          1          2         3
@@ -124,7 +117,7 @@ V1                37         0  PWL(0ps 0mv 10ps 2.5mv)
 *** jsim input file ***
 .tran 0.5PS 5nS 10PS 0.1PS
 .file OUTCNT.DAT
-.print Devv XI1_B2
-.print Devv XI2_B1
-.print Devv XI3_B1
-.print Devv XI11_B1
+.print Devv XI1_B2  *Input CLK
+.print Devv XI2_B1  *OUT0
+.print Devv XI3_B1  *OUT1
+.print Devv XI11_B1  *OUT2

@@ -14,6 +14,7 @@ class Jsimsyntax : public QSyntaxHighlighter
   //  Q_OBJECT
 public:
     Jsimsyntax(QTextDocument *parent = 0);
+    QStringList convertToJSIM(QStringList netlistCommands);
 
 protected:
     void highlightBlock(const QString &text) Q_DECL_OVERRIDE;
@@ -25,8 +26,8 @@ private:
         QRegularExpression pattern;
         QTextCharFormat format;
     };
-    QVector<HighlightingRule> highlightingRules;
 
+    QVector<HighlightingRule> highlightingRules;
     QRegularExpression subcktStartExpression;
     QRegularExpression subcktEndExpression;
 

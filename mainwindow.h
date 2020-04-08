@@ -7,11 +7,17 @@
 #include <ActiveQt>
 #endif
 #include "dialogplot.h"
+#include "setparamsdialog.h"
 #include "autooptim.h"
 #include "jsimsyntax.h"
+#include "joinuscapture.h"
+#include "inductexgui.h"
+
 
 //QT_BEGIN_NAMESPACE
+//class QScrollArea;
 //class QTextEdit;
+//class QScrollBar;
 //QT_END_NAMESPACE
 
 struct FileDataString
@@ -63,6 +69,7 @@ public:
 
 private slots:
     void on_StartPushButton_clicked();
+    void firstRun_Init();
     void on_actionAbout_triggered();
     void on_NetlistToolButton_clicked();
     void plotNetlist();
@@ -95,19 +102,28 @@ private slots:
     void on_action_WSIM_triggered();
     void on_actionSQUID_MAP_triggered();
     void on_actionMAR_GINOPT_triggered();
-
     void on_actionJSIM_manual_triggered();
-
     void on_actionJ_oSIM_manual_triggered();
-
     void on_ClearTerminalpushButton_clicked();
+    void on_StopPushButton_clicked();
+    void on_actionQuit_triggered();
+    void on_actionSet_Advanced_values_triggered();
+    void on_convertPushButton_clicked();
+    void on_actionAbout_Qt_triggered();
+    void on_actionSchamatic_Capture_triggered();
+    void on_actionSet_Workspace_triggered();
+
+    void on_actionInductex_triggered();
 
 private:
     Ui::MainWindow *ui;
     DialogPlot *dialogPlot;
-    //PlotWindow *plotWindow;
+    SetParamsDialog *setparamdialog;
+    JOINUSCapture *joinuscapture;
     AutoOptim *autooptim;
     Jsimsyntax *m_jsimsyntax;
+    InductexGUI *inductex;
+    QTimer* myTimer;
 };
 
 #endif // MAINWINDOW_H

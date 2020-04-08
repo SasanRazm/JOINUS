@@ -26,8 +26,15 @@ AutoOptim::AutoOptim(QWidget *parent) :
     this->setPalette(pal);
     //Finished setting background
 
+    //Set the image for start
+    QPixmap pix;
+    if (pix.load(":/image/Image/Help/Margin.png")){
+        //pix = pix.scaled(ui->label_Picture->size(),Qt::KeepAspectRatio);
+        ui->label_Picture->setPixmap(pix);
+    }
 
-    QString OptimFile=rootPath+"/OptimConfigFile.tmp";
+
+    QString OptimFile=documentFolderPath+"/OptimConfigFile.tmp";
     QFile optimFile(OptimFile);
     if (optimFile.exists())
     {
@@ -66,7 +73,7 @@ AutoOptim::AutoOptim(QWidget *parent) :
 
 void AutoOptim::on_buttonBox_accepted()
 {
-    QString OptimFile=rootPath+"/OptimConfigFile.tmp";
+    QString OptimFile=documentFolderPath+"/OptimConfigFile.tmp";
     QFile file(OptimFile);
 
     if (!file.open(QFile::WriteOnly | QFile::Text)){
@@ -76,6 +83,7 @@ void AutoOptim::on_buttonBox_accepted()
         QTextStream Optimstream(&file);
 
         QString SimMode=ui->radioButtonMargin->isChecked()?"MS":ui->radioButtonOptimMC->isChecked()?"MCO":"YA";
+
         Optimstream <<"Mode::"<<SimMode<<'\n';
 
         Optimstream <<"NF::"<<ui->lineEditNetlist->text()<<'\n';
@@ -202,7 +210,7 @@ void AutoOptim::MarginSimulation(QStringList OptimParams)
     struct processedNL aa= simclass->processNetlist(TempFileName);
     //Now aa.commands contain the netlist values.
     OutputFileName = aa.OutFileName;
-    QString DataFile = rootPath+OutputFileName;
+    QString DataFile = documentFolderPath+OutputFileName;
     columNum = aa.columNumb;
     timestep = aa.tstep;
     double CritCurrent=values->convertToValues(aa.Icrit); //To calculate shunt value!
@@ -400,8 +408,8 @@ void AutoOptim::MarginSimulation(QStringList OptimParams)
                 if (filestat.open(QFile::WriteOnly | QFile::Text))
                 {
                     QTextStream stream2(&filestat);
-                    stream << "Error"<<'\n';
-                    stream << "Nominal values do not give the same value as !" << '\n';
+                    stream2 << "Error"<<'\n';
+                    stream2 << "Nominal values do not give the same value as output definition!" << '\n';
                     stream2.flush();
                 }
                 filestat.close();
@@ -410,6 +418,163 @@ void AutoOptim::MarginSimulation(QStringList OptimParams)
     }
     fileout.close();
 }
+
+
+void AutoOptim::Yield_Analysis(QStringList OptimParams, double standardDevVal)
+{
+    uint starttime = QDateTime::currentDateTime().toTime_t();
+
+    QString netlistfile=OptimParams.at(1);
+    int iterNum=OptimParams.at(7).toInt();
+
+    temperature=OptimParams.at(8).toDouble();
+    QString preTempFileName=OptimParams.at(4)+"/YieldClac";
+
+    struct SimParams simParams;
+    simParams.pointNum="0";
+    simulateall *simclass=new simulateall;
+    CalcVals *values= new CalcVals;
+
+
+    //Make the netlist with noise and temperature
+    QString mnnerr=simclass->make_new_netlist(OptimParams.at(12).toInt(),netlistfile,simParams,0,0);
+
+    //get params from netlist
+    struct processedNL aa= simclass->processNetlist(TempFileName);
+
+    //Now aa.commands contain the netlist values.
+    OutputFileName = aa.OutFileName;
+    QString DataFile = documentFolderPath+OutputFileName;
+    columNum = aa.columNumb;
+    timestep = aa.tstep;
+    double CritCurrent=values->convertToValues(aa.Icrit); //To calculate shunt value!
+
+
+    //Read Parameters from the Param file
+    QVector<QVector<QString>> paramData=paramDataArrange(OptimParams.at(3));
+
+    int totalparam = paramData.length();
+
+
+    //Create the netlist with Nominal parameter svalues for simulation
+    QStringList paramLisnames;
+    QStringList temParamListvals;
+    titleVals.clear();
+
+    for (int paramcntr=0;paramcntr<totalparam;paramcntr++)
+    {
+        paramLisnames.append(paramData.at(paramcntr).at(0));
+        temParamListvals.append(paramData.at(paramcntr).at(1));
+        if (paramData.at(paramcntr).at(3)!="4" && paramData.at(paramcntr).at(3)!="0")
+            titleVals.append(paramData.at(paramcntr).at(2));
+
+    }
+
+    //Adding effect of Shunt Resistors to Junctions
+    QStringList paramListvals=addShuntParam(temParamListvals, paramLisnames, CritCurrent,OptimParams.at(11).toDouble());
+
+
+    QVector<QStringList> paramList;
+
+    for (int paramcntr=0;paramcntr<totalparam;paramcntr++)
+    {
+        //MakeRandNum(double meanVal, double sigmaVal, int datacount);
+        QVector<double> paramValDouble=MakeRandNum(paramListvals.at(paramcntr).toDouble(),standardDevVal,iterNum);
+        temParamListvals.clear();
+        for (int itercntr=0;itercntr<iterNum;itercntr++)
+        {
+            temParamListvals.append(QString::number(paramValDouble.at(itercntr)));
+        }
+        //puttin the values of each parameter in a list and
+        paramList.append(temParamListvals);
+
+    }
+
+    //Testing if primary netlist works
+
+    QString tempNetlistNominal=OptimParams.at(4)+"/YANominal.cir";
+    placeParams(aa.Commands,tempNetlistNominal,paramListvals,paramLisnames);
+    struct ConsoleOutputs bb = simclass->simulatenetlist(tempNetlistNominal,0);
+
+    //Define the parameters for file storage
+    QString YAOUT = OptimParams.at(5)+"/YAOUTPUT.DAT";
+    QString YASTAT = OptimParams.at(5)+"/YASTATUES.DAT";
+    QFile fileout(YAOUT);
+
+
+    if (!fileout.open(QFile::Append | QFile::Text))
+        return;
+
+    else{
+        QTextStream stream(&fileout);
+
+        if (CompareOutputs(DataFile,OptimParams.at(2)))
+        {
+            int YAcounter=0;
+
+            //making the netlists for each iteration
+            for (int itercntr=0;itercntr<iterNum;itercntr++)
+            {
+                tempNetlistNominal=preTempFileName+QString::number(itercntr)+".cir";
+                paramListvals.clear();
+
+                for (int paramcntr=0;paramcntr<totalparam;paramcntr++)
+                {
+                    paramListvals.append(paramList.at(paramcntr).at(itercntr));
+                }
+                placeParams(aa.Commands,tempNetlistNominal,paramListvals,paramLisnames);
+            }
+
+            //Simulating all the generated netlists
+            for (int itercntr=0;itercntr<iterNum;itercntr++)
+            {
+
+                tempNetlistNominal=preTempFileName+QString::number(itercntr)+".cir";
+                struct ConsoleOutputs bbtemp = simclass->simulatenetlist(tempNetlistNominal,0);
+                if (CompareOutputs(DataFile,OptimParams.at(2)))
+                    YAcounter++;
+            }
+
+            // Calculating the yield value and write it to the file
+            stream << QString::number(standardDevVal) << " " << QString::number(static_cast<double>(100*YAcounter/iterNum)) << " " << '\n';
+
+
+            //Write Success in the STAT file with time it took to compelete.
+            uint endTime = QDateTime::currentDateTime().toTime_t();
+
+            QFile filestat(YASTAT);
+            if (filestat.open(QFile::Append | QFile::Text))
+                {
+                   QTextStream stream2(&filestat);
+                   stream2 << "Success!"<<'\n';
+                   stream2 << "Standard deviation value : "<<QString::number(standardDevVal)<<'\n';
+                   stream2 << "Margin calculation run for : " << QString::number(endTime-starttime) << " seconds" << '\n';
+                   stream2.flush();
+                }
+            filestat.close();
+
+
+
+
+        }
+        else
+        {
+                QFile filestat(YASTAT);
+                if (filestat.open(QFile::WriteOnly | QFile::Text))
+                {
+                    QTextStream stream2(&filestat);
+                    stream2 << "Error!"<<'\n';
+                    stream2 << "Nominal values do not give the same value as output definition!" << '\n';
+                    stream2.flush();
+                }
+                filestat.close();
+        }
+        stream.flush();
+
+        }
+    fileout.close();
+}
+
 
 QVector<double> AutoOptim::MakeRandNum(double meanVal, double sigmaVal, int datacount)
 {
@@ -577,7 +742,7 @@ QVector<QVector<QString>> AutoOptim::paramDataArrange(QString paramfile)
     //1 means the parameter changes but has no distribution {@AA@ 2.16 B1 1}  @AA@ will be replaced with the range [2.16*0.1 ... 2.16*3]
     //2 means it has the dist determined by the Parameter variation {@AA@ 2.16 B1 2}  @AA@ will be replaced with the range [2.16(%PVP)*0.1 ... 2.16(%PVP)*3]
     //3 means it has the dist determined by the Junction spread {@AA@ 2.16 B1 3}  @AA@ will be replaced with the range [2.16(%JCCS)*0.1 ... 2.16(%JCCS)*3]
-    //4 means value of parameter is dependent on another parameter {@AA@ @BB@ RS1 4}  Value for RS1 is determined from [@BB@ 2.16 B1 3] based on RnIc
+    //4 means value of parameter is dependent on another parameter {@AA@ @BB@ RS1 4}  Value for RS1 is determined from [@BB@ 2.16 B1 3]  d on RnIc
 
     QVector<QVector<QString>> paramData; //Parametric data in a table for easier calculations
     QVector<QString> tempParamData;
@@ -749,70 +914,6 @@ void AutoOptim::onResetClicked()
 
 }
 
-void AutoOptim::Yield_Analysis(QStringList OptimParams)
-{
-    uint starttime = QDateTime::currentDateTime().toTime_t();
-
-    QString netlistfile=OptimParams.at(1);
-    temperature=OptimParams.at(8).toDouble();
-    TempFileName=OptimParams.at(4)+"/YieldClac.cir";
-    struct SimParams simParams;
-    simParams.pointNum="0";
-    simulateall *simclass=new simulateall;
-    CalcVals *values= new CalcVals;
-
-
-    //Make the netlist with noise and temperature
-    QString mnnerr=simclass->make_new_netlist(OptimParams.at(12).toInt(),netlistfile,simParams,0,0);
-
-    //get params from netlist
-    struct processedNL aa= simclass->processNetlist(TempFileName);
-    //Now aa.commands contain the netlist values.
-    OutputFileName = aa.OutFileName;
-    QString DataFile = rootPath+OutputFileName;
-    columNum = aa.columNumb;
-    timestep = aa.tstep;
-    double CritCurrent=values->convertToValues(aa.Icrit); //To calculate shunt value!
-
-
-    //Read Parameters from the Param file
-    QVector<QVector<QString>> paramData=paramDataArrange(OptimParams.at(3));
-
-    int totalparam = paramData.length();
-
-
-    //Create the netlist with Nominal parameter svalues for simulation
-    QStringList paramLisnames;
-    QStringList temParamListvals;
-    titleVals.clear();
-
-    for (int paramcntr=0;paramcntr<totalparam;paramcntr++)
-    {
-        paramLisnames.append(paramData.at(paramcntr).at(0));
-        temParamListvals.append(paramData.at(paramcntr).at(1));
-        if (paramData.at(paramcntr).at(3)!="4" && paramData.at(paramcntr).at(3)!="0")
-            titleVals.append(paramData.at(paramcntr).at(2));
-
-
-    }
-
-    //Adding effect of Shunt Resistors to Junctions
-    QStringList paramListvals=addShuntParam(temParamListvals, paramLisnames, CritCurrent,OptimParams.at(11).toDouble());
-
-
-
-    QString tempNetlistNominal=OptimParams.at(4)+"/YANominal.cir";
-    placeParams(aa.Commands,tempNetlistNominal,paramListvals,paramLisnames);
-
-    struct ConsoleOutputs bb = simclass->simulatenetlist(tempNetlistNominal,0);
-
-    QString MSOUT = OptimParams.at(5)+"/YAOUTPUT.DAT";
-    QString MSSTAT = OptimParams.at(5)+"/YASTATUES.DAT";
-    QFile fileout(MSOUT);
-
-
-}
-
 void AutoOptim::on_buttonBox_rejected()
 {
 
@@ -871,7 +972,7 @@ void AutoOptim::on_buttonBox_helpRequested()
 
 void AutoOptim::on_TestButton_clicked()
 {
-    QString OptimFile=rootPath+"/OptimConfigFile.tmp";
+    QString OptimFile=documentFolderPath+"/OptimConfigFile.tmp";
     on_buttonBox_accepted();
     QStringList OptimParams=ReadOptimFile(OptimFile);
     QString netlistfile=OptimParams.at(1);
@@ -889,7 +990,7 @@ void AutoOptim::on_TestButton_clicked()
     //get params from netlist
     struct processedNL aa= simclass->processNetlist(TempFileName);
     OutputFileName = aa.OutFileName;
-    QString DataFile = rootPath+OutputFileName;
+    QString DataFile = documentFolderPath+OutputFileName;
     columNum = aa.columNumb;
     timestep = aa.tstep;
     double CritCurrent=values->convertToValues(aa.Icrit);
@@ -935,7 +1036,7 @@ void AutoOptim::on_radioButtonMargin_clicked()
                          "step to the next parameter value is below    \n"
                          "the specified maximum margin uncertainty.    ");
    QPixmap pix;
-   if (pix.load(":/Help/Help/Margin.png")){
+   if (pix.load(":/image/Image/Help/Margin.png")){
        pix = pix.scaled(ui->label_Picture->size(),Qt::KeepAspectRatio);
        ui->label_Picture->setPixmap(pix);
    }
@@ -953,7 +1054,7 @@ void AutoOptim::on_radioButtonOptimMC_clicked()
                             "routines continues until the best margins    \n"
                             "are reached. ");
     QPixmap pix;
-    if (pix.load(":/Help/Help/Optimizer.PNG")){
+    if (pix.load(":/image/Image/Help/Optimizer.PNG")){
         pix = pix.scaled(ui->label_Picture->size(),Qt::KeepAspectRatio);
         ui->label_Picture->setPixmap(pix);
     }
@@ -978,12 +1079,11 @@ void AutoOptim::on_radioButtonYield_clicked()
                             "   plotted and can be saved."
                             );
     QPixmap pix;
-    if (pix.load(":/Help/Help/Yield.png")){
+    if (pix.load(":/image/Image/Help/Yield.png")){
         pix = pix.scaled(ui->label_Picture->size(),Qt::KeepAspectRatio);
         ui->label_Picture->setPixmap(pix);
     }
 }
-
 
 AutoOptim::~AutoOptim()
 {

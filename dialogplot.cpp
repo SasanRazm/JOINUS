@@ -18,15 +18,19 @@ DialogPlot::DialogPlot(QWidget *parent) :
         this->setPalette(pal);
         //Finished setting background
 
-
-        plotWindow = new PlotWindow(this);
+//Old method of calling plotter window
+        //plotWindow = new PlotWindow(this);
         QScreen *screen = QGuiApplication::primaryScreen();
         QRect  screenGeometry = screen->geometry();
-        this->setFixedWidth(screenGeometry.width()*5/6);
-        this->setFixedHeight(screenGeometry.height()*4/5);
-        plotWindow->setFixedWidth(screenGeometry.width()*5/6);
-        plotWindow->setFixedHeight(screenGeometry.height()*4/5);
-        plotWindow->show();
+        //this->setFixedWidth(screenGeometry.width()*5/6);
+        //this->setFixedHeight(screenGeometry.height()*4/5);
+        //plotWindow->setFixedWidth(screenGeometry.width()*5/6);
+        //plotWindow->setFixedHeight(screenGeometry.height()*4/5);
+        //plotWindow->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+        //plotWindow->show();
+
+        this->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+        this->setGeometry(20,50,screenGeometry.width()*5/6,screenGeometry.height()*4/5);
 
 
 }
@@ -188,6 +192,5 @@ DialogPlot::DialogPlot(QWidget *parent) :
 DialogPlot::~DialogPlot()
 {
     RawData.clear();
-    delete plotWindow;
     delete ui;
 }

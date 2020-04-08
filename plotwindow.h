@@ -53,6 +53,10 @@ private slots:
 
     void on_pushButton_3_clicked();
 
+    void on_toolButtonDecrease_clicked();
+
+    void on_toolButtonIncrease_clicked();
+
 private:
     Ui::PlotWindow *ui;
 };

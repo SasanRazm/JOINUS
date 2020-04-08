@@ -486,666 +486,74 @@
    <enum>QTabWidget::Rounded</enum>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_14">
+   <layout class="QHBoxLayout" name="horizontalLayout_10">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_13">
+     <layout class="QVBoxLayout" name="verticalLayout_5">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_9">
+       <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QLabel" name="label">
-              <property name="font">
-               <font>
-                <family>Arial</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Josephson digital simulator :</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_15">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Preferred</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QComboBox" name="SimComboBox">
-              <property name="font">
-               <font>
-                <family>Arial</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="statusTip">
-               <string>Choose Simulator Executable File</string>
-              </property>
-              <item>
-               <property name="text">
-                <string>JSIM</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>JoSIM (V2.3)</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Preferred</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QLabel" name="label_2">
-              <property name="font">
-               <font>
-                <family>Arial</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Netlist file :</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="NetlistLineEdit">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="statusTip">
-               <string>Choose Netlist File</string>
-              </property>
-              <property name="text">
-               <string>~/JsimNetLists/JJIV.inp</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="NetlistToolButton">
-              <property name="toolTip">
-               <string>Choose Netlist File</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLabel" name="label_3">
-              <property name="font">
-               <font>
-                <family>Arial</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Type of simulation :</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Minimum</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QComboBox" name="TypeComboBox">
-              <property name="font">
-               <font>
-                <family>Arial</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="statusTip">
-               <string>Choose Simulatoin Type From List</string>
-              </property>
-              <property name="currentIndex">
-               <number>0</number>
-              </property>
-              <property name="maxVisibleItems">
-               <number>10</number>
-              </property>
-              <item>
-               <property name="text">
-                <string>Time domain</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Parametric analysis</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Temperature analysis</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Bit Error Rate (BER)</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Frequency response</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>I-V characteristics (accurate)</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>I-V characteristics (fast)</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_16">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Minimum</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="NoiseCheckBox">
-              <property name="font">
-               <font>
-                <family>Arial</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="statusTip">
-               <string>Adds Noise to the Resistors in the Netlist depending on the temperature.</string>
-              </property>
-              <property name="text">
-               <string>Include noise</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QFrame" name="frame">
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_8">
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_6">
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout">
-                 <item>
-                  <widget class="QLabel" name="label_11">
-                   <property name="font">
-                    <font>
-                     <family>Arial</family>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Parameter name</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="ParamLineEdit">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>8</pointsize>
-                    </font>
-                   </property>
-                   <property name="toolTip">
-                    <string>Set the name of the parameter in top cell you want to change.</string>
-                   </property>
-                   <property name="statusTip">
-                    <string>Parameter Name</string>
-                   </property>
-                   <property name="text">
-                    <string>I0</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_12">
-                   <property name="font">
-                    <font>
-                     <family>Arial</family>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="text">
-                    <string>Value [dimension]</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="SubParamLineEdit">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>8</pointsize>
-                    </font>
-                   </property>
-                   <property name="toolTip">
-                    <string/>
-                   </property>
-                   <property name="statusTip">
-                    <string>Sub Parameter Value. (Value of the current, Frequency, ...)</string>
-                   </property>
-                   <property name="text">
-                    <string>5mA</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <spacer name="horizontalSpacer_4">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeType">
-                  <enum>QSizePolicy::Minimum</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_2">
-                 <item>
-                  <widget class="QLabel" name="label_9">
-                   <property name="font">
-                    <font>
-                     <family>Arial</family>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Min value</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="MinValLineEdit">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="toolTip">
-                    <string>Start value of simulation</string>
-                   </property>
-                   <property name="statusTip">
-                    <string>Minimum Value of the Parameter. (Don't forget to add the correct dimentions!)</string>
-                   </property>
-                   <property name="text">
-                    <string>-2m</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_10">
-                   <property name="font">
-                    <font>
-                     <family>Arial</family>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Max value</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="MaxValLineEdit">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="toolTip">
-                    <string>End value of simulation</string>
-                   </property>
-                   <property name="statusTip">
-                    <string>Maximum Value of the Parameter. (Don't forget to add the correct dimentions!)</string>
-                   </property>
-                   <property name="text">
-                    <string>2m</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <spacer name="horizontalSpacer_5">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeType">
-                  <enum>QSizePolicy::Minimum</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_4">
-                 <item>
-                  <widget class="QLabel" name="label_7">
-                   <property name="font">
-                    <font>
-                     <family>Arial</family>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Number of steps</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="StepLineEdit">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="toolTip">
-                    <string>Step Number, bigger step would take more time!</string>
-                   </property>
-                   <property name="statusTip">
-                    <string>Number of the simulation steps.</string>
-                   </property>
-                   <property name="text">
-                    <string>40</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_8">
-                   <property name="font">
-                    <font>
-                     <family>Arial</family>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Temperature [K]</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="TempLineEdit">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="toolTip">
-                    <string>Circuit temperature. (should be under 9.1K)</string>
-                   </property>
-                   <property name="statusTip">
-                    <string>Simulation temperature in Kelvins.</string>
-                   </property>
-                   <property name="text">
-                    <string>4.2</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <item>
-             <widget class="QCheckBox" name="PlotCheckBox">
-              <property name="font">
-               <font>
-                <family>Arial</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="statusTip">
-               <string>If Checked, Generates Plot for the Chosen Simulation.</string>
-              </property>
-              <property name="text">
-               <string>Plot results</string>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="PlotComboBox">
-              <property name="font">
-               <font>
-                <family>Arial</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="statusTip">
-               <string>Choose Your Plotter from List.</string>
-              </property>
-              <item>
-               <property name="text">
-                <string>Built-in plotter</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>GNUplot</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>XMgrace</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
-             <widget class="QCheckBox" name="SaveCheckBox">
-              <property name="font">
-               <font>
-                <family>Arial</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Save simulation results</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="SaveLineEdit">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="statusTip">
-               <string>Path of the Folder to Save the Simulation Results</string>
-              </property>
-              <property name="text">
-               <string>~/Test/Data</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="SaveToolButton">
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_12">
-            <item>
-             <widget class="QPushButton" name="StartPushButton">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="font">
-               <font>
-                <family>Arial</family>
-                <pointsize>14</pointsize>
-               </font>
-              </property>
-              <property name="statusTip">
-               <string>Starting the Simulation</string>
-              </property>
-              <property name="text">
-               <string>&amp;Start</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QProgressBar" name="ProgressBar">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="toolTip">
-               <string>Shows the progress of the simulation</string>
-              </property>
-              <property name="statusTip">
-               <string>Progress of Your Simulation, Be Patient!</string>
-              </property>
-              <property name="value">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="Line" name="line">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+         <widget class="QLabel" name="label">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Josephson digital simulator :</string>
           </property>
          </widget>
         </item>
         <item>
-         <spacer name="verticalSpacer">
+         <spacer name="horizontalSpacer_15">
           <property name="orientation">
-           <enum>Qt::Vertical</enum>
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Preferred</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>20</width>
-            <height>40</height>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QComboBox" name="SimComboBox">
+          <property name="font">
+           <font>
+            <family>Tahoma</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="statusTip">
+           <string>Choose Simulator Executable File</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>JSIM</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>JoSIM (V2.3)</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Preferred</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
            </size>
           </property>
          </spacer>
@@ -1153,18 +561,657 @@
        </layout>
       </item>
       <item>
-       <widget class="Line" name="line_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Netlist file :</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="NetlistLineEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>Tahoma</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="statusTip">
+           <string>Choose Netlist File</string>
+          </property>
+          <property name="text">
+           <string>~/JsimNetLists/JJIV.inp</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="NetlistToolButton">
+          <property name="toolTip">
+           <string>Choose Netlist File</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Type of simulation :</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Minimum</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QComboBox" name="TypeComboBox">
+          <property name="font">
+           <font>
+            <family>Tahoma</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="statusTip">
+           <string>Choose Simulatoin Type From List</string>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <property name="maxVisibleItems">
+           <number>10</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>Time domain</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Parametric analysis</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Temperature analysis</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Bit Error Rate (BER)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Frequency response</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>I-V characteristics (accurate)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>I-V characteristics (fast)</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_16">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Minimum</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QCheckBox" name="NoiseCheckBox">
+            <property name="font">
+             <font>
+              <family>Arial</family>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="statusTip">
+             <string>Adds Noise to the Resistors in the Netlist depending on the temperature.</string>
+            </property>
+            <property name="text">
+             <string>Include noise</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="ASWcheckBox">
+            <property name="font">
+             <font>
+              <family>Arial</family>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Adaptive &amp;step width</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QFrame" name="frame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout">
+             <item>
+              <widget class="QLabel" name="label_11">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Arial</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Parameter name</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="ParamLineEdit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Tahoma</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Set the name of the parameter in top cell you want to change.</string>
+               </property>
+               <property name="statusTip">
+                <string>Parameter Name</string>
+               </property>
+               <property name="text">
+                <string>I0</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_12">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Arial</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::NoFrame</enum>
+               </property>
+               <property name="text">
+                <string>Value [dimension]</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="SubParamLineEdit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Tahoma</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string/>
+               </property>
+               <property name="statusTip">
+                <string>Sub Parameter Value. (Value of the current, Frequency, ...)</string>
+               </property>
+               <property name="text">
+                <string>5mA</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Minimum</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <widget class="QLabel" name="label_9">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Arial</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Min value</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="MinValLineEdit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Tahoma</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Start value of simulation</string>
+               </property>
+               <property name="statusTip">
+                <string>Minimum Value of the Parameter. (Don't forget to add the correct dimentions!)</string>
+               </property>
+               <property name="text">
+                <string>-2m</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_10">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Arial</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Max value</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="MaxValLineEdit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Tahoma</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>End value of simulation</string>
+               </property>
+               <property name="statusTip">
+                <string>Maximum Value of the Parameter. (Don't forget to add the correct dimentions!)</string>
+               </property>
+               <property name="text">
+                <string>2m</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Minimum</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QLabel" name="label_7">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Arial</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Number of steps</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="StepLineEdit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Tahoma</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Step Number, bigger step would take more time!</string>
+               </property>
+               <property name="statusTip">
+                <string>Number of the simulation steps.</string>
+               </property>
+               <property name="text">
+                <string>40</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_8">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Arial</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Temperature [K]</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="TempLineEdit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Tahoma</family>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Circuit temperature. (should be under 9.1K)</string>
+               </property>
+               <property name="statusTip">
+                <string>Simulation temperature in Kelvins.</string>
+               </property>
+               <property name="text">
+                <string>4.2</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QPlainTextEdit" name="NetlistPlainTextEdit">
+         <widget class="QCheckBox" name="PlotCheckBox">
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="statusTip">
+           <string>If Checked, Generates Plot for the Chosen Simulation.</string>
+          </property>
+          <property name="text">
+           <string>Plot results</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="PlotComboBox">
+          <property name="font">
+           <font>
+            <family>Tahoma</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="statusTip">
+           <string>Choose Your Plotter from List.</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Built-in plotter</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>GNUplot</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>XMgrace</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QCheckBox" name="SaveCheckBox">
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Save simulation results</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="SaveLineEdit">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>Tahoma</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="statusTip">
+           <string>Path of the Folder to Save the Simulation Results</string>
+          </property>
+          <property name="text">
+           <string>~/Test/Data</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="SaveToolButton">
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_12">
+        <item>
+         <widget class="QPushButton" name="StartPushButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <italic>false</italic>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="statusTip">
+           <string>Starting the Simulation</string>
+          </property>
+          <property name="text">
+           <string>&amp;Start</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+          <property name="default">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="ProgressBar">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1172,8 +1219,144 @@
           <property name="toolTip">
            <string>Shows the progress of the simulation</string>
           </property>
-          <property name="plainText">
-           <string>*JSIM model
+          <property name="statusTip">
+           <string>Progress of Your Simulation, Be Patient!</string>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <item>
+         <widget class="QPushButton" name="StopPushButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <italic>false</italic>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="statusTip">
+           <string>Starting the Simulation</string>
+          </property>
+          <property name="text">
+           <string>Stop</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="InfoLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Panel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="lineWidth">
+           <number>1</number>
+          </property>
+          <property name="text">
+           <string>Temperature Value : </string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QFrame" name="frame_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_11">
+         <item>
+          <widget class="QLabel" name="lblNetlistPic">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::Box</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_2">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_6">
+      <item>
+       <widget class="QPlainTextEdit" name="NetlistPlainTextEdit">
+        <property name="sizeIncrement">
+         <size>
+          <width>1</width>
+          <height>1</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Shows the progress of the simulation</string>
+        </property>
+        <property name="sizeAdjustPolicy">
+         <enum>QAbstractScrollArea::AdjustIgnored</enum>
+        </property>
+        <property name="plainText">
+         <string>*JSIM model
 .model jjmod jj(Rtype=1, Vg=2.8mV, Cap=0.218pF, R0=200ohm, Rn=17ohm, Icrit=0.1mA)
 
 *** netlist file ***
@@ -1199,103 +1382,150 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
 .PRINT DEVI Rsource
 .PRINT NODEV 1 2
 *** jsim input file ***</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <spacer name="horizontalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ClearTerminalpushButton">
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Clears the terminal field.</string>
+          </property>
+          <property name="text">
+           <string>Clear Terminal</string>
           </property>
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7">
-          <item>
-           <spacer name="horizontalSpacer_6">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="ClearTerminalpushButton">
-            <property name="font">
-             <font>
-              <family>Arial</family>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Clear Terminal</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="TemplateNetListPushBottun">
-            <property name="font">
-             <font>
-              <family>Arial</family>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>Opens the help file for JSIIM and Auto5.</string>
-            </property>
-            <property name="text">
-             <string>Syntax Help</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="SaveNetListPushBottun">
-            <property name="font">
-             <font>
-              <family>Arial</family>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>Saves the changes to the netlist.</string>
-            </property>
-            <property name="text">
-             <string>Save Changes</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QPlainTextEdit" name="TerminalPlainTextEdit">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
+         <widget class="QPushButton" name="convertPushButton">
           <property name="font">
            <font>
             <family>Arial</family>
-            <pointsize>14</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
-          <property name="cursor" stdset="0">
-           <cursorShape>IBeamCursor</cursorShape>
+          <property name="toolTip">
+           <string>Converts the netlist to JSIM friendly netlist format.</string>
           </property>
-          <property name="focusPolicy">
-           <enum>Qt::NoFocus</enum>
+          <property name="text">
+           <string>Convert to JSIM</string>
           </property>
-          <property name="contextMenuPolicy">
-           <enum>Qt::ActionsContextMenu</enum>
+          <property name="autoRepeat">
+           <bool>false</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+          <property name="default">
+           <bool>false</bool>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="TemplateNetListPushBottun">
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>12</pointsize>
+           </font>
           </property>
           <property name="toolTip">
-           <string>Terminal</string>
+           <string>Opens the help file for JSIIM and Auto5.</string>
           </property>
-          <property name="statusTip">
-           <string>Terminal outputs are displayed here.</string>
+          <property name="text">
+           <string>Syntax Help</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="SaveNetListPushBottun">
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Saves the changes to the netlist.</string>
+          </property>
+          <property name="text">
+           <string>Save Changes</string>
           </property>
          </widget>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QPlainTextEdit" name="TerminalPlainTextEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="sizeIncrement">
+         <size>
+          <width>1</width>
+          <height>1</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="cursor" stdset="0">
+         <cursorShape>IBeamCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::ActionsContextMenu</enum>
+        </property>
+        <property name="toolTip">
+         <string>Terminal</string>
+        </property>
+        <property name="statusTip">
+         <string>Terminal outputs are displayed here.</string>
+        </property>
+        <property name="sizeAdjustPolicy">
+         <enum>QAbstractScrollArea::AdjustIgnored</enum>
+        </property>
+        <property name="lineWrapMode">
+         <enum>QPlainTextEdit::NoWrap</enum>
+        </property>
+        <property name="plainText">
+         <string>&gt;&gt;</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -1330,6 +1560,8 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
     <addaction name="separator"/>
     <addaction name="actionEdit_Simulator_Engines"/>
     <addaction name="actionEdit_Plotter_Engines"/>
+    <addaction name="separator"/>
+    <addaction name="actionSet_Workspace"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -1337,7 +1569,6 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
     </property>
     <addaction name="action_Open_Console"/>
     <addaction name="actionSet_Temperature"/>
-    <addaction name="actionIV_Curve_Statistical_Noise"/>
     <addaction name="separator"/>
     <addaction name="actionRun_Custom_Plotter"/>
     <addaction name="actionAUTO5"/>
@@ -1357,12 +1588,32 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
     <addaction name="actionJSIM_manual"/>
     <addaction name="actionJ_oSIM_manual"/>
     <addaction name="separator"/>
-    <addaction name="actionMore_Info"/>
     <addaction name="action_Wizard"/>
+    <addaction name="actionMore_Info"/>
+    <addaction name="actionAbout_Qt"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuLayout">
+    <property name="title">
+     <string>EDA</string>
+    </property>
+    <addaction name="actionLayout_Editor"/>
+    <addaction name="actionSchamatic_Capture"/>
+    <addaction name="separator"/>
+    <addaction name="actionTCAD"/>
+    <addaction name="actionInductex"/>
+    <addaction name="separator"/>
+    <addaction name="actionLVS_SPIRA"/>
+    <addaction name="actionAnalogue_verification"/>
+    <addaction name="actionDigital_verification"/>
+    <addaction name="separator"/>
+    <addaction name="actionVerilog"/>
+    <addaction name="actionMicrowave_calculator"/>
    </widget>
    <addaction name="FileMenu"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTools"/>
+   <addaction name="menuLayout"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
@@ -1516,6 +1767,9 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
    </property>
   </action>
   <action name="actionSet_Advanced_values">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Advanced settings...</string>
    </property>
@@ -1583,6 +1837,93 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
     <string>&amp;JSIM manual</string>
    </property>
   </action>
+  <action name="actionLayout_Editor">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Layout Editor</string>
+   </property>
+  </action>
+  <action name="actionInductex">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Inductex</string>
+   </property>
+  </action>
+  <action name="actionXIC">
+   <property name="text">
+    <string>XIC</string>
+   </property>
+  </action>
+  <action name="actionSchamatic_Capture">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Schamatic Capture</string>
+   </property>
+  </action>
+  <action name="actionMicrowave_calculator">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Microwave calculator</string>
+   </property>
+  </action>
+  <action name="actionVerilog">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Verilog</string>
+   </property>
+  </action>
+  <action name="actionTCAD">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>FLOOSS TCAD</string>
+   </property>
+  </action>
+  <action name="actionLVS_SPIRA">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>LVS (SPIRA)</string>
+   </property>
+  </action>
+  <action name="actionAnalogue_verification">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Analogue verification</string>
+   </property>
+  </action>
+  <action name="actionDigital_verification">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Digital verification</string>
+   </property>
+  </action>
+  <action name="actionAbout_Qt">
+   <property name="text">
+    <string>About Qt</string>
+   </property>
+  </action>
+  <action name="actionSet_Workspace">
+   <property name="text">
+    <string>Set &amp;Workspace</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
@@ -1617,8 +1958,8 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>614</x>
-     <y>341</y>
+     <x>663</x>
+     <y>381</y>
     </hint>
    </hints>
   </connection>

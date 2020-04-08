@@ -16,7 +16,7 @@ public:
     explicit AutoOptim(QWidget *parent = nullptr);
     QStringList ReadOptimFile(QString filename);
     void MarginSimulation(QStringList OptimParams);
-    void Yield_Analysis(QStringList OptimParams);
+    void Yield_Analysis(QStringList OptimParams, double standardDevVal);
     QVector<QVector<QString>> paramDataArrange(QString paramfile);
     void placeParams(QStringList commands,QString tempNetlistFile, QStringList paramListvals,QStringList paramLisnames);
     void newParamFileGen(QString oldParamFile, QString newParamFile,QStringList newParamVals);

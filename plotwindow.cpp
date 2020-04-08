@@ -22,6 +22,9 @@ PlotWindow::PlotWindow(QWidget *parent) :
 
     ui->customPlot->plotLayout()->insertRow(0);
 
+//    QScreen *screen = QGuiApplication::primaryScreen();
+//    QRect  screenGeometry = screen->geometry();
+
 
 
     switch (Simindex)
@@ -48,6 +51,9 @@ PlotWindow::PlotWindow(QWidget *parent) :
         break;
     case 10:
         title = new QCPTextElement(ui->customPlot, "Margin Calculation", QFont("sans", 14, QFont::Bold));
+        break;
+    case 11:
+        title = new QCPTextElement(ui->customPlot, "Yield Analyzer", QFont("sans", 14, QFont::Bold));
         break;
     default:
         title = new QCPTextElement(ui->customPlot, "Plotter", QFont("sans", 14, QFont::Bold));
@@ -82,7 +88,12 @@ PlotWindow::PlotWindow(QWidget *parent) :
     ui->customPlot->xAxis->setLabel("Parameters");
     ui->customPlot->yAxis->setLabel("Margin Percentage");
 
-    } else{
+    } else if (Simindex==11){
+
+        ui->customPlot->xAxis->setLabel("Standard Deviation (%)");
+        ui->customPlot->yAxis->setLabel("Yield (%)");
+
+    } else {
 
         ui->customPlot->xAxis->setLabel("Time (ns)");
         ui->customPlot->yAxis->setLabel("Voltage (mV)");
@@ -134,20 +145,33 @@ PlotWindow::PlotWindow(QWidget *parent) :
     else
         ui->comboBox->setCurrentIndex(4);
 
-    if (Simindex==1 || Simindex==4 || Simindex==5)
+    if (Simindex==1 || Simindex==4 || Simindex==5 || Simindex==11)
         ui->checkBox->setChecked(true);
 
     //show the slider bar for sliding between parameters
     if ((Simindex==2) || (Simindex==3))
+    {
         ui->paramSlide->show();
-    else ui->paramSlide->hide();
+        ui->labelMin->show();
+        ui->labelMax->show();
+        ui->toolButtonDecrease->show();
+        ui->toolButtonIncrease->show();
+    }
+    else
+    {
+        ui->paramSlide->hide();
+        ui->labelMin->hide();
+        ui->labelMax->hide();
+        ui->toolButtonDecrease->hide();
+        ui->toolButtonIncrease->hide();
+    }
 
     //Clear the data and start reading the out file
     if (Simindex!=2 && Simindex!=3)
     {
         RawData.clear();
         struct FileDataString readData={"Read function is not working correctly!",{"Plotter error"}};
-        QString DataFile = rootPath+OutputFileName;
+        QString DataFile = documentFolderPath+OutputFileName;
         if (!DataFile.isEmpty())
         {
             ui->lineEdit_2->setText(DataFile);
@@ -169,11 +193,17 @@ PlotWindow::PlotWindow(QWidget *parent) :
 
         ui->paramSlide->setValue(0);
         RawData.clear();
-        QString DataFile=rootPath+OutputFileName;
-        if (Simindex==2)
-             DataFile = rootPath+"/Data/Tmp"+titleVals.at(0)+".dat";
-        else if (Simindex==3)
-             DataFile = rootPath+"/Data/Tmp"+QString::number(0)+"K.dat";
+        QString DataFile=documentFolderPath+OutputFileName;
+        if (Simindex==2){
+             DataFile = documentFolderPath+"/Data/Tmp"+titleVals.at(0)+".dat";
+             ui->labelMin->setText(titleVals.at(0));
+             ui->labelMax->setText(titleVals.at(titleVals.length()-2));
+        }
+        else if (Simindex==3){
+             DataFile = documentFolderPath+"/Data/Tmp"+QString::number(0)+"K.dat";
+             ui->labelMin->setText(titleVals.at(0));
+             ui->labelMax->setText(titleVals.at(titleVals.length()-2));
+        }
 
         struct FileDataString readData={"Read function is not working correctly!",{"Plotter error"}};
 
@@ -448,7 +478,14 @@ void PlotWindow::addPlotSingleXY(QVector<double> x,QVector<double> y,int simstep
     }else
     {        
     ui->customPlot->addGraph();
-    ui->customPlot->graph()->setName(QString("New graph %1").arg(ui->customPlot->graphCount()));
+
+    if (Legends.isEmpty())
+        ui->customPlot->graph()->setName(QString("New graph %1").arg(ui->customPlot->graphCount()));
+    else
+    {
+        ui->customPlot->graph()->setName(QString(Legends.at(((ui->customPlot->graphCount()-1)%Legends.length()))));
+    }
+
     ui->customPlot->graph()->setData(x, y);
     if (ui->checkBox_2->isChecked()==true)
 
@@ -520,7 +557,14 @@ void PlotWindow::addPlotSingleYX(QVector<double> x,QVector<double> y,int simstep
         else
     {
     ui->customPlot->addGraph();
-    ui->customPlot->graph()->setName(QString("New graph %1").arg(ui->customPlot->graphCount()));
+
+    if (Legends.isEmpty())
+        ui->customPlot->graph()->setName(QString("New graph %1").arg(ui->customPlot->graphCount()));
+    else
+    {
+        ui->customPlot->graph()->setName(QString(Legends.at(((ui->customPlot->graphCount()-1)%Legends.length()))));
+    }
+
     ui->customPlot->graph()->setData(y, x);
     if (ui->checkBox_2->isChecked()==true)
         ui->customPlot->graph()->setLineStyle(static_cast<QCPGraph::LineStyle>(1));
@@ -612,7 +656,14 @@ void PlotWindow::addPlotMultiXYY(QVector<double> x,QVector<double> y,int graphco
     }else
     {
     ui->customPlot->addGraph();
-    ui->customPlot->graph()->setName(QString("New graph %1").arg(ui->customPlot->graphCount()));
+
+    if (Legends.isEmpty())
+        ui->customPlot->graph()->setName(QString("New graph %1").arg(ui->customPlot->graphCount()));
+    else
+    {
+        ui->customPlot->graph()->setName(QString(Legends.at(((ui->customPlot->graphCount()-1)%Legends.length()))));
+    }
+
     ui->customPlot->graph()->setData(x, y);
     if (ui->checkBox_2->isChecked()==true)
         ui->customPlot->graph()->setLineStyle(static_cast<QCPGraph::LineStyle>(1));
@@ -727,7 +778,14 @@ void PlotWindow::addPlotMultiXYXY(QVector<double> x,QVector<double> y,int graphc
     }else
     {
     ui->customPlot->addGraph();
-    ui->customPlot->graph()->setName(QString("New graph %1").arg(ui->customPlot->graphCount()));
+
+    if (Legends.isEmpty())
+        ui->customPlot->graph()->setName(QString("New graph %1").arg(ui->customPlot->graphCount()));
+    else
+    {
+        ui->customPlot->graph()->setName(QString(Legends.at(((ui->customPlot->graphCount()-1)%Legends.length()))));
+    }
+
     ui->customPlot->graph()->setData(x,y);
     if (ui->checkBox_2->isChecked()==true)
         ui->customPlot->graph()->setLineStyle(static_cast<QCPGraph::LineStyle>(1));
@@ -1046,9 +1104,9 @@ void PlotWindow::on_paramSlide_valueChanged(int value)
             struct FileDataString readData={"Read function is not working correctly!",{}};
 
 
-            QString DataFile = rootPath+"/Data/Tmp"+titleVals.at(simstep*2)+".dat";
+            QString DataFile = documentFolderPath+"/Data/Tmp"+titleVals.at(simstep*2)+".dat";
             if (Simindex==3)
-                DataFile = rootPath+"/Data/Tmp"+QString::number(simstep)+"K.dat";
+                DataFile = documentFolderPath+"/Data/Tmp"+QString::number(simstep)+"K.dat";
 
 
             if (!DataFile.isEmpty())
@@ -1073,9 +1131,9 @@ void PlotWindow::on_paramSlide_valueChanged(int value)
                 RawData.clear();
                 struct FileDataString readData={"Read function is not working correctly!",{}};
 
-                QString DataFile = rootPath+"/Data/Tmp"+titleVals.at((value)*2)+".dat";
+                QString DataFile = documentFolderPath+"/Data/Tmp"+titleVals.at((value)*2)+".dat";
                 if (Simindex==3)
-                    DataFile = rootPath+"/Data/Tmp"+QString::number(value)+"K.dat";
+                    DataFile = documentFolderPath+"/Data/Tmp"+QString::number(value)+"K.dat";
 
 
                 if (!DataFile.isEmpty())
@@ -1143,4 +1201,16 @@ void PlotWindow::barPlotter(QVector<double> x,QVector<double> errx,QVector<doubl
         textTicker->addTick(tickCntr, parameterNames.at(tickCntr));
     ui->customPlot->xAxis->setTicker(textTicker);
 
+}
+
+void PlotWindow::on_toolButtonDecrease_clicked()
+{
+    if (ui->paramSlide->value()>0)
+        ui->paramSlide->setValue(ui->paramSlide->value()-1);
+}
+
+void PlotWindow::on_toolButtonIncrease_clicked()
+{
+    if (ui->paramSlide->value() < ui->paramSlide->maximum())
+        ui->paramSlide->setValue(ui->paramSlide->value()+1);
 }

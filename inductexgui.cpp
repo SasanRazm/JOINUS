@@ -9,8 +9,10 @@
 #include <QMessageBox>
 #include <QRegExp>
 #include <QDebug>
+#include <QScreen>
 
-int tableSelect=0;
+int tableSelect;
+QString KlayoutPath="";
 
 InductexGUI::InductexGUI(QWidget *parent) :
     QDialog(parent),
@@ -24,6 +26,12 @@ InductexGUI::InductexGUI(QWidget *parent) :
     gradient.setColorAt(1, QColor(230, 255, 255));
     pal.setBrush(QPalette::Window, QBrush(gradient));
     this->setPalette(pal);
+
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QRect screenGeometry = screen->geometry();
+
+    this->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    this->setGeometry(20,50,screenGeometry.width()*4/5,screenGeometry.height()*5/6);
 
 
     m_jsimsyntax = new Jsimsyntax(ui->plainTextEditNetlist->document());
@@ -76,21 +84,22 @@ InductexGUI::InductexGUI(QWidget *parent) :
     {
         ui->plainTextEdit->appendPlainText(stderrInductex);
     }
+    restoredefaults();
 
-    if (QFile(ui->lineEditGDS->text()).exists())
-    {
+//    if (QFile(ui->lineEditGDS->text()).exists())
+//    {
 
-        LoadGDSImage(ui->lineEditGDS->text());
-        QFileInfo fi(ui->lineEditGDS->text());
-        QString cirFileName=fi.absolutePath()+"/"+fi.fileName().remove(fi.completeSuffix(),Qt::CaseInsensitive)
-                +"cir";
-        if (!QFile(cirFileName).exists())
-        {
-            QMessageBox::warning(this,"Circuit netlist","Cannot find \""+cirFileName+"\" in the layout file folder.");
-            return;
-        }
-        LoadNetlist(cirFileName);
-    }
+//        LoadGDSImage(ui->lineEditGDS->text());
+//        QFileInfo fi(ui->lineEditGDS->text());
+//        QString cirFileName=fi.absolutePath()+"/"+fi.fileName().remove(fi.completeSuffix(),Qt::CaseInsensitive)
+//                +"cir";
+//        if (!QFile(cirFileName).exists())
+//        {
+//            QMessageBox::warning(this,"Circuit netlist","Cannot find \""+cirFileName+"\" in the layout file folder.");
+//            return;
+//        }
+//        LoadNetlist(cirFileName);
+//    }
 
 }
 
@@ -117,9 +126,16 @@ void InductexGUI::on_pushButton_clicked()
     QStringList allArgs;
 
     if (ui->radioButtonNormal->isChecked())
+    {
         allArgs<<"/c"<<"inductex"<<layoutArg<<"-l"<<ldfArg<<"-i"<<infArg<<simEngine;
+        if (ui->checkBoxCurr->isChecked())
+            allArgs<<"-j";
+    }
     else
         allArgs<<"/c"<<"inductex"<<ixiArg;
+
+
+
 
     ui->labelStatue->setText("InductEx is running!");
 
@@ -178,7 +194,7 @@ void InductexGUI::on_toolButtonLoadGDS_clicked()
     if (!gdsFile.isEmpty())
     {
         ui->lineEditGDS->setText(gdsFile);
-        LoadGDSImage(gdsFile);
+        //LoadGDSImage(gdsFile);
         QFileInfo fi(gdsFile);
         QString cirFileName=fi.absolutePath()+"/"+fi.fileName().remove(fi.completeSuffix(),Qt::CaseInsensitive)
                 +"cir";
@@ -208,6 +224,11 @@ void InductexGUI::on_toolButtonLoadGDS_2_clicked()
 
 void InductexGUI::on_restoredefaults_clicked()
 {
+    restoredefaults();
+}
+
+void InductexGUI::restoredefaults()
+{
     QStringList loadmaterial={};
     QString inductexStatFile=documentFolderPath+"/inductex.stat";
 
@@ -232,6 +253,7 @@ void InductexGUI::on_restoredefaults_clicked()
             ui->lineEditVal_6->setText(loadmaterial.at(3));
             ui->lineEditGDS_2->setText(loadmaterial.at(4));
             ui->radioButtonFH->setChecked(loadmaterial.at(5).toInt());
+            KlayoutPath=loadmaterial.at(6);
         }
     }else
     {
@@ -246,7 +268,7 @@ void InductexGUI::on_restoredefaults_clicked()
     if (QFile(ui->lineEditGDS->text()).exists())
     {
 
-        LoadGDSImage(ui->lineEditGDS->text());
+        //LoadGDSImage(ui->lineEditGDS->text());
         QFileInfo fi(ui->lineEditGDS->text());
         QString cirFileName=fi.absolutePath()+"/"+fi.fileName().remove(fi.completeSuffix(),Qt::CaseInsensitive)
                 +"cir";
@@ -270,6 +292,8 @@ void InductexGUI::on_saveall_clicked()
     savematerial.append(ui->lineEditVal_6->text());
     savematerial.append(ui->lineEditGDS_2->text());
     savematerial.append(QString::number(ui->radioButtonFH->isChecked()));
+    savematerial.append(KlayoutPath);
+
 
     QFile file(inductexStatFile);
     if (!file.open(QFile::WriteOnly | QFile::Text)){
@@ -299,14 +323,17 @@ void InductexGUI::load_Table(QString InductexOUT)
             {
                 ui->plainTextEdit->appendPlainText("**********************End of calculation***********************");
                 spoiledDataCntr++;
-                while (!(spoiledData.at(spoiledDataCntr).contains("Deallocating memory")||spoiledData.at(spoiledDataCntr).contains("Ports")))
+                bool AlreadyRun;
+
+                while (!(spoiledData.at(spoiledDataCntr).contains("Mutual Inductance")
+                         ||spoiledData.at(spoiledDataCntr).contains("Ports")||spoiledData.at(spoiledDataCntr).contains("Deallocating memory")))
                 {
                     QString dataStringline=spoiledData.at(spoiledDataCntr);
                     dataStringline.remove("\r");
 
                     if (!dataStringline.isEmpty())
                     {
-                       qDebug()<<dataStringline;
+                       //qDebug()<<dataStringline;
                        QStringList parametersInductex=dataStringline.split(" ",QString::SkipEmptyParts);
                        for (int dataCNTR=0;dataCNTR<parametersInductex.length();dataCNTR++)
                        {
@@ -342,12 +369,113 @@ void InductexGUI::load_Table(QString InductexOUT)
                     spoiledDataCntr++;
                 }
 
+                AlreadyRun=true;
+                spoiledDataCntr++;
+                while (!(spoiledData.at(spoiledDataCntr).contains("Ports")||spoiledData.at(spoiledDataCntr).contains("Deallocating memory")))
+                {
+                    QString dataStringline=spoiledData.at(spoiledDataCntr);
+                    dataStringline.remove("\r");
+//                    if(AlreadyRun)
+//                    {
+//                        PN0.append("Couple_Name");
+//                        ID0.append("Design");
+//                        IE0.append("Extracted");
+//                        RD0.append("Abs_Diff");
+//                        RE0.append("Perc_Diff");
+//                        AD0.append("K");
+//                        PD0.append("--");
+//                        AlreadyRun=false;
+//                    }
+                    if (!dataStringline.isEmpty())
+                    {
+                       //qDebug()<<dataStringline;
+                       QStringList parametersInductex=dataStringline.split(" ",QString::SkipEmptyParts);
+                       PD1.append("--");
+                       for (int dataCNTR=0;dataCNTR<parametersInductex.length();dataCNTR++)
+                       {
+                               switch(dataCNTR)
+                               {case 0:
+                                   PN1.append(parametersInductex.at(dataCNTR));
+                                   break;
+                               case 1:
+                                   ID1.append(parametersInductex.at(dataCNTR));
+                                   break;
+                               case 2:
+                                   IE1.append(parametersInductex.at(dataCNTR));
+                                   break;
+                               case 3:
+                                   RD1.append(parametersInductex.at(dataCNTR));
+                                   break;
+                               case 4:
+                                   RE1.append(parametersInductex.at(dataCNTR));
+                                   break;
+                               case 5:
+                                   AD1.append(parametersInductex.at(dataCNTR));
+                                   break;
 
+                               default:
+                                   break;
+                               }
+                       }
 
+                    }
+
+                    spoiledDataCntr++;
+                }
+
+                AlreadyRun=true;
+                spoiledDataCntr++;
+
+                while (!spoiledData.at(spoiledDataCntr).contains("Deallocating memory"))
+                {
+                    QString dataStringline=spoiledData.at(spoiledDataCntr);
+                    dataStringline.remove("\r");
+                    if(AlreadyRun)
+                    {
+                        PN2.append("JJ_Name");
+                        ID2.append("Design");
+                        IE2.append("Extracted");
+                        RD2.append("--");
+                        RE2.append("--");
+                        AD2.append("--");
+                        PD2.append("--");
+                        AlreadyRun=false;
+                    }
+
+                    if (!dataStringline.isEmpty())
+                    {
+                       //qDebug()<<dataStringline;
+                       QStringList parametersInductex=dataStringline.split(" ",QString::SkipEmptyParts);
+                       RE2.append("--");
+                       PD2.append("--");
+                       AD2.append("--");
+                       RD2.append("--");
+                       for (int dataCNTR=0;dataCNTR<parametersInductex.length();dataCNTR++)
+                       {
+                               switch(dataCNTR)
+                               {case 0:
+                                   PN2.append(parametersInductex.at(dataCNTR));
+                                   break;
+                               case 1:
+                                   ID2.append(parametersInductex.at(dataCNTR));
+                                   break;
+                               case 2:
+                                   IE2.append(parametersInductex.at(dataCNTR));
+                                   break;
+                               default:
+                                   break;
+                               }
+                       }
+
+                    }
+
+                    spoiledDataCntr++;
+                }
 
                 break;
             }
         // Create model:
+        tableSelect=0;
         TestModel *ParamModel = new TestModel(this);
         ParamModel->populateData(PN0, ID0, IE0, RD0, RE0, AD0, PD0);
         ui->tableViewParams->setModel(ParamModel);
@@ -355,6 +483,25 @@ void InductexGUI::load_Table(QString InductexOUT)
         //ui->plainTextEdit->appendPlainText(QString::number(ParamModel->rowCount()));
         ui->tableViewParams->show();
 
+        if (!PN1.isEmpty())
+        {
+            //tableSelect=1;
+            TestModel *CoupleModel = new TestModel(this);
+            CoupleModel->populateData(PN1, ID1, IE1, RD1, RE1, AD1, PD1);
+            ui->tableViewK->setModel(CoupleModel);
+            ui->tableViewK->horizontalHeader()->setVisible(false);
+            ui->tableViewK->show();
+        }
+
+        if (!PN2.isEmpty())
+        {
+            //tableSelect=2;
+            TestModel *JJModel = new TestModel(this);
+            JJModel->populateData(PN2, ID2, IE2, RD2, RE2, AD2, PD2);
+            ui->tableViewJJ->setModel(JJModel);
+            ui->tableViewJJ->horizontalHeader()->setVisible(false);
+            ui->tableViewJJ->show();
+        }
 
     }
 
@@ -424,18 +571,18 @@ QVariant TestModel::headerData(int section, Qt::Orientation orientation, int rol
         switch (section)
         {
             case 0:
-                return QString("Par name");
+                return QString("Name");
             case 1:
                 if (tableSelect==0)
-                    return QString("Ind design");
+                    return QString("Ind_design");
                 else if (tableSelect==1)
-                    return QString("Mut Ind design");
+                    return QString("Design");
                 else
-                    return QString("JJ design");
+                    return QString("JJ_design");
 
             case 2:
                 if (tableSelect==0)
-                    return QString("Ind extracted");
+                    return QString("Ind_extracted");
                 else if (tableSelect==1)
                     return QString("Extracted");
                 else
@@ -443,23 +590,23 @@ QVariant TestModel::headerData(int section, Qt::Orientation orientation, int rol
 
             case 3:
                 if (tableSelect==0)
-                    return QString("Res design");
+                    return QString("Res_design");
                 else if (tableSelect==1)
-                    return QString("Abs Diff");
+                    return QString("Abs_Diff");
                 else
-                    return QString("Abs Diff");
+                    return QString("--");
 
             case 4:
                 if (tableSelect==0)
-                    return QString("Res extracted");
+                    return QString("Res_extracted");
                 else if (tableSelect==1)
-                    return QString("Perc Diff");
+                    return QString("Perc_Diff");
                 else
-                    return QString("Perc Diff");
+                    return QString("--");
 
             case 5:
                 if (tableSelect==0)
-                    return QString("Abs Diff");
+                    return QString("Abs_Diff");
                 else if (tableSelect==1)
                     return QString("K");
                 else
@@ -467,25 +614,10 @@ QVariant TestModel::headerData(int section, Qt::Orientation orientation, int rol
 
             case 6:
                 if (tableSelect==0)
-                    return QString("Perc Diff");
+                    return QString("Perc_Diff");
                 else
                     return QString("--");
         }
-//        if (section == 0) {
-//            return QString("Par name");
-//        } else if (section == 1) {
-//            return QString("Ind design");
-//        } else if (section == 2) {
-//            return QString("Ind extracted");
-//        }else if (section == 3) {
-//            return QString("Res design");
-//        }else if (section == 4) {
-//            return QString("Res extracted");
-//        }else if (section == 5) {
-//            return QString("Abs Diff");
-//        }else if (section == 6) {
-//            return QString("Perc Diff");
-//      }
     }
     return QVariant();
 }
@@ -504,8 +636,8 @@ void InductexGUI::on_pushButtonBackAnnotate_clicked()
 
 }
 
-void InductexGUI::LoadGDSImage(QString LayoutFile)
-{
+//void InductexGUI::LoadGDSImage(QString LayoutFile)
+//{
     //Set the image for start
 //    QFileInfo fi(NetlistFile);
 //    QString PicFileName=fi.absolutePath()+"/"+fi.fileName().remove(fi.completeSuffix(),Qt::CaseInsensitive)
@@ -522,7 +654,7 @@ void InductexGUI::LoadGDSImage(QString LayoutFile)
 //            pix.load(":/image/Image/actions/cancel.png");
 //            ui->lblNetlistPic->setPixmap(pix);
 //        }
-}
+//}
 void InductexGUI::LoadNetlist(QString LayoutFile)
 {
     QFile file(LayoutFile);
@@ -558,4 +690,115 @@ void InductexGUI::on_pushButtonSave_clicked()
                 file.close();
                 stream.flush();
         }
+}
+
+void InductexGUI::on_pushButtonLayout_clicked()
+{
+
+    if (KlayoutPath.isEmpty())
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Klayout Path", "Path not Found, select a path?",
+                                      QMessageBox::Yes|QMessageBox::No);
+
+        if (reply == QMessageBox::Yes) {
+
+            QString KlayoutFolder = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"$(pwd)",QFileDialog::ShowDirsOnly| QFileDialog::DontResolveSymlinks);
+            if (!KlayoutFolder.isEmpty())
+            {
+                KlayoutPath=KlayoutFolder;
+                QStringList allArgs;
+                QString layoutArg=ui->lineEditGDS->text();
+                //QString layersArg;
+                QProcess *process=new QProcess(this);
+                allArgs<<"/c"<<KlayoutPath+"/klayout_app"<<"-e"<<layoutArg;//<<"-l"<<layersArg;
+                        #ifdef __linux__
+
+
+                        #elif _WIN32
+                        //        process->setProgram("cmd.exe");
+                        //        process->start("cd "+InductexFolderPath);
+                        //        process->waitForFinished(-1);
+                        //        process->reset();
+
+                            process->setProgram("cmd.exe");
+                            process->setArguments(allArgs);
+                            process->setCreateProcessArgumentsModifier([] ( QProcess::CreateProcessArguments *args) {
+                                            args->flags &= CREATE_NO_WINDOW;});
+                            process->startDetached();
+                        #else
+
+
+                        #endif
+            }
+        }
+        else if (reply == QMessageBox::No)
+            return;
+    }
+    else
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Klayout Path", "Is \"" + KlayoutPath + "\" Correct?",
+                                      QMessageBox::Yes|QMessageBox::No);
+
+        if (reply == QMessageBox::Yes) {
+
+            QStringList allArgs;
+            QString layoutArg=ui->lineEditGDS->text();
+            //QString layersArg;
+            QProcess *process=new QProcess(this);
+            allArgs<<"/c"<<KlayoutPath+"/klayout_app"<<"-e"<<layoutArg;//<<"-l"<<layersArg;
+                    #ifdef __linux__
+
+
+                    #elif _WIN32
+                    //        process->setProgram("cmd.exe");
+                    //        process->start("cd "+InductexFolderPath);
+                    //        process->waitForFinished(-1);
+                    //        process->reset();
+
+                        process->setProgram("cmd.exe");
+                        process->setArguments(allArgs);
+                        process->setCreateProcessArgumentsModifier([] ( QProcess::CreateProcessArguments *args) {
+                                        args->flags &= CREATE_NO_WINDOW;});
+                        process->startDetached();
+                    #else
+
+
+                    #endif
+
+        }
+        else if (reply == QMessageBox::No)
+        {
+            QString KlayoutFolder = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"$(pwd)",QFileDialog::ShowDirsOnly| QFileDialog::DontResolveSymlinks);
+            if (!KlayoutFolder.isEmpty())
+            {
+                KlayoutPath=KlayoutFolder;
+                QStringList allArgs;
+                QString layoutArg=ui->lineEditGDS->text();
+                //QString layersArg;
+                QProcess *process=new QProcess(this);
+                allArgs<<"/c"<<KlayoutPath+"/klayout_app"<<"-e"<<layoutArg;//<<"-l"<<layersArg;
+                        #ifdef __linux__
+
+
+                        #elif _WIN32
+                        //        process->setProgram("cmd.exe");
+                        //        process->start("cd "+InductexFolderPath);
+                        //        process->waitForFinished(-1);
+                        //        process->reset();
+
+                            process->setProgram("cmd.exe");
+                            process->setArguments(allArgs);
+                            process->setCreateProcessArgumentsModifier([] ( QProcess::CreateProcessArguments *args) {
+                                            args->flags &= CREATE_NO_WINDOW;});
+                            process->startDetached();
+                        #else
+
+
+                        #endif
+            }
+        }
+
+    }
 }

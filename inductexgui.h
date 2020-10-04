@@ -7,6 +7,7 @@
 
 
 extern int tableSelect;
+extern QString KlayoutPath;
 
 namespace Ui {
 class InductexGUI;
@@ -28,15 +29,18 @@ private slots:
     void on_toolButtonLoadGDS_2_clicked();
     void on_saveall_clicked();
     void on_restoredefaults_clicked();
+    void restoredefaults();
     void load_Table(QString InductexOUT);
     void on_pushButtonExport_clicked();
     void on_pushButtonBackAnnotate_clicked();
     void LoadNetlist(QString LayoutFile);
-    void LoadGDSImage(QString LayoutFile);
+    //void LoadGDSImage(QString LayoutFile);
 
     void on_pushButtonClear_clicked();
 
     void on_pushButtonSave_clicked();
+
+    void on_pushButtonLayout_clicked();
 
 private:
     Ui::InductexGUI *ui;

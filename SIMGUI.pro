@@ -21,8 +21,8 @@ CONFIG+=app_bundle
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
-QMAKE_TARGET = JOINUS-V2.1.1
-TARGET = JOINUS-V2.1.1
+QMAKE_TARGET = JOINUS-V2.1.5
+TARGET = JOINUS-V2.1.5
 TEMPLATE = app
 RC_ICONS = IconJOINUS2.ico
 

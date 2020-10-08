@@ -964,7 +964,7 @@ void MainWindow::on_actionAUTO5_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this,"About JOINUS","JOINUS is developed by S. Razmkhah in France as part of the ColdFlux/Supertools project.");
+    QMessageBox::about(this,"About JOINUS","JOINUS is developed by S. R. in France as part of the ColdFlux/Supertools project.");
 }
 
 // Load the netlist file and copies it to the Plain text editor

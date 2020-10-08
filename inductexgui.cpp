@@ -13,6 +13,7 @@
 
 int tableSelect;
 QString KlayoutPath="";
+QString LayerPath="";
 
 InductexGUI::InductexGUI(QWidget *parent) :
     QDialog(parent),
@@ -105,6 +106,7 @@ InductexGUI::InductexGUI(QWidget *parent) :
 
 InductexGUI::~InductexGUI()
 {
+    saveall();
     delete ui;
 }
 
@@ -254,6 +256,7 @@ void InductexGUI::restoredefaults()
             ui->lineEditGDS_2->setText(loadmaterial.at(4));
             ui->radioButtonFH->setChecked(loadmaterial.at(5).toInt());
             KlayoutPath=loadmaterial.at(6);
+            LayerPath=loadmaterial.at(7);
         }
     }else
     {
@@ -283,6 +286,10 @@ void InductexGUI::restoredefaults()
 
 void InductexGUI::on_saveall_clicked()
 {
+    saveall();
+}
+void InductexGUI::saveall()
+{
     QString inductexStatFile=documentFolderPath+"/inductex.stat";
     QStringList savematerial={};
 
@@ -293,6 +300,7 @@ void InductexGUI::on_saveall_clicked()
     savematerial.append(ui->lineEditGDS_2->text());
     savematerial.append(QString::number(ui->radioButtonFH->isChecked()));
     savematerial.append(KlayoutPath);
+    savematerial.append(LayerPath);
 
 
     QFile file(inductexStatFile);
@@ -365,12 +373,13 @@ void InductexGUI::load_Table(QString InductexOUT)
                        }
 
                     }
-
                     spoiledDataCntr++;
                 }
 
                 AlreadyRun=true;
-                spoiledDataCntr++;
+
+                if (!spoiledData.at(spoiledDataCntr).contains("Deallocating memory"))
+                    spoiledDataCntr++;
                 while (!(spoiledData.at(spoiledDataCntr).contains("Ports")||spoiledData.at(spoiledDataCntr).contains("Deallocating memory")))
                 {
                     QString dataStringline=spoiledData.at(spoiledDataCntr);
@@ -419,12 +428,12 @@ void InductexGUI::load_Table(QString InductexOUT)
                        }
 
                     }
-
                     spoiledDataCntr++;
                 }
 
                 AlreadyRun=true;
-                spoiledDataCntr++;
+                if (!spoiledData.at(spoiledDataCntr).contains("Deallocating memory"))
+                    spoiledDataCntr++;
 
                 while (!spoiledData.at(spoiledDataCntr).contains("Deallocating memory"))
                 {
@@ -697,108 +706,143 @@ void InductexGUI::on_pushButtonLayout_clicked()
 
     if (KlayoutPath.isEmpty())
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Klayout Path", "Path not Found, select a path?",
-                                      QMessageBox::Yes|QMessageBox::No);
-
-        if (reply == QMessageBox::Yes) {
-
-            QString KlayoutFolder = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"$(pwd)",QFileDialog::ShowDirsOnly| QFileDialog::DontResolveSymlinks);
-            if (!KlayoutFolder.isEmpty())
-            {
-                KlayoutPath=KlayoutFolder;
-                QStringList allArgs;
-                QString layoutArg=ui->lineEditGDS->text();
-                //QString layersArg;
-                QProcess *process=new QProcess(this);
-                allArgs<<"/c"<<KlayoutPath+"/klayout_app"<<"-e"<<layoutArg;//<<"-l"<<layersArg;
-                        #ifdef __linux__
-
-
-                        #elif _WIN32
-                        //        process->setProgram("cmd.exe");
-                        //        process->start("cd "+InductexFolderPath);
-                        //        process->waitForFinished(-1);
-                        //        process->reset();
-
-                            process->setProgram("cmd.exe");
-                            process->setArguments(allArgs);
-                            process->setCreateProcessArgumentsModifier([] ( QProcess::CreateProcessArguments *args) {
-                                            args->flags &= CREATE_NO_WINDOW;});
-                            process->startDetached();
-                        #else
-
-
-                        #endif
-            }
-        }
-        else if (reply == QMessageBox::No)
-            return;
+        QMessageBox::warning(this, "Klayout", "Set path to continue.");
     }
     else
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Klayout Path", "Is \"" + KlayoutPath + "\" Correct?",
-                                      QMessageBox::Yes|QMessageBox::No);
-
-        if (reply == QMessageBox::Yes) {
-
-            QStringList allArgs;
-            QString layoutArg=ui->lineEditGDS->text();
-            //QString layersArg;
-            QProcess *process=new QProcess(this);
-            allArgs<<"/c"<<KlayoutPath+"/klayout_app"<<"-e"<<layoutArg;//<<"-l"<<layersArg;
-                    #ifdef __linux__
-
-
-                    #elif _WIN32
-                    //        process->setProgram("cmd.exe");
-                    //        process->start("cd "+InductexFolderPath);
-                    //        process->waitForFinished(-1);
-                    //        process->reset();
-
-                        process->setProgram("cmd.exe");
-                        process->setArguments(allArgs);
-                        process->setCreateProcessArgumentsModifier([] ( QProcess::CreateProcessArguments *args) {
-                                        args->flags &= CREATE_NO_WINDOW;});
-                        process->startDetached();
-                    #else
-
-
-                    #endif
-
-        }
-        else if (reply == QMessageBox::No)
-        {
-            QString KlayoutFolder = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"$(pwd)",QFileDialog::ShowDirsOnly| QFileDialog::DontResolveSymlinks);
-            if (!KlayoutFolder.isEmpty())
-            {
-                KlayoutPath=KlayoutFolder;
-                QStringList allArgs;
-                QString layoutArg=ui->lineEditGDS->text();
-                //QString layersArg;
-                QProcess *process=new QProcess(this);
-                allArgs<<"/c"<<KlayoutPath+"/klayout_app"<<"-e"<<layoutArg;//<<"-l"<<layersArg;
-                        #ifdef __linux__
-
-
-                        #elif _WIN32
-                        //        process->setProgram("cmd.exe");
-                        //        process->start("cd "+InductexFolderPath);
-                        //        process->waitForFinished(-1);
-                        //        process->reset();
-
-                            process->setProgram("cmd.exe");
-                            process->setArguments(allArgs);
-                            process->setCreateProcessArgumentsModifier([] ( QProcess::CreateProcessArguments *args) {
-                                            args->flags &= CREATE_NO_WINDOW;});
-                            process->startDetached();
-                        #else
-
-
-                        #endif
-            }
-        }
-
+        runKlayout();
     }
+
+//    if (KlayoutPath.isEmpty())
+//    {
+//        QMessageBox::StandardButton reply;
+//        reply = QMessageBox::question(this, "Klayout", "Set properties?",
+//                                      QMessageBox::Yes|QMessageBox::No);
+
+//        if (reply == QMessageBox::Yes) {
+
+//            QString KlayoutFolder = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"$(pwd)",QFileDialog::ShowDirsOnly| QFileDialog::DontResolveSymlinks);
+//            if (!KlayoutFolder.isEmpty())
+//            {
+//                KlayoutPath=KlayoutFolder;
+//                QStringList allArgs;
+//                QString layoutArg=ui->lineEditGDS->text();
+//                //QString layersArg;
+//                QProcess *process=new QProcess(this);
+//                allArgs<<"/c"<<KlayoutPath+"/klayout_app"<<"-e"<<layoutArg;//<<"-l"<<layersArg;
+//                        #ifdef __linux__
+
+
+//                        #elif _WIN32
+
+//                            process->setProgram("cmd.exe");
+//                            process->setArguments(allArgs);
+//                            process->setCreateProcessArgumentsModifier([] ( QProcess::CreateProcessArguments *args) {
+//                                            args->flags &= CREATE_NO_WINDOW;});
+//                            process->startDetached();
+//                        #else
+
+
+//                        #endif
+//            }
+//        }
+//        else if (reply == QMessageBox::No)
+//            return;
+//    }
+//    else
+//    {
+//        QMessageBox::StandardButton reply;
+//        reply = QMessageBox::question(this, "Klayout Path", "Is \"" + KlayoutPath + "\" Correct?",
+//                                      QMessageBox::Yes|QMessageBox::No);
+
+//        if (reply == QMessageBox::Yes) {
+
+//            QStringList allArgs;
+//            QString layoutArg=ui->lineEditGDS->text();
+//            //QString layersArg;
+//            QProcess *process=new QProcess(this);
+//            allArgs<<"/c"<<KlayoutPath+"/klayout_app"<<"-e"<<layoutArg;//<<"-l"<<layersArg;
+//                    #ifdef __linux__
+
+
+//                    #elif _WIN32
+
+//                        process->setProgram("cmd.exe");
+//                        process->setArguments(allArgs);
+//                        process->setCreateProcessArgumentsModifier([] ( QProcess::CreateProcessArguments *args) {
+//                                        args->flags &= CREATE_NO_WINDOW;});
+//                        process->startDetached();
+//                    #else
+
+
+//                    #endif
+
+//        }
+//        else if (reply == QMessageBox::No)
+//        {
+//            QString KlayoutFolder = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"$(pwd)",QFileDialog::ShowDirsOnly| QFileDialog::DontResolveSymlinks);
+//            if (!KlayoutFolder.isEmpty())
+//            {
+//                KlayoutPath=KlayoutFolder;
+//                QStringList allArgs;
+//                QString layoutArg=ui->lineEditGDS->text();
+//                //QString layersArg;
+//                QProcess *process=new QProcess(this);
+//                allArgs<<"/c"<<KlayoutPath+"/klayout_app"<<"-e"<<layoutArg;//<<"-l"<<layersArg;
+//                        #ifdef __linux__
+
+
+//                        #elif _WIN32
+
+//                            process->setProgram("cmd.exe");
+//                            process->setArguments(allArgs);
+//                            process->setCreateProcessArgumentsModifier([] ( QProcess::CreateProcessArguments *args) {
+//                                            args->flags &= CREATE_NO_WINDOW;});
+//                            process->startDetached();
+//                        #else
+
+
+//                        #endif
+//            }
+//        }
+
+//    }
+}
+
+void InductexGUI::on_toolButton_clicked()
+{
+    klayoutDlg = new KlayoutDlg(this);
+    klayoutDlg->show();
+}
+
+void InductexGUI::runKlayout()
+{
+                    QStringList allArgs;
+                    QString layoutArg=ui->lineEditGDS->text();
+                    //QString layersArg;
+                    QProcess *process=new QProcess(this);
+                    if (LayerPath.isEmpty())
+                        allArgs<<"/c"<<KlayoutPath<<"-e"<<layoutArg;//<<"-l"<<layersArg;
+                    else
+                       allArgs<<"/c"<<KlayoutPath<<"-e"<<layoutArg<<"-l"<<LayerPath;
+
+                            #ifdef __linux__
+
+
+                            #elif _WIN32
+
+                                process->setProgram("cmd.exe");
+                                process->setArguments(allArgs);
+                                process->setCreateProcessArgumentsModifier([] ( QProcess::CreateProcessArguments *args) {
+                                                args->flags &= CREATE_NO_WINDOW;});
+                                process->startDetached();
+                            #else
+
+
+                            #endif
+                    QString stderrKlayout = process->readAllStandardError();
+                    QString stdmssKlayout = process->readAllStandardOutput();
+                    ui->plainTextEdit->appendPlainText("**********Klayout**********");
+                    ui->plainTextEdit->appendPlainText(stdmssKlayout);
+                    ui->plainTextEdit->appendPlainText(stderrKlayout);
 }

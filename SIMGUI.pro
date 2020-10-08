@@ -40,6 +40,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     inductexgui.cpp \
     joinuscapture.cpp \
+    klayoutdlg.cpp \
         main.cpp \
         mainwindow.cpp \
     plotwindow3d.cpp \
@@ -58,6 +59,7 @@ SOURCES += \
 HEADERS += \
     inductexgui.h \
     joinuscapture.h \
+    klayoutdlg.h \
         mainwindow.h \
     plotwindow3d.h \
     qcustomplot.h \
@@ -73,6 +75,7 @@ HEADERS += \
 FORMS += \
     inductexgui.ui \
     joinuscapture.ui \
+    klayoutdlg.ui \
         mainwindow.ui \
     plotwindow.ui \
     dialogplot.ui \

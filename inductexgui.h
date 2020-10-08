@@ -4,10 +4,12 @@
 #include <QDialog>
 #include <QAbstractTableModel>
 #include "jsimsyntax.h"
+#include "klayoutdlg.h"
 
 
 extern int tableSelect;
 extern QString KlayoutPath;
+extern QString LayerPath;
 
 namespace Ui {
 class InductexGUI;
@@ -30,6 +32,8 @@ private slots:
     void on_saveall_clicked();
     void on_restoredefaults_clicked();
     void restoredefaults();
+    void saveall();
+    void runKlayout();
     void load_Table(QString InductexOUT);
     void on_pushButtonExport_clicked();
     void on_pushButtonBackAnnotate_clicked();
@@ -42,9 +46,14 @@ private slots:
 
     void on_pushButtonLayout_clicked();
 
+    //void on_toolButton_triggered(QAction *arg1);
+
+    void on_toolButton_clicked();
+
 private:
     Ui::InductexGUI *ui;
     Jsimsyntax *m_jsimsyntax;
+    KlayoutDlg *klayoutDlg;
 };
 
 class TestModel : public QAbstractTableModel

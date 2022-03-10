@@ -477,7 +477,7 @@
    <enum>Qt::DefaultContextMenu</enum>
   </property>
   <property name="windowTitle">
-   <string>JOINUS 2.0- JOsephson INterface Utility Software</string>
+   <string>JOINUS 3.0.0- JOsephson INterface Utility Software</string>
   </property>
   <property name="toolButtonStyle">
    <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -1628,11 +1628,29 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
     <property name="title">
      <string>&amp;Tools</string>
     </property>
+    <widget class="QMenu" name="menu_Optimizer_and_margin_analyzer">
+     <property name="title">
+      <string>&amp;Optimizer and margin analyzer...</string>
+     </property>
+     <widget class="QMenu" name="menuCenter_of_Gravity_Optimizer">
+      <property name="title">
+       <string>Center of Gravity Optimizer</string>
+      </property>
+      <addaction name="actionLocal_Parameters"/>
+      <addaction name="actionGlobal_Parameters"/>
+     </widget>
+     <addaction name="actionMargin_Analyzer"/>
+     <addaction name="actionYield_Analyzer"/>
+     <addaction name="menuCenter_of_Gravity_Optimizer"/>
+     <addaction name="actionParticle_Swarm_Optimizer"/>
+    </widget>
     <addaction name="action_Open_Console"/>
     <addaction name="actionSet_Temperature"/>
+    <addaction name="actionSet_Magnetic_Field"/>
     <addaction name="separator"/>
     <addaction name="actionRun_Custom_Plotter"/>
-    <addaction name="actionAUTO5"/>
+    <addaction name="actionParameter_Dispertion"/>
+    <addaction name="menu_Optimizer_and_margin_analyzer"/>
     <addaction name="separator"/>
     <addaction name="actionSet_Advanced_values"/>
     <addaction name="separator"/>
@@ -1840,11 +1858,6 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
     <string>Set chip &amp;temperature</string>
    </property>
   </action>
-  <action name="actionAUTO5">
-   <property name="text">
-    <string>&amp;Optimizer and margin analyzer...</string>
-   </property>
-  </action>
   <action name="actionChange_background_color">
    <property name="text">
     <string>Change background color</string>
@@ -1983,6 +1996,41 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
   <action name="actionSet_Workspace">
    <property name="text">
     <string>Set &amp;Workspace</string>
+   </property>
+  </action>
+  <action name="actionSet_Magnetic_Field">
+   <property name="text">
+    <string>Set Magnetic Field</string>
+   </property>
+  </action>
+  <action name="actionMargin_Analyzer">
+   <property name="text">
+    <string>Margin Calculator</string>
+   </property>
+  </action>
+  <action name="actionYield_Analyzer">
+   <property name="text">
+    <string>Yield Analyzer</string>
+   </property>
+  </action>
+  <action name="actionParameter_Dispertion">
+   <property name="text">
+    <string>Parameter Dispersion</string>
+   </property>
+  </action>
+  <action name="actionParticle_Swarm_Optimizer">
+   <property name="text">
+    <string>Particle Swarm Optimizer</string>
+   </property>
+  </action>
+  <action name="actionLocal_Parameters">
+   <property name="text">
+    <string>Local Parameters</string>
+   </property>
+  </action>
+  <action name="actionGlobal_Parameters">
+   <property name="text">
+    <string>Global Parameters</string>
    </property>
   </action>
  </widget>

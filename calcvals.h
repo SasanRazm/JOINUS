@@ -10,7 +10,7 @@ public:
     double criticalCurrent(double IcVal);
     double Rnoise(double Rval);
     double Rnorm(double Rval);
-    double Vgap(double Hfield);
+    double Vgap();
     double BetaParam(double Icrit, double JJcap, double Rtot);
     QString convertToUnits(double l_nvalue);
     double convertToValues(const QString& input);

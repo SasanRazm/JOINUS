@@ -52,6 +52,7 @@ private slots:
 
     void on_radioButtonYield_clicked();
 
+
 private:
     Ui::AutoOptim *ui;
 

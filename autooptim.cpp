@@ -381,7 +381,7 @@ void AutoOptim::MarginSimulation(QStringList OptimParams)
                 stream2 << "Success"<<'\n';
                 stream2 <<QString::number(CritCurrent)<<'\n';
                 uint endtime = QDateTime::currentDateTime().toTime_t();
-                stream2 << "Margin calculation run for : " << QString::number(endtime-starttime) << " seconds" << '\n';               
+                stream2 << "Margin calculation run for : " << QString::number(endtime-starttime) << " seconds" << '\n';
                 stream2.flush();
             }
             filestat.close();

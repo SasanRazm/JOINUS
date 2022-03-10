@@ -195,7 +195,12 @@
        </item>
        <item>
         <property name="text">
-         <string>Bar plot</string>
+         <string>Bar plot V</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Bar plot H</string>
         </property>
        </item>
       </widget>

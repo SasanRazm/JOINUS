@@ -7,8 +7,12 @@
 #include <ActiveQt>
 #endif
 #include "dialogplot.h"
+#include "lgpdispers.h"
+#include "globaloptimizer.h"
 #include "setparamsdialog.h"
-#include "autooptim.h"
+#include "margincalc.h"
+#include "yieldcalc.h"
+#include "cgoptimizer.h"
 #include "jsimsyntax.h"
 #include "joinuscapture.h"
 #include "inductexgui.h"
@@ -97,7 +101,6 @@ private slots:
     void on_actionFont_Properties_triggered();
     void on_actionRun_Custom_Plotter_triggered();
     void on_actionSet_Temperature_triggered();
-    void on_actionAUTO5_triggered();
     void on_actionChange_background_color_triggered();
     void on_action_WSIM_triggered();
     void on_actionSQUID_MAP_triggered();
@@ -112,17 +115,30 @@ private slots:
     void on_actionAbout_Qt_triggered();
     void on_actionSchamatic_Capture_triggered();
     void on_actionSet_Workspace_triggered();
-
     void on_actionInductex_triggered();
+    void on_actionSet_Magnetic_Field_triggered();
+    void on_actionMargin_Analyzer_triggered();
+    void on_actionYield_Analyzer_triggered();
+    void on_actionCenter_Gravity_Optimizer_triggered();
+
+    void on_actionParameter_Dispertion_triggered();
+
+    void on_actionLocal_Parameters_triggered();
+
+    void on_actionGlobal_Parameters_triggered();
 
 private:
     Ui::MainWindow *ui;
     DialogPlot *dialogPlot;
+    LGPdispers *lgpDispers;
     SetParamsDialog *setparamdialog;
     JOINUSCapture *joinuscapture;
-    AutoOptim *autooptim;
+    CGOptimizer *cgoptimizer;
+    YieldCalc *yieldcalc;
+    MarginCalc *margincalc;
     Jsimsyntax *m_jsimsyntax;
     InductexGUI *inductex;
+    GlobalOptimizer *globalOptimier;
     QTimer* myTimer;
 };
 

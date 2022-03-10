@@ -1,7 +1,11 @@
 #include "inductexgui.h"
 #include "ui_inductexgui.h"
 #include "myglobalvars.h"
+
+#ifdef _WIN32
 #include <windows.h>
+#endif
+
 #include <QProcess>
 #include <QFile>
 #include <QTextStream>
@@ -47,6 +51,9 @@ InductexGUI::InductexGUI(QWidget *parent) :
     QProcess *process=new QProcess(this);
     #ifdef __linux__
 
+        QString commandline="inductex";
+        process->start(commandline);
+        process->waitForFinished(-1);
 
     #elif _WIN32
         process->setProgram("cmd.exe");
@@ -57,6 +64,9 @@ InductexGUI::InductexGUI(QWidget *parent) :
         process->waitForFinished(-1);
     #else
 
+        QString commandline="inductex";
+        process->start(commandline);
+        process->waitForFinished(-1);
 
     #endif
     QString stderrInductex = process->readAllStandardError();
@@ -136,9 +146,6 @@ void InductexGUI::on_pushButton_clicked()
     else
         allArgs<<"/c"<<"inductex"<<ixiArg;
 
-
-
-
     ui->labelStatue->setText("InductEx is running!");
 
     QFileInfo fi(layoutArg);
@@ -147,7 +154,15 @@ void InductexGUI::on_pushButton_clicked()
     QDir::setCurrent(InductexFolderPath);
 
     #ifdef __linux__
+    QString commandline="inductex "+layoutArg+" -l "+ ldfArg + " -i "+infArg+" "+simEngine;
 
+    if (!ui->radioButtonNormal->isChecked())
+    {
+        commandline="inductex "+ixiArg;
+    }
+
+    process->start(commandline);
+    process->waitForFinished(-1);
 
     #elif _WIN32
 //        process->setProgram("cmd.exe");
@@ -163,6 +178,13 @@ void InductexGUI::on_pushButton_clicked()
         process->waitForFinished(-1);
     #else
 
+    QString commandline="inductex "+layoutArg+" -l "+ ldfArg + " -i "+infArg+" "+simEngine;
+    if (!ui->radioButtonNormal->isChecked())
+    {
+        commandline="inductex "+ixiArg;
+    }
+    process->start(commandline);
+    process->waitForFinished(-1);
 
     #endif
     QDir::setCurrent(folderPath);
@@ -378,7 +400,7 @@ void InductexGUI::load_Table(QString InductexOUT)
 
                 AlreadyRun=true;
 
-                if (!spoiledData.at(spoiledDataCntr).contains("Deallocating memory"))
+                if (!(spoiledData.at(spoiledDataCntr).contains("Deallocating memory")||spoiledData.at(spoiledDataCntr).contains("Ports")))
                     spoiledDataCntr++;
                 while (!(spoiledData.at(spoiledDataCntr).contains("Ports")||spoiledData.at(spoiledDataCntr).contains("Deallocating memory")))
                 {
@@ -828,6 +850,12 @@ void InductexGUI::runKlayout()
 
                             #ifdef __linux__
 
+                                QString commandLine = KlayoutPath;
+                                if (LayerPath.isEmpty())
+                                    allArgs<<"-e"<<layoutArg;
+                                else
+                                   allArgs<<"-e"<<layoutArg<<"-l"<<LayerPath;
+                                process->startDetached(commandLine, allArgs);
 
                             #elif _WIN32
 
@@ -838,6 +866,12 @@ void InductexGUI::runKlayout()
                                 process->startDetached();
                             #else
 
+                                QString commandLine = KlayoutPath;
+                                if (LayerPath.isEmpty())
+                                    allArgs<<"-e"<<layoutArg;
+                                else
+                                   allArgs<<"-e"<<layoutArg<<"-l"<<LayerPath;
+                                process->startDetached(commandLine, allArgs);
 
                             #endif
                     QString stderrKlayout = process->readAllStandardError();

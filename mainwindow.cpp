@@ -657,311 +657,6 @@ void MainWindow::on_StartPushButton_clicked()
 }
 
 
-void MainWindow::on_actionAUTO5_triggered()
-{
-    ui->StartPushButton->setEnabled(false);
-        autooptim = new AutoOptim(this);
-        autooptim->setModal(true);
-        QString OptimFile=documentFolderPath+"/OptimConfigFile.tmp";
-
-        AutoOptim *autofuns=new AutoOptim;
-
-        if(autooptim->exec() == QDialog::Accepted)
-        {
-            QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(this, "Optimizer & Margin Analyzer", "Start Optimization process?",
-                                          QMessageBox::Yes|QMessageBox::No);
-            if (reply == QMessageBox::Yes) {
-
-                ui->ProgressBar->setValue(0);
-                //Start the optimizatioon process here
-
-                //Reading the values
-                QStringList OptimParams=autofuns->ReadOptimFile(OptimFile);
-
-                //Act on error in configuration
-                if (OptimParams.at(0)=="error")
-                {
-                    QMessageBox::warning(this,"Error!","Optimizer cannot continue!");
-                    ui->StartPushButton->setEnabled(true);
-                    return;
-                }
-
-                //Run the function for selected mode
-
-                //Run function for Bias Margin calculation
-                else if (OptimParams.at(0)=="MS")
-                {
-                    Simindex=10;
-                    ui->ProgressBar->setValue(20);
-
-                    //This commands run the Margin Calculation
-                    autofuns->MarginSimulation(OptimParams);
-
-                    //Initializing the parameters
-                    ui->ProgressBar->setValue(70);
-                    QString DataFile=documentFolderPath+OutputFileName;
-                    QString MSOUT = OptimParams.at(5)+"/MSOUTPUT.DAT";
-                    QString MSSTAT = OptimParams.at(5)+"/MSSTATUES.DAT";
-
-                    QFile filestatues(MSSTAT);
-                    if (!filestatues.exists())
-                    {
-                        QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
-                    }
-                    else if (!filestatues.open(QFile::ReadOnly | QFile::Text))
-                    {
-                        QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
-                    }else{
-                        QTextStream instat(&filestatues);
-                        while(!instat.atEnd()) {
-                            QString statline = instat.readLine();
-                            ui->TerminalPlainTextEdit->appendPlainText(statline);
-                        }
-                        filestatues.close();
-                        instat.flush();
-                    }
-
-                    QFile::remove(DataFile);
-                    QFile::copy(MSOUT,DataFile);
-
-
-                }
-
-
-
-                //Run function for Optimization (This method uses center of gravity)
-                else if (OptimParams.at(0)=="MCO")
-                {
-
-                    // Define Parameters for the Calculation
-                    Simindex=10;
-                    int IterationNumber = OptimParams.at(7).toInt();
-                    double CritCurrent=1e-4;
-                    QString DataFile=documentFolderPath+OutputFileName;
-                    QString MSOUT = OptimParams.at(5)+"/MSOUTPUT.DAT";
-                    QString MSSTAT = OptimParams.at(5)+"/MSSTATUES.DAT";
-                    QString tempNetlistNominal=OptimParams.at(4)+"/MSNominal.cir";
-                    QString ParamFile=OptimParams.at(3);
-
-                    autofuns->MarginSimulation(OptimParams);
-
-                    //Write the result in terminal
-                    QFile filestatues(MSSTAT);
-                    if (!filestatues.exists())
-                    {
-                        QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
-                    }
-                    else if (!filestatues.open(QFile::ReadOnly | QFile::Text))
-                    {
-                        QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
-                    }else{
-                        int linecount=0;
-                        QTextStream instat(&filestatues);
-                        while(!instat.atEnd()) {
-                            QString statline = instat.readLine();
-                            if (linecount==0 && statline!="Success")
-                            {
-                                ui->TerminalPlainTextEdit->appendPlainText(statline);
-                                return;
-                            }else
-                            {
-                                if (linecount==1)
-                                    CritCurrent=statline.toDouble();
-
-                                else
-                                ui->TerminalPlainTextEdit->appendPlainText(statline);
-
-                                linecount++;
-                            }
-
-                        }
-                        filestatues.close();
-                        instat.flush();
-                    }
-
-                    for (int IterCntr=0; IterCntr<IterationNumber;IterCntr++)
-                    {
-
-                        //Write new parameter file based on the output
-                        QString tempMSOUT = OptimParams.at(5)+"/MSOUTPUT"+QString::number(IterCntr)+".DAT";
-                        QString tempParamFile=OptimParams.at(4)+"/tempParamFile"+QString::number(IterCntr)+".para";
-                        QFile::remove(tempMSOUT);
-                        QFile::copy(MSOUT,tempMSOUT);
-
-
-                        QVector<QVector<QString>> oldParamVector =  autofuns->paramDataArrange(ParamFile);
-
-
-                        //Change the ParamFile -> OptimParams.at(3) value to match new parametric file.
-                        QStringList newParamValues = autofuns->newParamGen(tempMSOUT, oldParamVector, CritCurrent, OptimParams.at(11).toDouble());
-                        autofuns->newParamFileGen(ParamFile, tempParamFile ,newParamValues);
-                        OptimParams[3]=tempParamFile;
-                        ParamFile=tempParamFile;
-
-                        ui->ProgressBar->setValue(100*((IterCntr+1)/IterationNumber));
-
-                        autofuns->MarginSimulation(OptimParams);
-
-
-                        qDebug()<< "Iteration Number: " <<QString::number(IterCntr+1)<<'\n';
-
-                        //Write the result in terminal
-                        QFile fileStatues(MSSTAT);
-
-                        if (!fileStatues.exists())
-                        {
-                            QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
-                        }
-                        else if (!fileStatues.open(QFile::ReadOnly | QFile::Text))
-                        {
-                            QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
-                        }
-                        else {
-                            int linecount=0;
-                            QTextStream instat2(&fileStatues);
-                            while(!instat2.atEnd()) {
-                                QString statline = instat2.readLine();
-                                    if (linecount!=1)
-                                        ui->TerminalPlainTextEdit->appendPlainText(statline);
-                                    linecount++;
-                            }
-                            fileStatues.close();
-                            instat2.flush();
-                        }
-                    }
-
-
-                    qDebug() << "End of simulation" << '\n';
-
-                        QVector<QVector<QString>> displayParamVector =  autofuns->paramDataArrange(ParamFile);
-                        for (int dispCntr=0;dispCntr<displayParamVector.length();dispCntr++)
-                        {
-                            QString displayLine=displayParamVector.at(dispCntr).at(2)+" = "+displayParamVector.at(dispCntr).at(1);
-                            ui->TerminalPlainTextEdit->appendPlainText(displayLine);
-                        }
-
-                        QFile::remove(DataFile);
-                        QFile::copy(MSOUT,DataFile);
-                        //for (int mydelay=0;mydelay<1000;mydelay++){}
-
-                }
-
-
-                //Run function for Yield calculation
-                else if (OptimParams.at(0)=="YA")
-                {
-                    Simindex=11;
-                    ui->ProgressBar->setValue(1);
-                    ui->TerminalPlainTextEdit->appendPlainText(">> Yield analyzer started, this process can be long, please be patient! \n");
-
-                    //Initializing the parameters
-                    QString DataFile=documentFolderPath+OutputFileName;
-                    QString YAOUT = OptimParams.at(5)+"/YAOUTPUT.DAT";
-                    QString YASTAT = OptimParams.at(5)+"/YASTATUES.DAT";
-
-                    QFile outFile(YAOUT);
-                    QFile filestatues(YASTAT);
-
-                    if (outFile.exists())
-                        outFile.remove();
-                    outFile.close();
-
-                    if (filestatues.exists())
-                        filestatues.remove();
-                    filestatues.close();
-
-
-                    //Start the loop for Yield analyze
-                    int yieldCycle=static_cast<int>(OptimParams.at(9).toDouble()/OptimParams.at(6).toDouble());
-
-                    for (int yieldCycleCNTR=1;yieldCycleCNTR<yieldCycle+1;yieldCycleCNTR++)
-                    {
-                        double standardDevVal=OptimParams.at(6).toDouble()*yieldCycleCNTR;
-
-                        //This commands run the Yield Analysis function
-                        autofuns->Yield_Analysis(OptimParams,standardDevVal);
-
-                        ui->ProgressBar->setValue(100*((yieldCycleCNTR)/yieldCycle));
-                    }
-
-
-
-                    if (!filestatues.exists())
-                    {
-                        QMessageBox::warning(this,"Error!","Yield analyzer didn't run correctly!");
-                    }
-                    else if (!filestatues.open(QFile::ReadOnly | QFile::Text))
-                    {
-                        QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
-                    }else{
-                        QTextStream instat(&filestatues);
-                        while(!instat.atEnd()) {
-                            QString statline = instat.readLine();
-                            ui->TerminalPlainTextEdit->appendPlainText(statline);
-                        }
-                        filestatues.close();
-                        instat.flush();
-                    }
-
-                    //Moving the result to the output file
-                    QFile::remove(DataFile);
-                    QFile::copy(YAOUT,DataFile);
-
-
-                    //QMessageBox::warning(this,"Good","Yield Analyzer is running");
-                }
-
-                //End Optim process here
-                ui->ProgressBar->setValue(100);
-
-                dialogPlot = new DialogPlot(this);
-                dialogPlot->show();
-            }
-            ui->StartPushButton->setEnabled(true);
-        }else
-        {
-            ui->StartPushButton->setEnabled(true);
-        }
-
-        int index = ui->TypeComboBox->currentIndex();
-        switch (index)
-        {
-        case 0:
-            //Time domain calculation
-            Simindex=0;
-            break;
-        case 1:
-            //Parametric Analysis
-            Simindex=2;
-            break;
-        case 2:
-            //Temperatures Analysis
-            Simindex=3;
-            break;
-        case 3:
-            //BER
-            Simindex=4;
-            break;
-        case 4:
-            //Frequency Analysis
-            Simindex=5;
-            break;
-        case 5:
-            //I-V slow
-            Simindex=1;
-            break;
-        case 6:
-            //I-V fast
-            Simindex=6;
-            break;
-        default:
-            Simindex=0;
-            break;
-        }
-
-}
-
 void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::about(this,"About JOINUS","JOINUS is developed by S. R. in France as part of the ColdFlux/Supertools project.");
@@ -1795,8 +1490,10 @@ void MainWindow::on_actionSet_Temperature_triggered()
         {
             QMessageBox::warning(this,"Error!","Temperature should be real number bigger or equal to zero!");
             return;
-        }
-            temperature = tempValString.toDouble();
+        }    
+        temperature = tempValString.toDouble();
+        if (temperature > Tc)
+            temperature=Tc-0.001;
             if (Simindex!=5 && Simindex!=4)
                 ui->TempLineEdit->setText(QString::number(temperature));
     }
@@ -1807,7 +1504,33 @@ void MainWindow::on_actionSet_Temperature_triggered()
             ui->TempLineEdit->setText("4.2");
     }
 
-    ui->InfoLabel->setText("Initial temperature value : "+QString::number(temperature)+" [K]");
+    ui->InfoLabel->setText("Temperature value : "+QString::number(temperature)+" [K] " + " Magnetic field value : "+QString::number(globalMagField)+" [uT]");
+}
+
+void MainWindow::on_actionSet_Magnetic_Field_triggered()
+{
+    bool ok;
+    bool validData1=true;
+    bool validData2=true;
+    QString magValString = QInputDialog::getText(  this,  tr("Magnetic field Value"),
+               tr("Enter the value of the global magnetic field for simulation in uT."),
+               QLineEdit::Normal, "", &ok );
+    if( ok && !magValString.isEmpty() )
+    {
+        validData2=magValString.toDouble(&validData1)>=0;
+        if (!validData1 || !validData2)
+        {
+            QMessageBox::warning(this,"Error!","Magnetic field should be real number bigger or equal to zero!");
+            return;
+        }
+            globalMagField = magValString.toDouble();
+    }
+    else
+    {
+        globalMagField = 0;
+    }
+
+    ui->InfoLabel->setText("Temperature value : "+QString::number(temperature)+" [K] " + " Magnetic field value : "+QString::number(globalMagField)+" [uT]");
 }
 
 void MainWindow::on_actionChange_background_color_triggered()
@@ -2118,4 +1841,859 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::on_actionMargin_Analyzer_triggered()
+{
+    ui->StartPushButton->setEnabled(false);
+        margincalc = new MarginCalc(this);
+        margincalc->setModal(true);
+        QString OptimFile=documentFolderPath+"/MarginConfigwb.tmp";
 
+        if(margincalc->exec() == QDialog::Accepted)
+        {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, "Margin Calculation", "Start margin calculation process?",
+                                          QMessageBox::Yes|QMessageBox::No);
+            if (reply == QMessageBox::Yes) {
+
+                ui->ProgressBar->setValue(0);
+                //Start the optimizatioon process here
+
+                //Reading the values
+                QStringList OptimParams=margincalc->ReadOptimFile(OptimFile);
+
+                //Act on error in configuration
+                if (OptimParams.at(0)=="error")
+                {
+                    QMessageBox::warning(this,"Error!","Optimizer cannot continue!");
+                    ui->StartPushButton->setEnabled(true);
+                    return;
+                }
+
+                //Run the function for selected mode
+
+                //Run function for Bias Margin calculation
+                else if (OptimParams.at(0)=="MS")
+                {
+                    Simindex=10;
+                    ui->ProgressBar->setValue(20);
+
+                    //qDebug() << OptimParams.at(5) << '\n';
+
+                    //This commands run the Margin Calculation
+                    margincalc->MarginSimulation(OptimParams);
+
+                    //Initializing the parameters
+                    ui->ProgressBar->setValue(70);
+                    QString DataFile=documentFolderPath+OutputFileName;
+                    QString MSOUT = OptimParams.at(5)+"/MSOUTPUT.DAT";
+                    QString MSSTAT = OptimParams.at(5)+"/MSSTATUES.DAT";
+
+                    QFile filestatues(MSSTAT);
+                    if (!filestatues.exists())
+                    {
+                        QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
+                    }
+                    else if (!filestatues.open(QFile::ReadOnly | QFile::Text))
+                    {
+                        QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
+                    }else{
+                        QTextStream instat(&filestatues);
+                        while(!instat.atEnd()) {
+                            QString statline = instat.readLine();
+                            ui->TerminalPlainTextEdit->appendPlainText(statline);
+                        }
+                        filestatues.close();
+                        instat.flush();
+                    }
+
+                    QFile::remove(DataFile);
+                    QFile::copy(MSOUT,DataFile);
+
+
+                }
+
+                //End Optim process here
+                ui->ProgressBar->setValue(100);
+
+                dialogPlot = new DialogPlot(this);
+                dialogPlot->show();
+            }
+            ui->StartPushButton->setEnabled(true);
+        }else
+        {
+            ui->StartPushButton->setEnabled(true);
+        }
+
+        int index = ui->TypeComboBox->currentIndex();
+        switch (index)
+        {
+        case 0:
+            //Time domain calculation
+            Simindex=0;
+            break;
+        case 1:
+            //Parametric Analysis
+            Simindex=2;
+            break;
+        case 2:
+            //Temperatures Analysis
+            Simindex=3;
+            break;
+        case 3:
+            //BER
+            Simindex=4;
+            break;
+        case 4:
+            //Frequency Analysis
+            Simindex=5;
+            break;
+        case 5:
+            //I-V slow
+            Simindex=1;
+            break;
+        case 6:
+            //I-V fast
+            Simindex=6;
+            break;
+        default:
+            Simindex=0;
+            break;
+        }
+
+}
+
+void MainWindow::on_actionYield_Analyzer_triggered()
+{
+    ui->StartPushButton->setEnabled(false);
+        yieldcalc = new YieldCalc(this);
+        yieldcalc->setModal(true);
+        QString OptimFile=documentFolderPath+"/YieldConfigwb.tmp";
+
+        if(yieldcalc->exec() == QDialog::Accepted)
+        {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, "Yield Analyzer", "This can take a long time! Start Yield process?",
+                                          QMessageBox::Yes|QMessageBox::No);
+            if (reply == QMessageBox::Yes) {
+
+                ui->ProgressBar->setValue(0);
+                //Start the optimizatioon process here
+
+                //Reading the values
+                QStringList OptimParams=yieldcalc->ReadOptimFile(OptimFile);
+
+                //Act on error in configuration
+                if (OptimParams.at(0)=="error")
+                {
+                    QMessageBox::warning(this,"Error!","Yield cannot continue!");
+                    ui->StartPushButton->setEnabled(true);
+                    return;
+                }
+
+                //Run function for Yield calculation
+                else if (OptimParams.at(0)=="YA")
+                {
+                    Simindex=11;
+                    ui->ProgressBar->setValue(1);
+                    ui->TerminalPlainTextEdit->appendPlainText(">> Yield analyzer started, this process can be long, please be patient! \n");
+
+                    //Initializing the parameters
+                    QString DataFile=documentFolderPath+OutputFileName;
+                    QString YAOUT = OptimParams.at(5)+"/YAOUTPUT.DAT";
+                    QString YASTAT = OptimParams.at(5)+"/YASTATUES.DAT";
+
+                    QFile outFile(YAOUT);
+                    QFile filestatues(YASTAT);
+
+                    if (outFile.exists())
+                        outFile.remove();
+                    outFile.close();
+
+                    if (filestatues.exists())
+                        filestatues.remove();
+                    filestatues.close();
+
+
+                    //Start the loop for Yield analyze
+                    int yieldCycle=static_cast<int>(OptimParams.at(9).toDouble()/OptimParams.at(6).toDouble());
+
+                    for (int yieldCycleCNTR=1;yieldCycleCNTR<yieldCycle+1;yieldCycleCNTR++)
+                    {
+                        double standardDevVal=OptimParams.at(6).toDouble()*yieldCycleCNTR;
+
+                        //This commands run the Yield Analysis function
+                        yieldcalc->Yield_Analysis(OptimParams,standardDevVal);
+
+                        ui->ProgressBar->setValue(100*((yieldCycleCNTR)/yieldCycle));
+                    }
+
+
+
+                    if (!filestatues.exists())
+                    {
+                        QMessageBox::warning(this,"Error!","Yield analyzer didn't run correctly!");
+                    }
+                    else if (!filestatues.open(QFile::ReadOnly | QFile::Text))
+                    {
+                        QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
+                    }else{
+                        QTextStream instat(&filestatues);
+                        while(!instat.atEnd()) {
+                            QString statline = instat.readLine();
+                            ui->TerminalPlainTextEdit->appendPlainText(statline);
+                        }
+                        filestatues.close();
+                        instat.flush();
+                    }
+
+                    //Moving the result to the output file
+                    QFile::remove(DataFile);
+                    QFile::copy(YAOUT,DataFile);
+
+
+                    //QMessageBox::warning(this,"Good","Yield Analyzer is running");
+                }
+
+                //End Optim process here
+                ui->ProgressBar->setValue(100);
+
+                dialogPlot = new DialogPlot(this);
+                dialogPlot->show();
+            }
+            ui->StartPushButton->setEnabled(true);
+        }
+        else
+        {
+            ui->StartPushButton->setEnabled(true);
+        }
+
+        int index = ui->TypeComboBox->currentIndex();
+        switch (index)
+        {
+        case 0:
+            //Time domain calculation
+            Simindex=0;
+            break;
+        case 1:
+            //Parametric Analysis
+            Simindex=2;
+            break;
+        case 2:
+            //Temperatures Analysis
+            Simindex=3;
+            break;
+        case 3:
+            //BER
+            Simindex=4;
+            break;
+        case 4:
+            //Frequency Analysis
+            Simindex=5;
+            break;
+        case 5:
+            //I-V slow
+            Simindex=1;
+            break;
+        case 6:
+            //I-V fast
+            Simindex=6;
+            break;
+        default:
+            Simindex=0;
+            break;
+        }
+}
+
+void MainWindow::on_actionCenter_Gravity_Optimizer_triggered()
+{
+//    ui->StartPushButton->setEnabled(false);
+//        cgoptimizer = new CGOptimizer(this);
+//        cgoptimizer->setModal(true);
+//        QString OptimFile=documentFolderPath+"/OptimConfigwb.tmp";
+
+//        MarginCalc *marginFuncs=new MarginCalc;
+
+//        if(cgoptimizer->exec() == QDialog::Accepted)
+//        {
+//            QMessageBox::StandardButton reply;
+//            reply = QMessageBox::question(this, "Optimizer & Margin Analyzer", "Start Optimization process?",
+//                                          QMessageBox::Yes|QMessageBox::No);
+//            if (reply == QMessageBox::Yes) {
+
+//                ui->ProgressBar->setValue(0);
+//                //Start the optimizatioon process here
+
+//                //Reading the values
+//                QStringList OptimParams=cgoptimizer->ReadOptimFile(OptimFile);
+
+//                //Act on error in configuration
+//                if (OptimParams.at(0)=="error")
+//                {
+//                    QMessageBox::warning(this,"Error!","Optimizer cannot continue!");
+//                    ui->StartPushButton->setEnabled(true);
+//                    return;
+//                }
+                
+//                //Run function for Optimization (This method uses center of gravity)
+//                else if (OptimParams.at(0)=="MCO")
+//                {
+
+//                    // Define Parameters for the Calculation
+//                    Simindex=10;
+//                    int IterationNumber = OptimParams.at(7).toInt();
+//                    double CritCurrent=1e-4;
+
+//                    QString MSOUT = OptimParams.at(5)+"/MSOUTPUT.DAT";
+//                    QString MSSTAT = OptimParams.at(5)+"/MSSTATUES.DAT";
+//                    //QString tempNetlistNominal=OptimParams.at(4)+"/MSNominal.cir";
+//                    QString ParamFile=OptimParams.at(3);
+
+//                    marginFuncs->MarginSimulation(OptimParams);
+//                    QString DataFile=documentFolderPath+OutputFileName;
+
+//                    //Write the result in terminal
+//                    QFile filestatues(MSSTAT);
+//                    if (!filestatues.exists())
+//                    {
+//                        QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
+//                    }
+//                    else if (!filestatues.open(QFile::ReadOnly | QFile::Text))
+//                    {
+//                        QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
+//                    }else{
+//                        int linecount=0;
+//                        QTextStream instat(&filestatues);
+//                        while(!instat.atEnd()) {
+//                            QString statline = instat.readLine();
+//                            if (linecount==0 && statline!="Success")
+//                            {
+//                                ui->TerminalPlainTextEdit->appendPlainText(statline);
+//                                return;
+//                            }else
+//                            {
+//                                if (linecount==1)
+//                                    CritCurrent=statline.toDouble();
+
+//                                else
+//                                ui->TerminalPlainTextEdit->appendPlainText(statline);
+
+//                                linecount++;
+//                            }
+
+//                        }
+//                        filestatues.close();
+//                        instat.flush();
+//                    }
+
+//                    for (int IterCntr=0; IterCntr<IterationNumber;IterCntr++)
+//                    {
+
+//                        //Write new parameter file based on the output
+//                        QString tempMSOUT = OptimParams.at(5)+"/MSOUTPUT"+QString::number(IterCntr)+".DAT";
+//                        QString tempParamFile=OptimParams.at(4)+"/tempParamFile"+QString::number(IterCntr)+".para";
+//                        QFile::remove(tempMSOUT);
+//                        QFile::copy(MSOUT,tempMSOUT);
+
+
+//                        QVector<QVector<QString>> oldParamVector =  marginFuncs->paramDataArrange(ParamFile);
+
+
+//                        //Change the ParamFile -> OptimParams.at(3) value to match new parametric file.
+//                        QStringList newParamValues = cgoptimizer->newParamGen(tempMSOUT, oldParamVector, CritCurrent, OptimParams.at(11).toDouble());
+//                        cgoptimizer->newParamFileGen(ParamFile, tempParamFile ,newParamValues);
+//                        OptimParams[3]=tempParamFile;
+//                        ParamFile=tempParamFile;
+
+//                        ui->ProgressBar->setValue(100*((IterCntr+1)/IterationNumber));
+
+//                        marginFuncs->MarginSimulation(OptimParams);
+
+
+//                        qDebug()<< "Iteration Number: " <<QString::number(IterCntr+1)<<'\n';
+
+//                        //Write the result in terminal
+//                        QFile fileStatues(MSSTAT);
+
+//                        if (!fileStatues.exists())
+//                        {
+//                            QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
+//                        }
+//                        else if (!fileStatues.open(QFile::ReadOnly | QFile::Text))
+//                        {
+//                            QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
+//                        }
+//                        else {
+//                            int linecount=0;
+//                            QTextStream instat2(&fileStatues);
+//                            while(!instat2.atEnd()) {
+//                                QString statline = instat2.readLine();
+//                                    if (linecount!=1)
+//                                        ui->TerminalPlainTextEdit->appendPlainText(statline);
+//                                    linecount++;
+//                            }
+//                            fileStatues.close();
+//                            instat2.flush();
+//                        }
+//                    }
+
+
+//                    qDebug() << "End of simulation" << '\n';
+
+//                        QVector<QVector<QString>> displayParamVector =  marginFuncs->paramDataArrange(ParamFile);
+//                        for (int dispCntr=0;dispCntr<displayParamVector.length();dispCntr++)
+//                        {
+//                            QString displayLine=displayParamVector.at(dispCntr).at(2)+" = "+displayParamVector.at(dispCntr).at(1);
+//                            ui->TerminalPlainTextEdit->appendPlainText(displayLine);
+//                        }
+
+//                        QFile::remove(DataFile);
+//                        QFile::copy(MSOUT,DataFile);
+
+//                        dialogPlot = new DialogPlot(this);
+//                        dialogPlot->show();
+//                        //for (int mydelay=0;mydelay<1000;mydelay++){}
+
+//                }
+
+//        }
+//        }else
+//        {
+//            ui->StartPushButton->setEnabled(true);
+//        }
+
+//        int index = ui->TypeComboBox->currentIndex();
+//        switch (index)
+//        {
+//        case 0:
+//            //Time domain calculation
+//            Simindex=0;
+//            break;
+//        case 1:
+//            //Parametric Analysis
+//            Simindex=2;
+//            break;
+//        case 2:
+//            //Temperatures Analysis
+//            Simindex=3;
+//            break;
+//        case 3:
+//            //BER
+//            Simindex=4;
+//            break;
+//        case 4:
+//            //Frequency Analysis
+//            Simindex=5;
+//            break;
+//        case 5:
+//            //I-V slow
+//            Simindex=1;
+//            break;
+//        case 6:
+//            //I-V fast
+//            Simindex=6;
+//            break;
+//        default:
+//            Simindex=0;
+//            break;
+//        }
+
+}
+
+void MainWindow::on_actionLocal_Parameters_triggered()
+{
+    ui->StartPushButton->setEnabled(false);
+        cgoptimizer = new CGOptimizer(this);
+        cgoptimizer->setModal(true);
+        QString OptimFile=documentFolderPath+"/OptimConfigwb.tmp";
+
+        MarginCalc *marginFuncs=new MarginCalc;
+
+        if(cgoptimizer->exec() == QDialog::Accepted)
+        {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, "Optimizer & Margin Analyzer", "Start Optimization process?",
+                                          QMessageBox::Yes|QMessageBox::No);
+            if (reply == QMessageBox::Yes) {
+
+                ui->ProgressBar->setValue(0);
+                //Start the optimizatioon process here
+
+                //Reading the values
+                QStringList OptimParams=cgoptimizer->ReadOptimFile(OptimFile);
+
+                //Act on error in configuration
+                if (OptimParams.at(0)=="error")
+                {
+                    QMessageBox::warning(this,"Error!","Optimizer cannot continue!");
+                    ui->StartPushButton->setEnabled(true);
+                    return;
+                }
+
+                //Run function for Optimization (This method uses center of gravity)
+                else if (OptimParams.at(0)=="MCO")
+                {
+
+                    // Define Parameters for the Calculation
+                    Simindex=10;
+                    int IterationNumber = OptimParams.at(7).toInt();
+                    double CritCurrent=1e-4;
+
+                    QString MSOUT = OptimParams.at(5)+"/MSOUTPUT.DAT";
+                    QString MSSTAT = OptimParams.at(5)+"/MSSTATUES.DAT";
+                    //QString tempNetlistNominal=OptimParams.at(4)+"/MSNominal.cir";
+                    QString ParamFile=OptimParams.at(3);
+
+                    marginFuncs->MarginSimulation(OptimParams);
+                    QString DataFile=documentFolderPath+OutputFileName;
+
+                    //Write the result in terminal
+                    QFile filestatues(MSSTAT);
+                    if (!filestatues.exists())
+                    {
+                        QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
+                    }
+                    else if (!filestatues.open(QFile::ReadOnly | QFile::Text))
+                    {
+                        QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
+                    }else{
+                        int linecount=0;
+                        QTextStream instat(&filestatues);
+                        while(!instat.atEnd()) {
+                            QString statline = instat.readLine();
+                            if (linecount==0 && statline!="Success")
+                            {
+                                ui->TerminalPlainTextEdit->appendPlainText(statline);
+                                return;
+                            }else
+                            {
+                                if (linecount==1)
+                                    CritCurrent=statline.toDouble();
+
+                                else
+                                ui->TerminalPlainTextEdit->appendPlainText(statline);
+
+                                linecount++;
+                            }
+
+                        }
+                        filestatues.close();
+                        instat.flush();
+                    }
+
+                    for (int IterCntr=0; IterCntr<IterationNumber;IterCntr++)
+                    {
+
+                        //Write new parameter file based on the output
+                        QString tempMSOUT = OptimParams.at(5)+"/MSOUTPUT"+QString::number(IterCntr)+".DAT";
+                        QString tempParamFile=OptimParams.at(4)+"/tempParamFile"+QString::number(IterCntr)+".para";
+                        QFile::remove(tempMSOUT);
+                        QFile::copy(MSOUT,tempMSOUT);
+
+
+                        QVector<QVector<QString>> oldParamVector =  marginFuncs->paramDataArrange(ParamFile);
+
+
+                        //Change the ParamFile -> OptimParams.at(3) value to match new parametric file.
+                        QStringList newParamValues = cgoptimizer->newParamGen(tempMSOUT, oldParamVector, CritCurrent, OptimParams.at(11).toDouble());
+                        cgoptimizer->newParamFileGen(ParamFile, tempParamFile ,newParamValues);
+                        OptimParams[3]=tempParamFile;
+                        ParamFile=tempParamFile;
+
+                        ui->ProgressBar->setValue(100*((IterCntr+1)/IterationNumber));
+
+                        marginFuncs->MarginSimulation(OptimParams);
+
+
+                        qDebug()<< "Iteration Number: " <<QString::number(IterCntr+1)<<'\n';
+
+                        //Write the result in terminal
+                        QFile fileStatues(MSSTAT);
+
+                        if (!fileStatues.exists())
+                        {
+                            QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
+                        }
+                        else if (!fileStatues.open(QFile::ReadOnly | QFile::Text))
+                        {
+                            QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
+                        }
+                        else {
+                            int linecount=0;
+                            QTextStream instat2(&fileStatues);
+                            while(!instat2.atEnd()) {
+                                QString statline = instat2.readLine();
+                                    if (linecount!=1)
+                                        ui->TerminalPlainTextEdit->appendPlainText(statline);
+                                    linecount++;
+                            }
+                            fileStatues.close();
+                            instat2.flush();
+                        }
+                    }
+
+
+                    qDebug() << "End of simulation" << '\n';
+
+                        QVector<QVector<QString>> displayParamVector =  marginFuncs->paramDataArrange(ParamFile);
+                        for (int dispCntr=0;dispCntr<displayParamVector.length();dispCntr++)
+                        {
+                            QString displayLine=displayParamVector.at(dispCntr).at(2)+" = "+displayParamVector.at(dispCntr).at(1);
+                            ui->TerminalPlainTextEdit->appendPlainText(displayLine);
+                        }
+
+                        QFile::remove(DataFile);
+                        QFile::copy(MSOUT,DataFile);
+
+                        dialogPlot = new DialogPlot(this);
+                        dialogPlot->show();
+                        //for (int mydelay=0;mydelay<1000;mydelay++){}
+
+                }
+
+        }
+        }else
+        {
+            ui->StartPushButton->setEnabled(true);
+        }
+
+        int index = ui->TypeComboBox->currentIndex();
+        switch (index)
+        {
+        case 0:
+            //Time domain calculation
+            Simindex=0;
+            break;
+        case 1:
+            //Parametric Analysis
+            Simindex=2;
+            break;
+        case 2:
+            //Temperatures Analysis
+            Simindex=3;
+            break;
+        case 3:
+            //BER
+            Simindex=4;
+            break;
+        case 4:
+            //Frequency Analysis
+            Simindex=5;
+            break;
+        case 5:
+            //I-V slow
+            Simindex=1;
+            break;
+        case 6:
+            //I-V fast
+            Simindex=6;
+            break;
+        default:
+            Simindex=0;
+            break;
+        }
+}
+
+void MainWindow::on_actionParameter_Dispertion_triggered()
+{
+    TempFileName=ui->NetlistLineEdit->text();
+    lgpDispers = new LGPdispers(this);
+    lgpDispers->show();
+}
+
+void MainWindow::on_actionGlobal_Parameters_triggered()
+{
+   // ui->StartPushButton->setEnabled(false);
+        globalOptimier = new GlobalOptimizer(this);
+        globalOptimier->show();
+
+        //globalOptimier->setModal(true);
+//        QString OptimFile=documentFolderPath+"/OptimConfigwb.tmp";
+
+//        MarginCalc *marginFuncs=new MarginCalc;
+
+//        if(cgoptimizer->exec() == QDialog::Accepted)
+//        {
+//            QMessageBox::StandardButton reply;
+//            reply = QMessageBox::question(this, "Optimizer & Margin Analyzer", "Start Optimization process?",
+//                                          QMessageBox::Yes|QMessageBox::No);
+//            if (reply == QMessageBox::Yes) {
+
+//                ui->ProgressBar->setValue(0);
+//                //Start the optimizatioon process here
+
+//                //Reading the values
+//                QStringList OptimParams=cgoptimizer->ReadOptimFile(OptimFile);
+
+//                //Act on error in configuration
+//                if (OptimParams.at(0)=="error")
+//                {
+//                    QMessageBox::warning(this,"Error!","Optimizer cannot continue!");
+//                    ui->StartPushButton->setEnabled(true);
+//                    return;
+//                }
+
+//                //Run function for Optimization (This method uses center of gravity)
+//                else if (OptimParams.at(0)=="MCO")
+//                {
+
+//                    // Define Parameters for the Calculation
+//                    Simindex=10;
+//                    int IterationNumber = OptimParams.at(7).toInt();
+//                    double CritCurrent=1e-4;
+
+//                    QString MSOUT = OptimParams.at(5)+"/MSOUTPUT.DAT";
+//                    QString MSSTAT = OptimParams.at(5)+"/MSSTATUES.DAT";
+//                    //QString tempNetlistNominal=OptimParams.at(4)+"/MSNominal.cir";
+//                    QString ParamFile=OptimParams.at(3);
+
+//                    marginFuncs->MarginSimulation(OptimParams);
+//                    QString DataFile=documentFolderPath+OutputFileName;
+
+//                    //Write the result in terminal
+//                    QFile filestatues(MSSTAT);
+//                    if (!filestatues.exists())
+//                    {
+//                        QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
+//                    }
+//                    else if (!filestatues.open(QFile::ReadOnly | QFile::Text))
+//                    {
+//                        QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
+//                    }else{
+//                        int linecount=0;
+//                        QTextStream instat(&filestatues);
+//                        while(!instat.atEnd()) {
+//                            QString statline = instat.readLine();
+//                            if (linecount==0 && statline!="Success")
+//                            {
+//                                ui->TerminalPlainTextEdit->appendPlainText(statline);
+//                                return;
+//                            }else
+//                            {
+//                                if (linecount==1)
+//                                    CritCurrent=statline.toDouble();
+
+//                                else
+//                                ui->TerminalPlainTextEdit->appendPlainText(statline);
+
+//                                linecount++;
+//                            }
+
+//                        }
+//                        filestatues.close();
+//                        instat.flush();
+//                    }
+
+//                    for (int IterCntr=0; IterCntr<IterationNumber;IterCntr++)
+//                    {
+
+//                        //Write new parameter file based on the output
+//                        QString tempMSOUT = OptimParams.at(5)+"/MSOUTPUT"+QString::number(IterCntr)+".DAT";
+//                        QString tempParamFile=OptimParams.at(4)+"/tempParamFile"+QString::number(IterCntr)+".para";
+//                        QFile::remove(tempMSOUT);
+//                        QFile::copy(MSOUT,tempMSOUT);
+
+
+//                        QVector<QVector<QString>> oldParamVector =  marginFuncs->paramDataArrange(ParamFile);
+
+
+//                        //Change the ParamFile -> OptimParams.at(3) value to match new parametric file.
+//                        QStringList newParamValues = cgoptimizer->newParamGen(tempMSOUT, oldParamVector, CritCurrent, OptimParams.at(11).toDouble());
+//                        cgoptimizer->newParamFileGen(ParamFile, tempParamFile ,newParamValues);
+//                        OptimParams[3]=tempParamFile;
+//                        ParamFile=tempParamFile;
+
+//                        ui->ProgressBar->setValue(100*((IterCntr+1)/IterationNumber));
+
+//                        marginFuncs->MarginSimulation(OptimParams);
+
+
+//                        qDebug()<< "Iteration Number: " <<QString::number(IterCntr+1)<<'\n';
+
+//                        //Write the result in terminal
+//                        QFile fileStatues(MSSTAT);
+
+//                        if (!fileStatues.exists())
+//                        {
+//                            QMessageBox::warning(this,"Error!","Optimizer didn't run correctly!");
+//                        }
+//                        else if (!fileStatues.open(QFile::ReadOnly | QFile::Text))
+//                        {
+//                            QMessageBox::warning(this,"Error!","Cannot open statue file, check the permissions!");
+//                        }
+//                        else {
+//                            int linecount=0;
+//                            QTextStream instat2(&fileStatues);
+//                            while(!instat2.atEnd()) {
+//                                QString statline = instat2.readLine();
+//                                    if (linecount!=1)
+//                                        ui->TerminalPlainTextEdit->appendPlainText(statline);
+//                                    linecount++;
+//                            }
+//                            fileStatues.close();
+//                            instat2.flush();
+//                        }
+//                    }
+
+
+//                    qDebug() << "End of simulation" << '\n';
+
+//                        QVector<QVector<QString>> displayParamVector =  marginFuncs->paramDataArrange(ParamFile);
+//                        for (int dispCntr=0;dispCntr<displayParamVector.length();dispCntr++)
+//                        {
+//                            QString displayLine=displayParamVector.at(dispCntr).at(2)+" = "+displayParamVector.at(dispCntr).at(1);
+//                            ui->TerminalPlainTextEdit->appendPlainText(displayLine);
+//                        }
+
+//                        QFile::remove(DataFile);
+//                        QFile::copy(MSOUT,DataFile);
+
+//                        dialogPlot = new DialogPlot(this);
+//                        dialogPlot->show();
+//                        //for (int mydelay=0;mydelay<1000;mydelay++){}
+
+//                }
+
+//        }
+//        }else
+//        {
+//            ui->StartPushButton->setEnabled(true);
+//        }
+
+//        int index = ui->TypeComboBox->currentIndex();
+//        switch (index)
+//        {
+//        case 0:
+//            //Time domain calculation
+//            Simindex=0;
+//            break;
+//        case 1:
+//            //Parametric Analysis
+//            Simindex=2;
+//            break;
+//        case 2:
+//            //Temperatures Analysis
+//            Simindex=3;
+//            break;
+//        case 3:
+//            //BER
+//            Simindex=4;
+//            break;
+//        case 4:
+//            //Frequency Analysis
+//            Simindex=5;
+//            break;
+//        case 5:
+//            //I-V slow
+//            Simindex=1;
+//            break;
+//        case 6:
+//            //I-V fast
+//            Simindex=6;
+//            break;
+//        default:
+//            Simindex=0;
+//            break;
+//        }
+//
+
+}

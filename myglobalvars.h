@@ -24,14 +24,17 @@ extern QStringList Legends;
 extern QString propertiesFile;
 extern int columNum;
 extern double temperature;
+extern double globalMagField;
 extern double timestep;
 extern int Simindex;
 extern bool runProcess;
 
 //Physical constants
+extern double P_lambda;
 extern double hbar;
 extern double ecnst;
 extern double Tc;
+extern double Bc2;
 extern double Kbolt;
 extern double Pi;
 extern double Phi0;

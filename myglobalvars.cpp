@@ -28,9 +28,12 @@ QString propertiesFile=documentFolderPath+"/properties.stat";
 
 int columNum = 2;
 double temperature = 4.2;
+double P_lambda = 84e-9;
+double globalMagField = 0;
 double hbar=1.05457e-34;
-double ecnst=1.602e-19;
-double Tc=9.2;
+double ecnst=1.602e-19; //C
+double Tc=9.2; //Kelvin
+double Bc2=1000; //micro tesla
 double Kbolt=1.3806e-23;
 double Pi=3.14159265358979;
 double Phi0=hbar*Pi/ecnst;

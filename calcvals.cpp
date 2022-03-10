@@ -11,9 +11,11 @@ CalcVals::CalcVals()
 //Claculation of critical current based on temperatrue
 double CalcVals::criticalCurrent(double IcVal)
 {
-    double IcritVal0=IcVal/((1-qPow((4.2/Tc),2))*qSqrt(1-qPow((4.2/Tc),4)));
-    double IcritValNew=IcritVal0*((1-qPow((temperature/Tc),2))*qSqrt(1-qPow((temperature/Tc),4)));
-
+    double IcritVal0 = IcVal/((1-qPow((4.2/Tc),2))*qSqrt(1-qPow((4.2/Tc),4)));
+    double Bcrit = Bc2 * (1-qPow((temperature/Tc),2));
+    if (globalMagField > Bcrit)
+        globalMagField=Bcrit;
+    double IcritValNew = IcritVal0 * (1-qPow((temperature/Tc),2)) * qSqrt(1-qPow((temperature/Tc),4)) * (1-qPow((globalMagField/Bcrit),2));
     return IcritValNew;
 }
 
@@ -28,13 +30,13 @@ double CalcVals::Rnoise(double Rval)
 double CalcVals::Rnorm(double IcVal)
 {
 
-    double vg= Vgap(0);
+    double vg= Vgap();
     double rnorm = tanh((vg*ecnst/4*Kbolt*temperature))*(Pi*vg)/(2*criticalCurrent(IcVal));
     return rnorm;
 }
 
 //Calculation of gap voltage depending on the temperature and external magnetic field
-double CalcVals::Vgap(double Hfield)
+double CalcVals::Vgap()
 {
     double Delta0=1.76*Kbolt*Tc;
     double DeltaT=Delta0*qSqrt(cos(Pi/2*qPow((temperature/Tc),2)));
@@ -88,7 +90,7 @@ QString CalcVals::convertToUnits(double l_nvalue)
          value = value*1e9;
          unit = "n";
      }
-     else if((value*1e12)>=1 && value*1e9<1){
+     else if(value*1e9<1){
          value = value*1e12;
          unit = "p";
      }
@@ -105,7 +107,7 @@ QString CalcVals::convertToUnits(double l_nvalue)
 
 //Unit Convertion for better understanding
 double CalcVals::convertToValues(const QString& input) {
-    QRegExp r = QRegExp("^(.+)([nµumKG]|meg)$", Qt::CaseInsensitive);
+    QRegExp r = QRegExp("^(.+)([pnµumKG]|meg)$", Qt::CaseInsensitive);
     r.indexIn(input);
 
     if ( r.captureCount() == 2 ) {
@@ -119,6 +121,9 @@ double CalcVals::convertToValues(const QString& input) {
             return input.toDouble();
         }
 
+        if ( unit == "p" || unit == "P") {
+            return (value*1e-12);
+        } else
         if ( unit == "n" || unit == "N") {
             return (value*1e-9);
         } else

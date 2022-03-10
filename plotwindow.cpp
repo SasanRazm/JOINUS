@@ -143,7 +143,7 @@ PlotWindow::PlotWindow(QWidget *parent) :
     else if (Simindex!=10)
         ui->comboBox->setCurrentIndex(0);
     else
-        ui->comboBox->setCurrentIndex(4);
+        ui->comboBox->setCurrentIndex(5);//HERE! 4->5
 
     if (Simindex==1 || Simindex==4 || Simindex==5 || Simindex==11)
         ui->checkBox->setChecked(true);
@@ -425,6 +425,31 @@ void PlotWindow::addPlots(int simstep)
             }
 
         barPlotter(MaxVals,errMaxVals,MinVals,errMinVals,titleVals);
+    }else if (ui->comboBox->currentIndex()==5)
+    {
+        int paramNums=titleVals.length();
+        QVector<double> MaxVals(paramNums),MinVals(paramNums);
+        QVector<double> errMaxVals(paramNums),errMinVals(paramNums);
+        for (int paramCntr=0;paramCntr<RawData.length();paramCntr++)
+            switch (paramCntr%4)
+            {
+            case 0:
+                MaxVals[paramCntr/4]=RawData.at(paramCntr).toDouble();
+                break;
+            case 1:
+                errMaxVals[(paramCntr-1)/4]=RawData.at(paramCntr).toDouble();
+                break;
+            case 2:
+                MinVals[(paramCntr-2)/4]=RawData.at(paramCntr).toDouble();
+                break;
+            case 3:
+                errMinVals[(paramCntr-3)/4]=RawData.at(paramCntr).toDouble();
+                break;
+            default:
+                break;
+            }
+
+        barPlotterH(MaxVals,errMaxVals,MinVals,errMinVals,titleVals);
     }
 
     // Log and linear axises
@@ -1173,7 +1198,7 @@ void PlotWindow::on_pushButton_3_clicked()
 
 void PlotWindow::barPlotter(QVector<double> x,QVector<double> errx,QVector<double> y,QVector<double> erry, QStringList parameterNames)
 {
-
+    removeAllGraphs();
     QCPStatisticalBox *statistical = new QCPStatisticalBox(ui->customPlot->xAxis, ui->customPlot->yAxis);
     QBrush boxBrush(QColor(20, 20, 255, 120));
     boxBrush.setStyle(Qt::Dense4Pattern); // make it look oldschool
@@ -1182,7 +1207,10 @@ void PlotWindow::barPlotter(QVector<double> x,QVector<double> errx,QVector<doubl
      // prepare axes:
 
     ui->customPlot->yAxis->setNumberFormat("f");
-    ui->customPlot->yAxis->setNumberPrecision(0);
+    ui->customPlot->yAxis->setNumberPrecision(1);
+    ui->customPlot->yAxis->setTickPen(QPen(Qt::black));
+    ui->customPlot->yAxis->setSubTickPen(QPen(Qt::black));
+    ui->customPlot->yAxis->grid()->setSubGridVisible(true);
     ui->customPlot->rescaleAxes();
     ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
 
@@ -1195,12 +1223,51 @@ void PlotWindow::barPlotter(QVector<double> x,QVector<double> errx,QVector<doubl
     // prepare manual x axis labels:
     ui->customPlot->xAxis->setSubTicks(false);
     ui->customPlot->xAxis->setTickLength(0, 5);
-    ui->customPlot->xAxis->setTickLabelRotation(0);
+    ui->customPlot->xAxis->setTickLabelRotation(60);
     QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
     for (int tickCntr=0; tickCntr<parameterNames.length();tickCntr++)
         textTicker->addTick(tickCntr, parameterNames.at(tickCntr));
     ui->customPlot->xAxis->setTicker(textTicker);
 
+}
+
+void PlotWindow::barPlotterH(QVector<double> x,QVector<double> errx,QVector<double> y,QVector<double> erry, QStringList parameterNames)
+{
+    removeAllGraphs();
+
+    QSharedPointer<QCPAxisTicker> linTicker(new QCPAxisTicker);
+    ui->customPlot->xAxis->setTicker(linTicker);
+
+    QCPStatisticalBox *statistical = new QCPStatisticalBox(ui->customPlot->yAxis, ui->customPlot->xAxis);
+    QBrush boxBrush(QColor(20, 20, 20, 200));
+    boxBrush.setStyle(Qt::Dense4Pattern); // make it look oldschool
+    statistical->setBrush(boxBrush);
+
+     // prepare axes:
+
+    ui->customPlot->xAxis->setNumberFormat("f");
+    ui->customPlot->xAxis->setNumberPrecision(1);
+    ui->customPlot->xAxis->setTickPen(QPen(Qt::black));
+    ui->customPlot->xAxis->setSubTickPen(QPen(Qt::black));
+    ui->customPlot->xAxis->grid()->setSubGridVisible(true);
+    ui->customPlot->rescaleAxes();
+    ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+
+    // specify data:
+    for (int tickCntr=0; tickCntr<parameterNames.length();tickCntr++)
+    {
+        statistical->addData(tickCntr,-(erry[tickCntr]+y[tickCntr]),-y[tickCntr],0,x[tickCntr],x[tickCntr]+errx[tickCntr]);
+    }
+
+    // prepare manual y axis labels:
+    ui->customPlot->yAxis->setSubTicks(false);
+    ui->customPlot->yAxis->setTickLength(0, 5);
+    ui->customPlot->yAxis->setTickLabelRotation(0);
+
+    QSharedPointer<QCPAxisTickerText> textTickery(new QCPAxisTickerText);
+    for (int tickCntr=0; tickCntr<parameterNames.length();tickCntr++)
+        textTickery->addTick(tickCntr, parameterNames.at(tickCntr));
+    ui->customPlot->yAxis->setTicker(textTickery);
 }
 
 void PlotWindow::on_toolButtonDecrease_clicked()

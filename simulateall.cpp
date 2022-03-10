@@ -961,7 +961,7 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
         //New critical current based on temperature
 
         QString Icritnew = values->convertToUnits(values->criticalCurrent(values->convertToValues(netlist.Icrit)));
-        QString Vg=values->convertToUnits(values->Vgap(0));
+        QString Vg=values->convertToUnits(values->Vgap());
 
         //Value of step for shifting parameters
         if (simParams.pointNum.toInt()>1)
@@ -1421,6 +1421,8 @@ QString simulateall::make_new_netlist(bool noise,QString NetlistFile, struct Sim
                                 & !netlist.Commands.at(fcntr).contains("nonoise",Qt::CaseInsensitive)
                             //Add the old Rz format and mention it to the user!
                                 & !netlist.Commands.at(fcntr).contains("z",Qt::CaseInsensitive)
+                            //If there is ohm in sub circuit name, it is ignored
+                                & !netlist.Commands.at(fcntr).contains(".subckt",Qt::CaseInsensitive)
                                 & !netlist.Commands.at(fcntr).contains("model",Qt::CaseInsensitive);
 
                         if (addnoisecond)

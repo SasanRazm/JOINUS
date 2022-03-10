@@ -48,7 +48,7 @@ private slots:
     void on_pushButton_2_clicked();
     void on_colorButton_clicked();
     void barPlotter(QVector<double> x,QVector<double> errx,QVector<double> y,QVector<double> erry, QStringList parameterNames);
-
+    void barPlotterH(QVector<double> x,QVector<double> errx,QVector<double> y,QVector<double> erry, QStringList parameterNames);
     void on_paramSlide_valueChanged(int value);
 
     void on_pushButton_3_clicked();

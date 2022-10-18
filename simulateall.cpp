@@ -30,6 +30,7 @@ struct processedNL simulateall::processNetlist(QString FileName)
     QString Cap="0.218p";
     QString OutFileName="/OUT.DAT";
     QStringList Commands;
+    QStringList temp;
 
     Legends.clear();
 
@@ -49,26 +50,29 @@ struct processedNL simulateall::processNetlist(QString FileName)
 
     while(!in.atEnd()) {
         QString line = in.readLine();
-        QStringList temp = line.split('*');
-        if (!temp.at(0).isEmpty())
+        if (!line.contains(".param",Qt::CaseInsensitive))
         {
-            Commands.append(temp.at(0));
-
-            //Adding the legends to the graph.
-            if (temp.at(0).contains("print",Qt::CaseInsensitive))
+            temp = line.split('*');
+            if (!temp.at(0).isEmpty())
             {
-                if (temp.length()==1)
-                {
-                   QStringList tempstr=temp.at(0).split(' ');
-                   int tempcntr=1;
-                    while(tempstr.at(tempstr.length()-tempcntr).isEmpty())
-                        tempcntr++;
-                    Legends.append(tempstr.at(tempstr.length()-tempcntr));
-                }
-                else
-                   Legends.append(temp.last());
-            }
+                Commands.append(temp.at(0));
 
+                //Adding the legends to the graph.
+                if (temp.at(0).contains("print",Qt::CaseInsensitive))
+                {
+                    if (temp.length()==1)
+                    {
+                       QStringList tempstr=temp.at(0).split(' ');
+                       int tempcntr=1;
+                        while(tempstr.at(tempstr.length()-tempcntr).isEmpty())
+                            tempcntr++;
+                        Legends.append(tempstr.at(tempstr.length()-tempcntr));
+                    }
+                    else
+                       Legends.append(temp.last());
+                }
+
+            }
         }
         temp.clear();
     }

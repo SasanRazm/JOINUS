@@ -15,6 +15,10 @@ class Jsimsyntax : public QSyntaxHighlighter
 public:
     Jsimsyntax(QTextDocument *parent = 0);
     QStringList convertToJSIM(QStringList netlistCommands);
+    QStringList annotateParam(QStringList ParamList);
+    QString changeNodesToNum(QStringList stringNodes, QString commandLine);
+    double annotateConstants(QString constName);
+    double CalculateParam(double x, char oper, double y);
 
 protected:
     void highlightBlock(const QString &text) Q_DECL_OVERRIDE;

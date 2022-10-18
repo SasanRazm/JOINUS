@@ -25,8 +25,8 @@ GlobalOptimizer::GlobalOptimizer(QWidget *parent) :
     //Setting the interface
         QPalette pal = this->palette();
         QLinearGradient gradient(0, 0, 0, 400);
-        gradient.setColorAt(0, QColor(0, 50, 50));
-        gradient.setColorAt(0.7, QColor(0, 100, 100));
+        gradient.setColorAt(0, QColor(0,150, 150));
+        gradient.setColorAt(0.7, QColor(0, 100, 10));
         gradient.setColorAt(1, QColor(200, 100, 200));
         pal.setBrush(QPalette::Window, QBrush(gradient));
         this->setPalette(pal);
@@ -211,9 +211,19 @@ QStringList GlobalOptimizer::Change_Inductances(QStringList Commands, QString Fi
     return NewCommands;
 }
 
+double GlobalOptimizer::Change_CriticalCurr(double areaJJ, double varVal)
+{
+    double areaVar = (100 + varVal) / 100;
+    double newArea = areaJJ * areaVar;
+
+    return newArea;
+}
+
 QStringList GlobalOptimizer::Change_Junctions(QStringList Commands, QString FileName)
 {
     CalcVals *values= new CalcVals;
+
+    double varVal = ui->spinBoxJC->value();
 
     QStringList JunctionChanges;
     QStringList NewCommands = Commands;
@@ -246,8 +256,11 @@ QStringList GlobalOptimizer::Change_Junctions(QStringList Commands, QString File
 
                 if (Bval > 0)
                 {
+
+                    double newArea = Change_CriticalCurr(Bval, varVal);
+
                     //Write the command for the parameter file for the inductance optimization
-                    QString JunctionParamLine = "@B"+QString::number(fcntr)+"@   "+values->convertToUnits(Bval)+ "   " + Bcommand.at(0)+"   1";
+                    QString JunctionParamLine = "@B"+QString::number(fcntr)+"@   "+values->convertToUnits(newArea)+ "   " + Bcommand.at(0)+"   1";
                     JunctionChanges.append(JunctionParamLine);
 
                     //Find the multiplier value of the parameter
@@ -290,11 +303,19 @@ QStringList GlobalOptimizer::Change_Junctions(QStringList Commands, QString File
     return NewCommands;
 }
 
+double GlobalOptimizer::Change_BiasVals(double biasRes, double varVal)
+{
+    double biasResVar = (100 + varVal) / 100;
+    double newBiasRes = biasRes * biasResVar;
 
+    return newBiasRes;
+}
 
 QStringList GlobalOptimizer::Change_BiasResistances(QStringList Commands, QString FileName)
 {
     CalcVals *values= new CalcVals;
+
+    double varVal = ui->spinBoxRes->value();
 
     QStringList BiasResChanges;
     QStringList NewCommands = Commands;
@@ -305,6 +326,8 @@ QStringList GlobalOptimizer::Change_BiasResistances(QStringList Commands, QStrin
     {
         bool correctLine = Commands.at(fcntr).contains("ohm",Qt::CaseInsensitive)
                 & Commands.at(fcntr).contains("R",Qt::CaseInsensitive)
+
+                // This line ignore the shunt resistances, you can comment this line to affect shunts
                 & !Commands.at(fcntr).contains("RS",Qt::CaseInsensitive)
                 & !Commands.at(fcntr).contains("z",Qt::CaseInsensitive)
                 & !Commands.at(fcntr).contains("model",Qt::CaseInsensitive)
@@ -329,8 +352,10 @@ QStringList GlobalOptimizer::Change_BiasResistances(QStringList Commands, QStrin
 
                 if (Rval > 0)
                 {
+                    double newBiasRes = Change_BiasVals(Rval, varVal);
+
                     //Write the command for the parameter file for the inductance optimization
-                    QString BiasResParamLine = "@R"+QString::number(fcntr)+"@   "+values->convertToUnits(Rval)+ "   " + Rcommand.at(0)+"   1";
+                    QString BiasResParamLine = "@R"+QString::number(fcntr)+"@   "+values->convertToUnits(newBiasRes)+ "   " + Rcommand.at(0)+"   1";
                     BiasResChanges.append(BiasResParamLine);
 
                     //Find the multiplier value of the parameter
@@ -373,10 +398,21 @@ QStringList GlobalOptimizer::Change_BiasResistances(QStringList Commands, QStrin
     return NewCommands;
 }
 
+
+double GlobalOptimizer::Change_BetaParam(double Rshunt, double varVal)
+{
+
+    double betaVar = (100 + varVal) / 100;
+    double newRshunt = Rshunt * qSqrt(betaVar);
+
+    return newRshunt;
+}
+
 QStringList GlobalOptimizer::Change_ShuntResistances(QStringList Commands, QString FileName)
 {
     CalcVals *values= new CalcVals;
 
+    double varVal = ui->spinBoxShunt->value();
     QStringList ShuntResChanges;
     QStringList NewCommands = Commands;
     QFile file(FileName);
@@ -409,8 +445,11 @@ QStringList GlobalOptimizer::Change_ShuntResistances(QStringList Commands, QStri
 
                 if (Rval > 0)
                 {
+                    //Change the shunt value based on Beta parameter
+                    double newRS = Change_BetaParam(Rval, varVal);
+
                     //Write the command for the parameter file for the inductance optimization
-                    QString BiasResParamLine = "@R"+QString::number(fcntr)+"@   "+values->convertToUnits(Rval)+ "   " + Rcommand.at(0)+"   1";
+                    QString BiasResParamLine = "@R"+QString::number(fcntr)+"@   "+values->convertToUnits(newRS)+ "   " + Rcommand.at(0)+"   1";
                     ShuntResChanges.append(BiasResParamLine);
 
                     //Find the multiplier value of the parameter
@@ -577,32 +616,139 @@ QVector<double> GlobalOptimizer::MakeRandNum(double meanVal, double sigmaVal, in
     return RandomData;
 }
 
-double GlobalOptimizer::Change_BetaParam(double Rshunt, double varVal)
+void GlobalOptimizer::load_paramTable(QString filePath)
 {
 
+    QList<QString> PN0, ID0, IE0, RD0;
 
-    double betaVar = (100 + varVal) / 100;
-    double newRshunt = Rshunt * qSqrt(betaVar);
+    QStringList paramCommands;
+
+    QFile paramFile(filePath);
+    paramCommands.clear();
+
+    if (!paramFile.exists())
+    {
+        QMessageBox::warning(this,"Warning","Netlist file do not exist in the defined location.");
+    }
+    if (!paramFile.open(QFile::ReadOnly | QFile::Text))
+    {
+        QMessageBox::warning(this,"Warning","Cannot open netlist for read. Check for permissions.");
+    }
+
+    QTextStream in(&paramFile);
+
+    while(!in.atEnd()) {
+        QString line = in.readLine();
+        paramCommands.append(line);
+    }
+    in.flush();
+    paramFile.close();
 
 
-    return newRshunt;
+    for (int fcntr = 0 ; fcntr < paramCommands.length() ; fcntr++)
+    {
+        if (!paramCommands.at(fcntr).isEmpty())
+        {
+            QStringList parametersInductex=paramCommands.at(fcntr).split(" ",QString::SkipEmptyParts);
+
+            for (int dataCNTR=0;dataCNTR<parametersInductex.length();dataCNTR++)
+                switch(dataCNTR)
+                {case 0:
+                    PN0.append(parametersInductex.at(dataCNTR));
+                    break;
+                case 1:
+                    ID0.append(parametersInductex.at(dataCNTR));
+                    break;
+                case 2:
+                    IE0.append(parametersInductex.at(dataCNTR));
+                    break;
+                case 3:
+                    RD0.append(parametersInductex.at(dataCNTR));
+                    break;
+                default:
+                    break;
+                }
+        }
+
+    }
+
+
+        // Create model:
+        tableSelect=0;
+        TestModel1 *ParamModel = new TestModel1(this);
+        ParamModel->populateData(PN0, ID0, IE0, RD0);
+
+        ui->tableViewParams->setModel(ParamModel);
+        ui->tableViewParams->horizontalHeader()->setVisible(true);
+        //ui->plainTextEdit->appendPlainText(QString::number(ParamModel->rowCount()));
+        ui->tableViewParams->show();
+
 }
 
-
-
-QStringList GlobalOptimizer::Change_CriticalCurr(QStringList Commands, QString FileName)
+void TestModel1::populateData(const QList<QString> &PN,const QList<QString> &ID,const QList<QString> &IE,
+                             const QList<QString> &RD)
 {
-    QStringList NewCommands = Commands;
-
-
-    return NewCommands;
+    paramName.clear();
+    paramName=PN;
+    inductanceDesign.clear();
+    inductanceDesign=ID;
+    inductanceExtracted.clear();
+    inductanceExtracted=IE;
+    resistanceDesign.clear();
+    resistanceDesign=RD;
+    return;
 }
 
-QStringList GlobalOptimizer::Change_BiasVals(QStringList Commands, QString FileName)
+int TestModel1::rowCount(const QModelIndex &parent) const
 {
-    QStringList NewCommands = Commands;
+    Q_UNUSED(parent)
+    return paramName.length();
+}
 
-    return NewCommands;
+int TestModel1::columnCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent)
+    return 4;
+}
+
+QVariant TestModel1::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid() || role != Qt::DisplayRole) {
+        return QVariant();
+    }
+    switch (index.column())
+    {
+        case 0:
+            return paramName[index.row()];
+        case 1:
+            return inductanceDesign[index.row()];
+        case 2:
+            return inductanceExtracted[index.row()];
+        case 3:
+            return resistanceDesign[index.row()];
+    }
+
+    return QVariant();
+}
+
+QVariant TestModel1::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
+        switch (section)
+        {
+            case 0:
+                return QString("Parameter Name");
+
+            case 1:
+                if (tableSelect==0)
+                    return QString("Numeric Value");
+        }
+    }
+    return QVariant();
+}
+
+TestModel1::TestModel1(QObject *parent) : QAbstractTableModel(parent)
+{
 }
 
 void GlobalOptimizer::on_buttonBox_clicked(QAbstractButton *button)
@@ -611,6 +757,66 @@ void GlobalOptimizer::on_buttonBox_clicked(QAbstractButton *button)
 
     if (button->text()=="Apply")
     {
+        simulateall *simclass=new simulateall;
+
+        QString netlistfile=ui->lineEditNetlist->text();
+
+            QFileInfo Myfile(netlistfile);
+
+            QString GlobalOptimizerFile=Myfile.absolutePath()+"/GO"+Myfile.fileName().remove(Myfile.completeSuffix(),Qt::CaseInsensitive)+"cir";
+            QString GlobalOptimizerParamFile=Myfile.absolutePath()+"/GO"+Myfile.fileName().remove(Myfile.completeSuffix(),Qt::CaseInsensitive)+"para";
+            QString GlobalOptimizerSolFile=Myfile.absolutePath()+"/GO"+Myfile.fileName().remove(Myfile.completeSuffix(),Qt::CaseInsensitive)+"sol";
+
+
+
+            struct SimParams simParams;
+            simParams.pointNum="0";
+
+
+            struct processedNL aa= simclass->processNetlist(netlistfile);
+            OutputFileName = aa.OutFileName;
+            QString DataFile = documentFolderPath+OutputFileName;
+            columNum = aa.columNumb;
+            timestep = aa.tstep;
+
+
+
+            struct GCommandList MyCommandList=ReadCommands(netlistfile);
+
+            QStringList NewCommands = MyCommandList.NoCommentCommands;
+            QStringList TempNewCommands = NewCommands;
+
+
+                    if (ui->checkBoxInd->isChecked())
+                    {
+                        TempNewCommands = Change_Inductances(NewCommands,GlobalOptimizerParamFile);
+                        NewCommands = TempNewCommands;
+                        qDebug()<<"Ind"<<'\n';
+                    }
+
+                    if (ui->checkBoxRes->isChecked())
+                    {
+                        TempNewCommands = Change_BiasResistances(NewCommands,GlobalOptimizerParamFile);
+                        NewCommands = TempNewCommands;
+                        qDebug()<<"Res"<<'\n';
+                    }
+
+                    if (ui->checkBoxJC->isChecked())
+                    {
+                        TempNewCommands = Change_Junctions(NewCommands,GlobalOptimizerParamFile);
+                        NewCommands = TempNewCommands;
+                        qDebug()<<"JC"<<'\n';
+                    }
+
+                    if (ui->checkBoxShunt->isChecked())
+                    {
+                        TempNewCommands = Change_ShuntResistances(NewCommands,GlobalOptimizerParamFile);
+                        NewCommands = TempNewCommands;
+                        qDebug()<<"Shunt"<<'\n';
+                    }
+
+                load_paramTable(GlobalOptimizerParamFile);
+
 
     }
 
@@ -652,25 +858,25 @@ void GlobalOptimizer::on_buttonBox_accepted()
 
                 if (ui->checkBoxInd->isChecked())
                 {
-                    TempNewCommands = Change_Inductances(NewCommands,);
+                    TempNewCommands = Change_Inductances(NewCommands,GlobalOptimizerParamFile);
                     NewCommands = TempNewCommands;
                 }
 
                 if (ui->checkBoxRes->isChecked())
                 {
-                    TempNewCommands = Change_BiasResistances(NewCommands,ui->spinBoxRes->value());
+                    TempNewCommands = Change_BiasResistances(NewCommands,GlobalOptimizerParamFile);
                     NewCommands = TempNewCommands;
                 }
 
                 if (ui->checkBoxJC->isChecked())
                 {
-                    TempNewCommands = Change_Junctions(NewCommands,ui->spinBoxJJ->value());
+                    TempNewCommands = Change_Junctions(NewCommands,GlobalOptimizerParamFile);
                     NewCommands = TempNewCommands;
                 }
 
                 if (ui->checkBoxShunt->isChecked())
                 {
-                    TempNewCommands = Change_ShuntResistances(NewCommands,ui->spinBoxSrc->value());
+                    TempNewCommands = Change_ShuntResistances(NewCommands,GlobalOptimizerParamFile);
                     NewCommands = TempNewCommands;
                 }
 
@@ -678,8 +884,7 @@ void GlobalOptimizer::on_buttonBox_accepted()
         QStringList AllCommands = WriteCommands(MyCommandList, NewCommands);
 
 
-
-        QFile file(lgpdispersFile);
+        QFile file(GlobalOptimizerFile);
         if (!file.open(QFile::WriteOnly | QFile::Text)){
              QMessageBox::warning(this,"Error!",file.errorString());
         }
@@ -694,10 +899,14 @@ void GlobalOptimizer::on_buttonBox_accepted()
                 file.close();
                 stream.flush();
 
-                QString message = "File generated at the same path as netlist. File name : \n" + Myfile.absolutePath() + "/PD" + Myfile.fileName().remove(Myfile.completeSuffix(),Qt::CaseInsensitive)+"cir";
+                QString message = "Netlist file generated at the same path as original netlist. File name : \n" + Myfile.absolutePath() + "/GO" + Myfile.fileName().remove(Myfile.completeSuffix(),Qt::CaseInsensitive)+"cir";
                 QMessageBox::information(this,"Dispertion File",message);
         }
 
+
+        //Copy Sol file in new destination
+        QString orgSolFile = ui->lineEditSolution->text();
+        QFile::copy(orgSolFile, GlobalOptimizerSolFile);
 }
 
 

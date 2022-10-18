@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <qabstractbutton.h>
+#include <QAbstractTableModel>
 
 struct GCommandList {
     QStringList NoCommentCommands;
@@ -27,8 +28,8 @@ public:
 
     double Change_BetaParam(double Rshunt, double varVal);
     double Change_Thickness(double Lk, double varVal);
-    QStringList Change_CriticalCurr(QStringList Commands, QString FileName);
-    QStringList Change_BiasVals(QStringList Commands, QString FileName);
+    double Change_CriticalCurr(double areaJJ, double varVal);
+    double Change_BiasVals(double biasRes, double varVal);
     ~GlobalOptimizer();
 
 private slots:
@@ -40,9 +41,34 @@ private slots:
 
 private:
     struct GCommandList ReadCommands(QString FileName);
+    void load_paramTable(QString filePath);
     QStringList WriteCommands(struct GCommandList NewList, QStringList NewCommands);
     QVector<double> MakeRandNum(double meanVal, double sigmaVal, int datacount);
     Ui::GlobalOptimizer *ui;
+};
+
+class TestModel1 : public QAbstractTableModel
+{
+    Q_OBJECT
+
+public:
+    TestModel1(QObject *parent = nullptr);
+
+    void populateData(const QList<QString> &PN,const QList<QString> &ID,const QList<QString> &IE,const QList<QString> &RD);
+    int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+
+private:
+    QList<QString> paramName;
+    QList<QString> inductanceDesign;
+    QList<QString> inductanceExtracted;
+    QList<QString> resistanceDesign;
+    QList<QString> resistanceExtracted;
+    QList<QString> absDiff;
+    QList<QString> percDiff;
+
 };
 
 #endif // GLOBALOPTIMIZER_H

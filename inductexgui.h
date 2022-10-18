@@ -10,6 +10,7 @@
 extern int tableSelect;
 extern QString KlayoutPath;
 extern QString LayerPath;
+extern QStringList inductexParamName;
 
 namespace Ui {
 class InductexGUI;

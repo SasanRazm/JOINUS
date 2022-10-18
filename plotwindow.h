@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QInputDialog>
-#include "../SIMGUI/qcustomplot.h"
+#include "qcustomplot.h"
 #include <QStringList>
 
 extern QColor color;

@@ -103,6 +103,11 @@ void KlayoutDlg::on_toolButtonPath_clicked()
 //            QMessageBox::warning(this,"Executable not found","Cannot find \""+ExeFileName+"\" in the selected location.");
 //            return;
 //        }
+        #ifdef __linux__
+          ui->lineEditPath->setText("klayout");
+        #endif
+    } else{
+
     }
 }
 

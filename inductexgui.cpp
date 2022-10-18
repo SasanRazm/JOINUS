@@ -18,6 +18,7 @@
 int tableSelect;
 QString KlayoutPath="";
 QString LayerPath="";
+QStringList inductexParamName={};
 
 InductexGUI::InductexGUI(QWidget *parent) :
     QDialog(parent),
@@ -398,7 +399,7 @@ void InductexGUI::load_Table(QString InductexOUT)
                     spoiledDataCntr++;
                 }
 
-                AlreadyRun=true;
+                //AlreadyRun = true;
 
                 if (!(spoiledData.at(spoiledDataCntr).contains("Deallocating memory")||spoiledData.at(spoiledDataCntr).contains("Ports")))
                     spoiledDataCntr++;
@@ -536,6 +537,37 @@ void InductexGUI::load_Table(QString InductexOUT)
 
     }
 
+    //Setting the values for export
+    if (!PN0.isEmpty())
+    {
+        for (int paramcntr0=0; paramcntr0<PN0.size();paramcntr0++)
+        {
+            inductexParamName.append("Inductance");
+            inductexParamName.append(PN0.at(paramcntr0));
+            inductexParamName.append(IE0.at(paramcntr0));
+        }
+    }
+
+        if (!PN1.isEmpty())
+    {
+        for (int paramcntr1=0; paramcntr1<PN1.size();paramcntr1++)
+        {
+            inductexParamName.append("Coupling");
+            inductexParamName.append(PN1.at(paramcntr1));
+            inductexParamName.append(IE1.at(paramcntr1));
+        }
+    }
+
+    if (!PN1.isEmpty())
+    {
+        for (int paramcntr2=0; paramcntr2<PN2.size();paramcntr2++)
+        {
+            inductexParamName.append("Junction");
+            inductexParamName.append(PN2.at(paramcntr2));
+            inductexParamName.append(IE2.at(paramcntr2));
+        }
+    }
+
 }
 
 void TestModel::populateData(const QList<QString> &PN,const QList<QString> &ID,const QList<QString> &IE,
@@ -655,15 +687,235 @@ QVariant TestModel::headerData(int section, Qt::Orientation orientation, int rol
 
 TestModel::TestModel(QObject *parent) : QAbstractTableModel(parent)
 {
+
 }
+
 
 void InductexGUI::on_pushButtonExport_clicked()
 {
+    // This will put the values calculated in the inductex to the netlist selected by user,
+    //Be careful if there are similar names in subcircuits, this will not work correctly!
+
+    QString NetlistFile=QFileDialog::getOpenFileName(this, tr("Open Netlist for value assignment"),documentFolderPath, tr("Netlist files (*.js *.inp *.cir);;All files (*)"));
+
+    QStringList netlistCommands;
+    QString NewCommand;
+
+    if (!NetlistFile.isEmpty())
+    {
+
+            QFile file(NetlistFile);
+            if (!file.open(QFile::ReadOnly | QFile::Text))
+            {
+                QMessageBox::warning(this,"Warning","Cannot open netlist for read. Check for permissions.");
+                return;
+            }
+
+            QTextStream in(&file);
+
+            while(!in.atEnd()) {
+                QString line = in.readLine();
+                netlistCommands.append(line);
+            }
+            file.close();
+
+
+        if (inductexParamName.isEmpty())
+        {
+            QMessageBox::warning(this,"Error!","No inductex data found!");
+        }
+        else
+        {
+            for (int paramNamecntr=0;paramNamecntr<inductexParamName.length();paramNamecntr+=3)
+            {
+                if (inductexParamName.at(paramNamecntr)=="Inductance")
+                    for (int Commandcntr=0;Commandcntr<netlistCommands.length();Commandcntr++)
+                    {
+                        if (netlistCommands.at(Commandcntr).contains(inductexParamName.at(paramNamecntr+1)))
+                        {
+                            QStringList Rcommand={};
+                            QStringList tempe=netlistCommands.at(Commandcntr).split(" ");
+                            for (int tempcntr=0;tempcntr<tempe.length();tempcntr++){
+                                if (!tempe.at(tempcntr).isEmpty())
+                                    Rcommand.append(tempe.at(tempcntr));
+                            }
+
+                            NewCommand = Rcommand.at(0) + "   " + Rcommand.at(1) + "   " + Rcommand.at(2) + "   " + inductexParamName.at(paramNamecntr+2);
+                            netlistCommands.replace(Commandcntr,NewCommand);
+
+                        }
+
+                    }
+
+                if (inductexParamName.at(paramNamecntr)=="Coupling")
+                {
+                    //The inductex result show as M, while netlist is shown as K
+
+
+                    QString Newname = inductexParamName.at(paramNamecntr+1);
+                    Newname.replace(QRegularExpression("M(.*)"), "K\\1");
+                    inductexParamName.replace(paramNamecntr+1,Newname);
+
+
+                    for (int Commandcntr=0;Commandcntr<netlistCommands.length();Commandcntr++)
+                    {
+
+                        if (netlistCommands.at(Commandcntr).contains(inductexParamName.at(paramNamecntr+1)))
+                        {
+                            QStringList Rcommand={};
+                            QStringList tempe=netlistCommands.at(Commandcntr).split(" ");
+                            for (int tempcntr=0;tempcntr<tempe.length();tempcntr++){
+                                if (!tempe.at(tempcntr).isEmpty())
+                                    Rcommand.append(tempe.at(tempcntr));
+                            }
+
+                            NewCommand = Rcommand.at(0) + "   " + Rcommand.at(1) + "   " + Rcommand.at(2) + "   " + inductexParamName.at(paramNamecntr+2);
+                            netlistCommands.replace(Commandcntr,NewCommand);
+
+                        }
+
+                    }
+                }
+
+                if (inductexParamName.at(paramNamecntr)=="Junction")
+                    for (int Commandcntr=0;Commandcntr<netlistCommands.length();Commandcntr++)
+                    {
+                        for (int Commandcntr=0;Commandcntr<netlistCommands.length();Commandcntr++)
+                        {
+                            if (netlistCommands.at(Commandcntr).contains(inductexParamName.at(paramNamecntr+1)))
+                            {
+                                QStringList Rcommand={};
+                                QStringList tempe=netlistCommands.at(Commandcntr).split(" ");
+                                for (int tempcntr=0;tempcntr<tempe.length();tempcntr++){
+                                    if (!tempe.at(tempcntr).isEmpty())
+                                        Rcommand.append(tempe.at(tempcntr));
+                                }
+
+                                NewCommand = Rcommand.at(0) + "   " + Rcommand.at(1) + "   " + Rcommand.at(2) + "   " + inductexParamName.at(paramNamecntr+2);
+                                netlistCommands.replace(Commandcntr,NewCommand);
+
+                            }
+
+                        }
+
+                    }
+            }
+
+        }
+    }
 
 }
 
 void InductexGUI::on_pushButtonBackAnnotate_clicked()
 {
+
+    // This will annotate the values calculated in the inductex to the netlist of the inductex itself
+    QFileInfo fi(ui->lineEditGDS->text());
+    QString NetlistFile=fi.absolutePath()+"/"+fi.fileName().remove(fi.completeSuffix(),Qt::CaseInsensitive)
+            +"cir";
+    QStringList netlistCommands;
+    QString NewCommand;
+
+        QFile file(NetlistFile);
+        if (!file.open(QFile::ReadOnly | QFile::Text))
+        {
+            QMessageBox::warning(this,"Warning","Cannot open netlist for read. Check for permissions.");
+            return;
+        }
+
+        QTextStream in(&file);
+
+        while(!in.atEnd()) {
+            QString line = in.readLine();
+            netlistCommands.append(line);
+        }
+        file.close();
+
+
+    if (inductexParamName.isEmpty())
+    {
+        QMessageBox::warning(this,"Error!","No inductex data found!");
+    }
+    else
+    {
+        for (int paramNamecntr=0;paramNamecntr<inductexParamName.length();paramNamecntr+=3)
+        {
+            if (inductexParamName.at(paramNamecntr)=="Inductance")
+                for (int Commandcntr=0;Commandcntr<netlistCommands.length();Commandcntr++)
+                {
+                    if (netlistCommands.at(Commandcntr).contains(inductexParamName.at(paramNamecntr+1)))
+                    {
+                        QStringList Rcommand={};
+                        QStringList tempe=netlistCommands.at(Commandcntr).split(" ");
+                        for (int tempcntr=0;tempcntr<tempe.length();tempcntr++){
+                            if (!tempe.at(tempcntr).isEmpty())
+                                Rcommand.append(tempe.at(tempcntr));
+                        }
+
+                        NewCommand = Rcommand.at(0) + "   " + Rcommand.at(1) + "   " + Rcommand.at(2) + "   " + inductexParamName.at(paramNamecntr+2);
+                        netlistCommands.replace(Commandcntr,NewCommand);
+
+                    }
+
+                }
+
+            if (inductexParamName.at(paramNamecntr)=="Coupling")
+            {
+                //The inductex result show as M, while netlist is shown as K
+
+
+                QString Newname = inductexParamName.at(paramNamecntr+1);
+                Newname.replace(QRegularExpression("M(.*)"), "K\\1");
+                inductexParamName.replace(paramNamecntr+1,Newname);
+
+
+                for (int Commandcntr=0;Commandcntr<netlistCommands.length();Commandcntr++)
+                {
+
+                    if (netlistCommands.at(Commandcntr).contains(inductexParamName.at(paramNamecntr+1)))
+                    {
+                        QStringList Rcommand={};
+                        QStringList tempe=netlistCommands.at(Commandcntr).split(" ");
+                        for (int tempcntr=0;tempcntr<tempe.length();tempcntr++){
+                            if (!tempe.at(tempcntr).isEmpty())
+                                Rcommand.append(tempe.at(tempcntr));
+                        }
+
+                        NewCommand = Rcommand.at(0) + "   " + Rcommand.at(1) + "   " + Rcommand.at(2) + "   " + inductexParamName.at(paramNamecntr+2);
+                        netlistCommands.replace(Commandcntr,NewCommand);
+
+                    }
+
+                }
+            }
+
+            if (inductexParamName.at(paramNamecntr)=="Junction")
+                for (int Commandcntr=0;Commandcntr<netlistCommands.length();Commandcntr++)
+                {
+                    for (int Commandcntr=0;Commandcntr<netlistCommands.length();Commandcntr++)
+                    {
+                        if (netlistCommands.at(Commandcntr).contains(inductexParamName.at(paramNamecntr+1)))
+                        {
+                            QStringList Rcommand={};
+                            QStringList tempe=netlistCommands.at(Commandcntr).split(" ");
+                            for (int tempcntr=0;tempcntr<tempe.length();tempcntr++){
+                                if (!tempe.at(tempcntr).isEmpty())
+                                    Rcommand.append(tempe.at(tempcntr));
+                            }
+
+                            NewCommand = Rcommand.at(0) + "   " + Rcommand.at(1) + "   " + Rcommand.at(2) + "   " + inductexParamName.at(paramNamecntr+2);
+                            netlistCommands.replace(Commandcntr,NewCommand);
+
+                        }
+
+                    }
+
+                }
+        }
+
+    }
+
+
 
 }
 
@@ -728,7 +980,12 @@ void InductexGUI::on_pushButtonLayout_clicked()
 
     if (KlayoutPath.isEmpty())
     {
-        QMessageBox::warning(this, "Klayout", "Set path to continue.");
+        #ifdef __linux__
+            KlayoutPath = "klayout";
+            runKlayout();
+        #elif
+            QMessageBox::warning(this, "Klayout", "Set path to continue.");
+        #endif
     }
     else
     {
@@ -851,6 +1108,7 @@ void InductexGUI::runKlayout()
                             #ifdef __linux__
 
                                 QString commandLine = KlayoutPath;
+                                allArgs.clear();
                                 if (LayerPath.isEmpty())
                                     allArgs<<"-e"<<layoutArg;
                                 else

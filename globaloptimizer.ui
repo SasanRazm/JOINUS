@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Global optimizer</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -144,7 +144,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Change In Beta parameter</string>
+           <string>Change in Beta parameter</string>
           </property>
          </widget>
         </item>
@@ -306,7 +306,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Changes in Biases</string>
+           <string>Changes in Resistances (Not shunts)</string>
           </property>
          </widget>
         </item>

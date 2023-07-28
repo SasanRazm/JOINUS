@@ -108,7 +108,7 @@ PlotWindow::PlotWindow(QWidget *parent) :
     ui->customPlot->legend->setSelectedFont(legendFont);
     ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
 
-    ui->paramSlide->setMaximum(titleVals.length()/2);
+    ui->paramSlide->setMaximum((titleVals.length()/2));
 
     // connect slot that ties some axis selections together (especially opposite axes):
     connect(ui->customPlot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChanged()));
@@ -151,6 +151,9 @@ PlotWindow::PlotWindow(QWidget *parent) :
     //show the slider bar for sliding between parameters
     if ((Simindex==2) || (Simindex==3))
     {
+        //This line is to decreased the value by one to disable the allGraph option!
+        ui->paramSlide->setMaximum((titleVals.length()/2)-1);
+
         ui->paramSlide->show();
         ui->labelMin->show();
         ui->labelMax->show();

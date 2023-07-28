@@ -1598,7 +1598,7 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
      <x>0</x>
      <y>0</y>
      <width>1327</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="FileMenu">
@@ -1657,6 +1657,7 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
     <addaction name="action_WSIM"/>
     <addaction name="actionSQUID_MAP"/>
     <addaction name="actionMAR_GINOPT"/>
+    <addaction name="actionIsingMachineSim"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -2031,6 +2032,11 @@ I1               1         0   SIN(0 250uA 100GHZ 0us 0)
   <action name="actionGlobal_Parameters">
    <property name="text">
     <string>Global Parameters</string>
+   </property>
+  </action>
+  <action name="actionIsingMachineSim">
+   <property name="text">
+    <string>IsingMachineSim</string>
    </property>
   </action>
  </widget>

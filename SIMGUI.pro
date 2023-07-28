@@ -40,6 +40,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     cgoptimizer.cpp \
     globaloptimizer.cpp \
+    imsolver.cpp \
     inductexgui.cpp \
     joinuscapture.cpp \
     klayoutdlg.cpp \
@@ -47,7 +48,6 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     margincalc.cpp \
-    plotwindow3d.cpp \
     qcustomplot.cpp \
     plotwindow.cpp \
     readoutdata.cpp \
@@ -63,13 +63,13 @@ SOURCES += \
 HEADERS += \
     cgoptimizer.h \
     globaloptimizer.h \
+    imsolver.h \
     inductexgui.h \
     joinuscapture.h \
     klayoutdlg.h \
     lgpdispers.h \
         mainwindow.h \
     margincalc.h \
-    plotwindow3d.h \
     qcustomplot.h \
     plotwindow.h \
     dialogplot.h \
@@ -83,6 +83,7 @@ HEADERS += \
 FORMS += \
     cgoptimizer.ui \
     globaloptimizer.ui \
+    imsolver.ui \
     inductexgui.ui \
     joinuscapture.ui \
     klayoutdlg.ui \
@@ -91,7 +92,6 @@ FORMS += \
     margincalc.ui \
     plotwindow.ui \
     dialogplot.ui \
-    plotwindow3d.ui \
     setparamsdialog.ui \
     yieldcalc.ui
 

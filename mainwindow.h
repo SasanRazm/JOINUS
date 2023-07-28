@@ -16,7 +16,7 @@
 #include "jsimsyntax.h"
 #include "joinuscapture.h"
 #include "inductexgui.h"
-
+#include "imsolver.h"
 
 //QT_BEGIN_NAMESPACE
 //class QScrollArea;
@@ -127,6 +127,8 @@ private slots:
 
     void on_actionGlobal_Parameters_triggered();
 
+    void on_actionIsingMachineSim_triggered();
+
 private:
     Ui::MainWindow *ui;
     DialogPlot *dialogPlot;
@@ -138,6 +140,7 @@ private:
     MarginCalc *margincalc;
     Jsimsyntax *m_jsimsyntax;
     InductexGUI *inductex;
+    IMsolver *imsolver;
     GlobalOptimizer *globalOptimier;
     QTimer* myTimer;
 };

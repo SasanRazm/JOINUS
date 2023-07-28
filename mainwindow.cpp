@@ -337,7 +337,7 @@ void MainWindow::on_StartPushButton_clicked()
             ui->ProgressBar->setValue(50);
             simout = simclass->simulatenetlist(TempFileName,SimulatorIndex);
             ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
-            ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+            //ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
             ui->ProgressBar->setValue(100);
             
             //testing jsim command for MacOS
@@ -375,14 +375,14 @@ void MainWindow::on_StartPushButton_clicked()
                 //simulate the newly generated netlist from statistical data
                 simout = simclass->simulateivcurve(TempFileName,SimulatorIndex,simParams.pointNum.toInt(),simParams.subParam.toInt(),IVstatistical);
                 ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
-                ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+                //ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
 
 
             }else{
                 ui->ProgressBar->setValue(50);
                 simout = simclass->simulateivcurve(TempFileName,SimulatorIndex,simParams.pointNum.toInt(),simParams.subParam.toInt(),IVstatistical);
                 ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
-                ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+                //ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
             }
 
             ui->ProgressBar->setValue(100);
@@ -416,7 +416,7 @@ void MainWindow::on_StartPushButton_clicked()
                     ui->ProgressBar->setValue(100*(simstep+1)/simParams.pointNum.toInt());
 
                     ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
-                    ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+                    //ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
 
                     QString Outtemp=documentFolderPath+"/Data/Tmp"+titleVals.at(simstep*2)+".dat";
                     QFile::remove(Outtemp);
@@ -460,7 +460,7 @@ void MainWindow::on_StartPushButton_clicked()
                     ui->ProgressBar->setValue(100*(simstep+1)/simParams.pointNum.toInt());
 
                     ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
-                    ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+                    //ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
 
                     QString Outtemp=documentFolderPath+"/Data/Tmp"+QString::number(simstep)+"K.dat";
                     QFile::remove(Outtemp);
@@ -501,7 +501,7 @@ void MainWindow::on_StartPushButton_clicked()
                     simout=simclass->simulateBER(SimulatorIndex,simParams.tempVal.toFloat(),calcVal->convertToValues(simParams.minVal)+simstep*stepSize);
                     ui->ProgressBar->setValue(100*(simstep+1)/simParams.pointNum.toInt());
                     ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
-                    ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+                    //ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
                 }
               }
 
@@ -553,7 +553,7 @@ void MainWindow::on_StartPushButton_clicked()
                         simout=simclass->simulateFreq(SimulatorIndex,Multiplyers,freqvalforfunc);
                         ui->ProgressBar->setValue(100*(simstep+1)/simParams.pointNum.toInt());
                         ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
-                        ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+                        //ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
 
                     }
                   }
@@ -576,7 +576,7 @@ void MainWindow::on_StartPushButton_clicked()
                     simout=simclass->simulateFreq(SimulatorIndex,Multiplyers,calcVal->convertToValues(simParams.minVal));
                     ui->ProgressBar->setValue(100);
                     ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
-                    ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+                    //ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
                 }
             }
 
@@ -595,7 +595,7 @@ void MainWindow::on_StartPushButton_clicked()
             ui->ProgressBar->setValue(50);
             simout = simclass->simulateivnew(TempFileName,SimulatorIndex,simParams.pointNum.toInt());
             ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolErr);
-            ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
+            //ui->TerminalPlainTextEdit->appendPlainText(simout.ConsolOut);
             ui->ProgressBar->setValue(100);
             columNum=2;
             break;
@@ -1793,6 +1793,12 @@ void MainWindow::on_actionInductex_triggered()
     inductex->show();
 }
 
+void MainWindow::on_actionIsingMachineSim_triggered()
+{
+    imsolver = new IMsolver(this);
+    imsolver->show();
+}
+
 void MainWindow::on_actionQuit_triggered()
 {
 
@@ -2106,6 +2112,9 @@ void MainWindow::on_actionYield_Analyzer_triggered()
 
 void MainWindow::on_actionCenter_Gravity_Optimizer_triggered()
 {
+
+}
+
 //    ui->StartPushButton->setEnabled(false);
 //        cgoptimizer = new CGOptimizer(this);
 //        cgoptimizer->setModal(true);
@@ -2297,7 +2306,7 @@ void MainWindow::on_actionCenter_Gravity_Optimizer_triggered()
 //            break;
 //        }
 
-}
+//}
 
 void MainWindow::on_actionLocal_Parameters_triggered()
 {
@@ -2697,3 +2706,5 @@ void MainWindow::on_actionGlobal_Parameters_triggered()
 //
 
 }
+
+

@@ -603,7 +603,7 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
     QString simstdout="";
     QString programName=simEngine+"/jsim_n";
     QString commandline=simEngine+"/jsim_n "+FileName;
-    qDebug()<< commandline;
+    //qDebug()<< commandline;
 
 
     QObject *parent = nullptr;
@@ -741,7 +741,7 @@ struct ConsoleOutputs simulateall::simulatenetlist(QString FileName, int Simulat
             delimator=" ";
             break;
     case 1:
-        commandline=simEngine+"/JoSIM_n -o "+ OutFile +" "+FileName;
+        commandline=simEngine+"/JoSIM_n -m -o "+ OutFile +" "+FileName;
         //commandline=":/Data/Data/JoSIM_n -o "+ OutFile +" "+FileName;
         #ifdef __linux__
                     process->start(commandline);
